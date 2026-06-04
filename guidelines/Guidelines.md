@@ -1,61 +1,102 @@
-**Add your own guidelines here**
-<!--
+# Arbeitswetter App — Design Guidelines
 
-System Guidelines
+## Status Color System
 
-Use this file to provide the AI with rules and guidelines you want it to follow.
-This template outlines a few examples of things you can add. You can add your own sections and format it to suit your needs
+There are **4 Belastungsstufen** (heat stress levels). Each level has a dedicated set of tokens for different contexts. Never mix tokens across contexts.
 
-TIP: More context isn't always better. It can confuse the LLM. Try and add the most important rules you need
+### The 4 Levels
 
-# General guidelines
+| Level | Label    | Meaning                        |
+|-------|----------|--------------------------------|
+| 1     | Gering   | Low stress, safe to work       |
+| 2     | Mäßig    | Moderate, some precautions     |
+| 3     | Stark    | High stress, restrict activity |
+| 4     | Kritisch | Extreme, stop outdoor work     |
 
-Any general rules you want the AI to follow.
-For example:
+---
 
-* Only use absolute positioning when necessary. Opt for responsive and well structured layouts that use flexbox and grid by default
-* Refactor code as you go to keep code clean
-* Keep file sizes small and put helper functions and components in their own files.
+### Token Usage Rules
 
---------------
+#### 1. Icon Circles (small filled circle with icon inside — list rows, legend)
+Use the **tinted/lighter** variants so black icons stay legible. Icons are always **black** (`--neutral-black`).
 
-# Design system guidelines
-Rules for how the AI should make generations look like your company's design system
+| Level     | Token                    | Hex       |
+|-----------|--------------------------|-----------|
+| 1 Gering  | `--status-icon-ok`       | `#85D7A2` |
+| 2 Mäßig   | `--status-warning`       | `#F8D74A` |
+| 3 Stark   | `--status-strong`        | `#FEBB6A` |
+| 4 Kritisch| `--status-critical-tint` | `#FF878A` |
 
-Additionally, if you select a design system to use in the prompt box, you can reference
-your design system's components, tokens, variables and components.
-For example:
+**Rule:** Never use `--status-critical` (#E8193C) for icon circles. Too dark, harsh contrast.
 
-* Use a base font-size of 14px
-* Date formats should always be in the format “Jun 10”
-* The bottom toolbar should only ever have a maximum of 4 items
-* Never use the floating action button with the bottom toolbar
-* Chips should always come in sets of 3 or more
-* Don't use a dropdown if there are 2 or fewer options
+#### 2. Ring Arc Segments (SVG clock arcs)
+Use the **full saturated** colors — they need to be vivid against the light ring background.
 
-You can also create sub sections and add more specific details
-For example:
+| Level     | Token               | Hex       |
+|-----------|---------------------|-----------|
+| 2 Mäßig   | `--status-warning`  | `#F8D74A` |
+| 3 Stark   | `--status-strong`   | `#FEBB6A` |
+| 4 Kritisch| `--status-critical` | `#E8193C` |
+| 1 Gering  | no segment          | —         |
 
+#### 3. Alert Banner Background (full-width banner behind alert text)
+Use the **-bg** tints — very light so text stays readable.
 
-## Button
-The Button component is a fundamental interactive element in our design system, designed to trigger actions or navigate
-users through the application. It provides visual feedback and clear affordances to enhance user experience.
+| Level     | Token                  | Hex       |
+|-----------|------------------------|-----------|
+| 1 Gering  | `--status-success-bg`  | `#ECFDF5` |
+| 2 Mäßig   | `--status-warning-bg`  | `#FFEDD4` |
+| 3 Stark   | `--status-strong-bg`   | `#FFF0E0` |
+| 4 Kritisch| `--status-critical-bg` | `#FFEEEF` |
 
-### Usage
-Buttons should be used for important actions that users need to take, such as form submissions, confirming choices,
-or initiating processes. They communicate interactivity and should have clear, action-oriented labels.
+#### 4. Alert Icon Circle (icon circle inside the alert banner)
+Alert banners use a **black background** — use softer/lighter variants for better contrast with the black icon inside.
 
-### Variants
-* Primary Button
-  * Purpose : Used for the main action in a section or page
-  * Visual Style : Bold, filled with the primary brand color
-  * Usage : One primary button per section to guide users toward the most important action
-* Secondary Button
-  * Purpose : Used for alternative or supporting actions
-  * Visual Style : Outlined with the primary color, transparent background
-  * Usage : Can appear alongside a primary button for less important actions
-* Tertiary Button
-  * Purpose : Used for the least important actions
-  * Visual Style : Text-only with no border, using primary color
-  * Usage : For actions that should be available but not emphasized
--->
+| Level     | Token                    | Hex       | Note |
+|-----------|--------------------------|-----------|------|
+| 1 Gering  | `--status-success`       | `#10B981` | |
+| 2 Mäßig   | `--status-warning`       | ``#F8D74A`` | |
+| 3 Stark   | `--status-strong`        | `#FEBB6A` | |
+| 4 Kritisch| `--status-critical-tint` | `#FF878A` | |
+
+#### 5. Status Badge Dot (small inline dot next to a label)
+Use full saturated colors — the dot is tiny, tint would be invisible.
+
+| Level     | Token               |
+|-----------|---------------------|
+| 1 Gering  | `--status-success`  |
+| 2 Mäßig   | `--status-warning`  |
+| 3 Stark   | `--status-strong`   |
+| 4 Kritisch| `--status-critical` |
+
+---
+
+### Typography in Status Contexts
+
+- Status labels (Gering/Mäßig/Stark/Kritisch) always use `--neutral-950`. Never color the text to match the level color.
+- Secondary/sublabel text uses `--neutral-500` or `--muted-foreground`.
+- Alert title text: `--neutral-white` (alert bg is dark-tinted).
+- Alert body text: `--neutral-100`.
+
+---
+
+## Icons
+
+Use `@phosphor-icons/react` for weather/decorative icons. Use `lucide-react` for UI/action icons.
+
+| Context         | Icon            |
+|-----------------|-----------------|
+| Gering circle   | `CheckCircle`   |
+| Mäßig circle    | text `i` (bold) |
+| Stark circle    | `AlertCircle`   |
+| Kritisch circle | `AlertTriangle` |
+| Settings        | `Edit3`         |
+| Location        | `MapPin`        |
+
+---
+
+## Layout
+
+- Use flexbox/grid. Avoid absolute positioning unless essential (e.g. SVG overlays).
+- Bottom nav: max 4 items.
+- Border radius follows `--radius` (0.5rem) or multiples thereof.

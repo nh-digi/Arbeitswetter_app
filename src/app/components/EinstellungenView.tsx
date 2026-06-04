@@ -1,17 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   HardHat, MapPin, Sun, CloudSun, Leaf, Building2,
-  Check, Info, Clock, Plus, MoreVertical, Trash2,
-  Pencil, ChevronRight, Moon, Sunrise,
+  Check, Info, Clock, Trash2,
+  ChevronRight, Moon, Sunrise, Bell, X, LocateFixed, Search,
 } from 'lucide-react';
 import PageHeader from './PageHeader';
+import { Switch } from './ui/switch';
 
-type Schwere      = 'leicht' | 'mittel' | 'schwer';
-type Umgebung     = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
-type Schicht      = 'früh' | 'tag' | 'nacht';
-type StandortModus = 'gps' | 'arbeitsort';
+type Schwere  = 'leicht' | 'mittel' | 'schwer';
+type Umgebung = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
+type Schicht  = 'früh' | 'tag' | 'nacht';
 
-interface Ort { id: number; name: string; city: string; }
+interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
+interface OrtVorschlag { id: string; name: string; region: string; lat: number; lng: number; }
+
+interface EinstellungenProps {
+  startZeit: string; setStartZeit: (v: string) => void;
+  endZeit: string;   setEndZeit:   (v: string) => void;
+  orte: Ort[];       setOrte:      React.Dispatch<React.SetStateAction<Ort[]>>;
+  aktiveOrtId: number | null; setAktiveOrtId: (id: number | null) => void;
+  schwere: Schwere;  setSchwere:   (v: Schwere) => void;
+}
+
+const MOCK_VORSCHLÄGE: OrtVorschlag[] = [
+  { id: 'berlin-mitte',   name: 'Berlin Mitte',   region: 'Berlin',  lat: 52.5200, lng: 13.4050 },
+  { id: 'hamburg-mitte',  name: 'Hamburg Mitte',  region: 'Hamburg', lat: 53.5511, lng: 9.9937  },
+  { id: 'hamburg-hafen',  name: 'Hamburg Hafen',  region: 'Hamburg', lat: 53.5453, lng: 9.9679  },
+  { id: 'hamburg-altona', name: 'Hamburg Altona', region: 'Hamburg', lat: 53.5498, lng: 9.9356  },
+  { id: 'munich',         name: 'München',        region: 'Bayern',  lat: 48.1351, lng: 11.5820 },
+  { id: 'cologne',        name: 'Köln',           region: 'NRW',     lat: 50.9333, lng: 6.9500  },
+  { id: 'frankfurt',      name: 'Frankfurt',      region: 'Hessen',  lat: 50.1109, lng: 8.6821  },
+  { id: 'flensburg',      name: 'Flensburg',      region: 'S-H',     lat: 54.7833, lng: 9.4333  },
+];
 
 const SCHICHT_PRESETS: Record<Schicht, { start: string; end: string }> = {
   früh:  { start: '05:00', end: '13:00' },
@@ -34,33 +54,101 @@ const UMGEBUNG_OPTIONS: { id: Umgebung; label: string; sub: string; Icon: React.
 
 // Soft tint selected style (chips + cards)
 const SEL = 'bg-[#eef2fd] text-[#1d3fa3] border-[#325cda]/40';
-const UNSEL = 'bg-neutral-50 text-black/60 border-black/[0.08] hover:border-black/20 hover:text-black/80';
+const UNSEL = 'bg-neutral-50 text-muted-foreground border-black/[0.08] hover:border-black/20 hover:text-black/80';
 
 function timeToMinutes(t: string): number {
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
 }
 
-function ShiftTimeline({ start, end, schicht }: { start: string; end: string; schicht: Schicht }) {
-  const TOTAL = 24 * 60;
-  const s = timeToMinutes(start);
-  const e = timeToMinutes(end);
-  const overnight = e <= s;
+function formatTimeInput(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 4);
+  if (digits.length > 2) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  return digits;
+}
 
-  const seg1Left  = (s / TOTAL) * 100;
-  const seg1Width = overnight ? ((TOTAL - s) / TOTAL) * 100 : ((e - s) / TOTAL) * 100;
-  const seg2Width = overnight ? (e / TOTAL) * 100 : 0;
-  const durationMin = overnight ? (TOTAL - s + e) : (e - s);
+function isValidTime(val: string): boolean {
+  const match = val.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return false;
+  const h = parseInt(match[1], 10);
+  const min = parseInt(match[2], 10);
+  return h >= 0 && h <= 23 && min >= 0 && min <= 59;
+}
+
+function ShiftTimeline({
+  start, end, schicht, onStartChange, onEndChange, onCommit,
+}: {
+  start: string; end: string; schicht: Schicht;
+  onStartChange: (t: string) => void;
+  onEndChange: (t: string) => void;
+  onCommit: () => void;
+}) {
+  const TOTAL = 24 * 60;
+  const sMin = timeToMinutes(start);
+  const eMin = timeToMinutes(end);
+  const overnight = eMin <= sMin;
+
+  const seg1Left  = (sMin / TOTAL) * 100;
+  const seg1Width = overnight ? ((TOTAL - sMin) / TOTAL) * 100 : ((eMin - sMin) / TOTAL) * 100;
+  const seg2Width = overnight ? (eMin / TOTAL) * 100 : 0;
+  const durationMin = overnight ? (TOTAL - sMin + eMin) : (eMin - sMin);
   const durationH   = Math.floor(durationMin / 60);
 
   // Recommended early window 05:00–09:00
   const recL = ((5 * 60) / TOTAL) * 100;
   const recW = ((4 * 60) / TOTAL) * 100;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{
+    mode: 'move' | 'resize-start' | 'resize-end';
+    startX: number;
+    origStartMin: number;
+    origEndMin: number;
+  } | null>(null);
+
+  function minutesToTime(min: number): string {
+    const m = ((min % TOTAL) + TOTAL) % TOTAL;
+    const h = Math.floor(m / 60);
+    const mm = m % 60;
+    return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  }
+
+  function startDrag(ev: React.PointerEvent, mode: 'move' | 'resize-start' | 'resize-end') {
+    ev.preventDefault();
+    ev.stopPropagation();
+    dragRef.current = { mode, startX: ev.clientX, origStartMin: sMin, origEndMin: eMin };
+    containerRef.current?.setPointerCapture(ev.pointerId);
+  }
+
+  function onMove(ev: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const deltaMin = Math.round(((ev.clientX - drag.startX) / rect.width * TOTAL) / 15) * 15;
+    if (drag.mode === 'move') {
+      onStartChange(minutesToTime(drag.origStartMin + deltaMin));
+      onEndChange(minutesToTime(drag.origEndMin + deltaMin));
+    } else if (drag.mode === 'resize-start') {
+      onStartChange(minutesToTime(drag.origStartMin + deltaMin));
+    } else {
+      onEndChange(minutesToTime(drag.origEndMin + deltaMin));
+    }
+  }
+
+  function onUp() {
+    if (dragRef.current) { dragRef.current = null; onCommit(); }
+  }
+
   return (
     <div className="mb-4">
       {/* Bar */}
-      <div className="relative h-9 md:h-10 rounded-xl overflow-hidden border border-black/[0.06]">
+      <div
+        ref={containerRef}
+        className="relative h-9 md:h-10 rounded-xl overflow-hidden border border-black/[0.06]"
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+      >
         {/* Night zones */}
         <div className="absolute inset-y-0 left-0   bg-neutral-100" style={{ width: '25%' }} />
         <div className="absolute inset-y-0 right-0  bg-neutral-100" style={{ width: '25%' }} />
@@ -69,9 +157,23 @@ function ShiftTimeline({ start, end, schicht }: { start: string; end: string; sc
         {/* Recommended early window (5–9) */}
         <div className="absolute inset-y-0 bg-emerald-50"
           style={{ left: `${recL}%`, width: `${recW}%` }} />
-        {/* Work segment(s) */}
-        <div className="absolute top-1.5 bottom-1.5 bg-[#325cda] rounded-lg"
-          style={{ left: `${seg1Left}%`, width: `${seg1Width}%` }} />
+        {/* Work segment – draggable */}
+        <div
+          className="absolute top-1.5 bottom-1.5 bg-[#325cda] rounded-lg cursor-grab active:cursor-grabbing touch-none select-none"
+          style={{ left: `${seg1Left}%`, width: `${seg1Width}%` }}
+          onPointerDown={ev => startDrag(ev, 'move')}
+        >
+          {/* Left resize handle */}
+          <div
+            className="absolute left-0 inset-y-0 w-3 cursor-ew-resize"
+            onPointerDown={ev => startDrag(ev, 'resize-start')}
+          />
+          {/* Right resize handle */}
+          <div
+            className="absolute right-0 inset-y-0 w-3 cursor-ew-resize"
+            onPointerDown={ev => startDrag(ev, 'resize-end')}
+          />
+        </div>
         {overnight && (
           <div className="absolute top-1.5 bottom-1.5 bg-[#325cda] rounded-lg"
             style={{ left: '0%', width: `${seg2Width}%` }} />
@@ -89,53 +191,49 @@ function ShiftTimeline({ start, end, schicht }: { start: string; end: string; sc
         ].map(({ label, Icon }) => (
           <div key={label} className="flex flex-col items-center gap-0.5">
             {Icon ? (
-              <Icon className="w-3 h-3 text-black/60" strokeWidth={1.5} />
+              <Icon className="w-3 h-3 text-muted-foreground" strokeWidth={1.5} />
             ) : (
               <div className="w-3 h-3" />
             )}
-            <span className="text-xs text-black/60 tabular-nums">{label}:00</span>
+            <span className="text-xs text-muted-foreground tabular-nums">{label}:00</span>
           </div>
         ))}
       </div>
 
       {/* Duration + hint */}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-xs text-black/60">{durationH} Stunden</span>
+        <span className="text-xs text-muted-foreground">{durationH} Stunden</span>
         {schicht === 'früh' && (
           <span className="text-xs text-[#166534] font-medium">
             Empfohlen bei Hitze
           </span>
         )}
         {schicht === 'nacht' && (
-          <span className="text-xs text-black/60">Nachtschicht</span>
+          <span className="text-xs text-muted-foreground">Nachtschicht</span>
         )}
       </div>
     </div>
   );
 }
 
-export default function EinstellungenView() {
-  const [schwere,       setSchwere]       = useState<Schwere>('mittel');
+export default function EinstellungenView({ startZeit, setStartZeit, endZeit, setEndZeit, orte, setOrte, aktiveOrtId, setAktiveOrtId, schwere, setSchwere }: EinstellungenProps) {
   const [umgebung,      setUmgebung]      = useState<Umgebung>('sonne');
   const [schicht,       setSchicht]       = useState<Schicht>('tag');
-  const [startZeit,     setStartZeit]     = useState('06:00');
-  const [endZeit,       setEndZeit]       = useState('14:00');
-  const [standortModus, setStandortModus] = useState<StandortModus>('gps');
-  const [aktiveOrtId,   setAktiveOrtId]   = useState<number | null>(null);
-  const [swipedIdx,     setSwipedIdx]     = useState<number | null>(null);
+  const [startZeitDraft, setStartZeitDraft] = useState<string | null>(null);
+  const [endZeitDraft,   setEndZeitDraft]   = useState<string | null>(null);
+  const [benachrichtigungen, setBenachrichtigungen] = useState(true);
   const [showSaved,     setShowSaved]     = useState(false);
-  const [showOrtFeedback, setShowOrtFeedback] = useState(false);
-  const [orte, setOrte] = useState<Ort[]>([
-    { id: 1, name: 'Baustelle Berlin Ost', city: 'Berlin'    },
-    { id: 2, name: 'Lager Nord',           city: 'Hamburg'   },
-    { id: 3, name: 'Windpark Süd',         city: 'Flensburg' },
-  ]);
+  const [suchQuery,              setSuchQuery]              = useState('');
+  const [suchFokus,              setSuchFokus]              = useState(false);
+  const [auswahl,                setAuswahl]                = useState<OrtVorschlag | null>(null);
+  const [neuerOrtId,             setNeuerOrtId]             = useState<number | null>(null);
+  const [showStandortGespeichert, setShowStandortGespeichert] = useState(false);
 
-  const startRef    = useRef<HTMLInputElement>(null);
-  const endRef      = useRef<HTMLInputElement>(null);
-  const touchX      = useRef(0);
-  const savedTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const ortTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedTimer       = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const standortTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const neuerOrtTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suchInputRef     = useRef<HTMLInputElement>(null);
+  const dropdownRef      = useRef<HTMLDivElement>(null);
 
   // Flash autosave feedback
   const markSaved = () => {
@@ -155,35 +253,43 @@ export default function EinstellungenView() {
     markSaved();
   };
 
-  const handleOrtTap = (idx: number, id: number) => {
-    if (swipedIdx === idx) { setSwipedIdx(null); return; }
-    setStandortModus('arbeitsort');
-    setAktiveOrtId(id);
-    markSaved();
-    setShowOrtFeedback(true);
-    if (ortTimer.current) clearTimeout(ortTimer.current);
-    ortTimer.current = setTimeout(() => setShowOrtFeedback(false), 2200);
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchX.current = e.touches[0].clientX;
-  };
-  const onTouchEnd = (e: React.TouchEvent, idx: number) => {
-    const dx = e.changedTouches[0].clientX - touchX.current;
-    if (dx < -50) setSwipedIdx(idx);
-    else if (dx > 20) setSwipedIdx(null);
-  };
-
   const deleteOrt = (id: number) => {
     setOrte(prev => prev.filter(o => o.id !== id));
     if (aktiveOrtId === id) setAktiveOrtId(null);
-    setSwipedIdx(null);
     markSaved();
   };
 
-  const triggerPicker = (ref: React.RefObject<HTMLInputElement>) => {
-    try { ref.current?.showPicker?.(); } catch { ref.current?.click(); }
+  const handleSaveOrt = () => {
+    if (!auswahl) return;
+    const newId = Date.now();
+    setOrte(prev => [{ id: newId, name: auswahl.name, city: auswahl.region, lat: auswahl.lat, lng: auswahl.lng }, ...prev]);
+    setAktiveOrtId(newId);
+    setNeuerOrtId(newId);
+    setShowStandortGespeichert(true);
+    setSuchQuery('');
+    setAuswahl(null);
+    setSuchFokus(false);
+    markSaved();
+    if (standortTimer.current) clearTimeout(standortTimer.current);
+    standortTimer.current = setTimeout(() => setShowStandortGespeichert(false), 3500);
+    if (neuerOrtTimer.current) clearTimeout(neuerOrtTimer.current);
+    neuerOrtTimer.current = setTimeout(() => setNeuerOrtId(null), 5000);
   };
+
+  const handleGPSWählen = () => {
+    setSuchQuery('Aktueller Standort');
+    setAuswahl({ id: 'gps', name: 'Hamburg Mitte', region: 'Hamburg', lat: 53.5511, lng: 9.9937 });
+    setSuchFokus(false);
+  };
+
+  const vorschläge = suchQuery.trim().length > 0
+    ? MOCK_VORSCHLÄGE.filter(v =>
+        v.name.toLowerCase().includes(suchQuery.toLowerCase()) ||
+        v.region.toLowerCase().includes(suchQuery.toLowerCase())
+      ).slice(0, 4)
+    : MOCK_VORSCHLÄGE.slice(0, 4);
+
+  const showDropdown = suchFokus && !auswahl;
 
   // Chip component for reuse
   const Chip = ({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) => (
@@ -212,7 +318,7 @@ export default function EinstellungenView() {
       <div className="max-w-4xl mx-auto px-4 md:px-8 pt-2">
         <div className="flex justify-end">
           <span
-            className="text-xs text-black/60 flex items-center gap-1.5 pb-0.5 transition-opacity duration-300"
+            className="text-xs text-muted-foreground flex items-center gap-1.5 pb-0.5 transition-opacity duration-300"
             style={{ opacity: showSaved ? 1 : 0 }}
             aria-live="polite"
           >
@@ -227,9 +333,9 @@ export default function EinstellungenView() {
         {/* ── SECTION 1: Arbeitsprofil ─────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <HardHat className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
-            <p className="text-xs font-semibold tracking-widest uppercase text-black/60">Arbeitsprofil</p>
-            <p className="text-xs text-black/60 ml-1">· Beeinflusst Empfehlungen</p>
+            <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
+            <p className="text-xs text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
           </div>
 
           <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] divide-y divide-black/[0.05]">
@@ -239,7 +345,7 @@ export default function EinstellungenView() {
               <div className="flex items-center gap-1.5 mb-3">
                 <p className="text-sm font-semibold text-black">Arbeitsschwere</p>
                 <button aria-label="Info zur Arbeitsschwere" className="rounded p-0.5 hover:bg-black/[0.04] transition-colors">
-                  <Info className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
+                  <Info className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
                 </button>
               </div>
               <div className="flex gap-2 md:gap-3">
@@ -247,7 +353,7 @@ export default function EinstellungenView() {
                 <Chip label="Mittel" selected={schwere === 'mittel'} onClick={() => change(setSchwere)('mittel')} />
                 <Chip label="Schwer" selected={schwere === 'schwer'} onClick={() => change(setSchwere)('schwer')} />
               </div>
-              <p className="text-xs text-black/60 mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
+              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
             </div>
 
             {/* Arbeitsumgebung */}
@@ -272,13 +378,13 @@ export default function EinstellungenView() {
                         </div>
                       )}
                       <Icon
-                        className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-black/60'}`}
+                        className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}
                         strokeWidth={1.5}
                       />
                       <p className={`text-xs font-semibold leading-tight ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
                         {label}
                       </p>
-                      <p className={`text-xs mt-1 leading-tight ${sel ? 'text-[#325cda]' : 'text-black/60'}`}>
+                      <p className={`text-xs mt-1 leading-tight ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
                         {sub}
                       </p>
                     </button>
@@ -299,43 +405,71 @@ export default function EinstellungenView() {
               </div>
 
               {/* Timeline */}
-              <ShiftTimeline start={startZeit} end={endZeit} schicht={schicht} />
+              <ShiftTimeline
+                start={startZeit}
+                end={endZeit}
+                schicht={schicht}
+                onStartChange={setStartZeit}
+                onEndChange={setEndZeit}
+                onCommit={markSaved}
+              />
 
-              {/* Time pills */}
+              {/* Time inputs */}
               <div className="flex items-center gap-3 mb-3">
-                <button
-                  onClick={() => triggerPicker(startRef)}
-                  className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                    hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors active:scale-[0.98]"
-                >
-                  <Clock className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
-                  <span className="text-sm font-semibold tabular-nums text-black">{startZeit}</span>
-                </button>
+                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
+                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
+                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  cursor-text">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={startZeitDraft ?? startZeit}
+                    placeholder="HH:MM"
+                    maxLength={5}
+                    onChange={e => setStartZeitDraft(formatTimeInput(e.target.value))}
+                    onFocus={e => { setStartZeitDraft(startZeit); e.target.select(); }}
+                    onBlur={() => {
+                      const val = startZeitDraft ?? startZeit;
+                      if (isValidTime(val)) { setStartZeit(val); markSaved(); }
+                      setStartZeitDraft(null);
+                    }}
+                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+                    aria-label="Arbeitsbeginn"
+                  />
+                </label>
 
-                <div className="flex items-center gap-1 text-black/50">
+                <div className="flex items-center gap-1 text-muted-foreground">
                   <div className="w-4 h-px bg-current" />
                   <div className="w-1 h-1 rounded-full bg-current" />
                   <div className="w-4 h-px bg-current" />
                 </div>
 
-                <button
-                  onClick={() => triggerPicker(endRef)}
-                  className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                    hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors active:scale-[0.98]"
-                >
-                  <Clock className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
-                  <span className="text-sm font-semibold tabular-nums text-black">{endZeit}</span>
-                </button>
-
-                <input ref={startRef} type="time" value={startZeit}
-                  onChange={e => { setStartZeit(e.target.value); markSaved(); }}
-                  className="sr-only" aria-label="Arbeitsbeginn" />
-                <input ref={endRef} type="time" value={endZeit}
-                  onChange={e => { setEndZeit(e.target.value); markSaved(); }}
-                  className="sr-only" aria-label="Arbeitsende" />
+                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
+                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
+                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  cursor-text">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={endZeitDraft ?? endZeit}
+                    placeholder="HH:MM"
+                    maxLength={5}
+                    onChange={e => setEndZeitDraft(formatTimeInput(e.target.value))}
+                    onFocus={e => { setEndZeitDraft(endZeit); e.target.select(); }}
+                    onBlur={() => {
+                      const val = endZeitDraft ?? endZeit;
+                      if (isValidTime(val)) { setEndZeit(val); markSaved(); }
+                      setEndZeitDraft(null);
+                    }}
+                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+                    aria-label="Arbeitsende"
+                  />
+                </label>
               </div>
 
-              <p className="text-xs text-black/60 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Frühere Arbeitszeiten werden bei Hitze empfohlen
               </p>
             </div>
@@ -346,142 +480,203 @@ export default function EinstellungenView() {
         {/* ── SECTION 2: Standort ─────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <MapPin className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
-            <p className="text-xs font-semibold tracking-widest uppercase text-black/60">Standort</p>
-            <p className="text-xs text-black/60 ml-1">· Verbessert lokale Vorhersagen</p>
+            <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Standort</p>
+            <p className="text-xs text-muted-foreground ml-1">· Verbessert lokale Vorhersagen</p>
           </div>
 
-          <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] divide-y divide-black/[0.05]">
+          <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden divide-y divide-black/[0.05]">
 
-            {/* Standortmodus */}
-            <div className="p-4 md:p-6">
-              <p className="text-sm font-semibold text-black mb-3">Standortmodus</p>
-              <div className="flex gap-2 md:gap-3 mb-3">
-                <Chip
-                  label="GPS automatisch"
-                  selected={standortModus === 'gps'}
-                  onClick={() => { setStandortModus('gps'); setAktiveOrtId(null); markSaved(); }}
-                />
-                <Chip
-                  label="Arbeitsort"
-                  selected={standortModus === 'arbeitsort'}
-                  onClick={() => { setStandortModus('arbeitsort'); markSaved(); }}
-                />
+            {/* Success banner */}
+            <div
+              className="flex items-center gap-3 bg-emerald-50 px-4 transition-all duration-300 overflow-hidden"
+              style={{ maxHeight: showStandortGespeichert ? '64px' : '0px', opacity: showStandortGespeichert ? 1 : 0, paddingTop: showStandortGespeichert ? '12px' : '0', paddingBottom: showStandortGespeichert ? '12px' : '0' }}
+              aria-live="polite"
+            >
+              <div className="w-5 h-5 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center flex-shrink-0">
+                <Check className="w-3 h-3 text-emerald-700" strokeWidth={2.5} />
               </div>
-              {standortModus === 'gps' && (
-                <div className="flex items-center gap-2 py-0.5">
-                  <div className="w-4 h-4 rounded-full bg-[#ECFDF5] border border-emerald-300 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-2.5 h-2.5 text-[#166534]" strokeWidth={3} />
-                  </div>
-                  <p className="text-xs text-black/60">Standort erkannt · München, Bayern</p>
+              <span className="text-sm font-semibold text-emerald-800">Standort erfolgreich gespeichert</span>
+            </div>
+
+            {/* Search field + dropdown */}
+            <div className="relative p-4 md:p-6" ref={dropdownRef}>
+              <label className="block text-sm font-semibold text-black mb-3" htmlFor="ort-suche">
+                Arbeitsort suchen
+              </label>
+              <div className={`bg-neutral-100 border rounded-xl transition-all ${
+                suchFokus ? 'border-[#325cda] bg-white shadow-[0_0_0_3px_rgba(50,92,218,0.12)]' : 'border-transparent'
+              } ${showDropdown ? 'rounded-b-none border-b-0' : ''}`}>
+                <div className="flex items-center gap-3 px-3.5 py-3">
+                  <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${
+                    suchFokus ? 'text-[#325cda]' : 'text-black/30'
+                  }`} strokeWidth={2} />
+                  <input
+                    id="ort-suche"
+                    ref={suchInputRef}
+                    type="text"
+                    value={suchQuery}
+                    onChange={e => { setSuchQuery(e.target.value); setAuswahl(null); }}
+                    onFocus={() => setSuchFokus(true)}
+                    onBlur={() => setTimeout(() => setSuchFokus(false), 150)}
+                    placeholder="Stadt oder Postleitzahl..."
+                    className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground/60 text-black"
+                    aria-label="Ort suchen"
+                  />
+                  {suchQuery && (
+                    <button
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => { setSuchQuery(''); setAuswahl(null); suchInputRef.current?.focus(); }}
+                      className="text-black/40 hover:text-black/70 transition-colors"
+                      aria-label="Suche löschen"
+                    >
+                      <X className="w-4 h-4" strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Dropdown */}
+              {showDropdown && (
+                <div className="absolute left-4 right-4 md:left-6 md:right-6 bg-white border border-[#325cda] border-t-black/[0.06] rounded-b-xl shadow-lg
+                  divide-y divide-black/[0.05] overflow-hidden z-10">
+                  {/* GPS option */}
+                  <button
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={handleGPSWählen}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-neutral-50 transition-colors text-left"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-[#eef2fd] flex items-center justify-center flex-shrink-0">
+                      <LocateFixed className="w-3.5 h-3.5 text-[#325cda]" strokeWidth={2} />
+                    </div>
+                    <span className="text-sm font-semibold text-black">Aktueller Standort</span>
+                  </button>
+                  {/* Search results */}
+                  {vorschläge.map(v => (
+                    <button
+                      key={v.id}
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => { setAuswahl(v); setSuchQuery(`${v.name}, ${v.region}`); setSuchFokus(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-neutral-50 transition-colors text-left"
+                    >
+                      <MapPin className="w-4 h-4 text-muted-foreground/60 flex-shrink-0" strokeWidth={1.5} />
+                      <span className="text-sm text-black">
+                        <span className="font-semibold">{v.name}</span>
+                        <span className="text-muted-foreground">, {v.region}</span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
               )}
-              {standortModus === 'arbeitsort' && !aktiveOrtId && (
-                <input
-                  type="text"
-                  placeholder="Stadt oder Postleitzahl eingeben"
-                  className="w-full px-3.5 py-3 text-sm bg-neutral-50 border border-black/10 rounded-xl
-                    focus:outline-none focus:border-[#325cda]/40 focus:bg-[#eef2fd]/40
-                    transition-colors placeholder:text-black/60"
-                />
+
+              {/* Selection confirmation */}
+              {auswahl && (
+                <div className="mt-3 bg-neutral-50 rounded-xl border border-black/[0.06] p-4">
+                  {auswahl.id === 'gps' && (
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <LocateFixed className="w-3 h-3 text-[#325cda] flex-shrink-0" strokeWidth={2} />
+                      <span className="text-xs font-medium text-[#325cda]">GPS-Standort</span>
+                    </div>
+                  )}
+                  <p className="text-sm font-semibold text-black">{auswahl.name}, {auswahl.region}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Koordinaten: {auswahl.lat.toFixed(4)}° N, {auswahl.lng.toFixed(4)}° E
+                  </p>
+                  <button
+                    onClick={handleSaveOrt}
+                    className="w-full md:w-auto md:px-8 mt-3 bg-[#325cda] hover:bg-[#1d3fa3] active:scale-[0.99]
+                      text-white text-sm font-semibold rounded-xl py-3 transition-all"
+                  >
+                    Als Arbeitsort speichern
+                  </button>
+                </div>
               )}
             </div>
 
-            {/* Gespeicherte Orte */}
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-semibold text-black">Gespeicherte Orte</p>
-                <span
-                  className="text-xs text-[#166534] flex items-center gap-1 transition-opacity duration-300"
-                  style={{ opacity: showOrtFeedback ? 1 : 0 }}
-                  aria-live="polite"
-                >
-                  <Check className="w-3 h-3" strokeWidth={2.5} />
-                  Arbeitsort geändert
-                </span>
-              </div>
-              <div className="space-y-2 mb-3">
-                {orte.map((ort, idx) => {
-                  const isActive = standortModus === 'arbeitsort' && aktiveOrtId === ort.id;
-                  const isSwiped = swipedIdx === idx;
-                  return (
-                    <div key={ort.id} className="relative rounded-xl overflow-hidden">
-                      {/* Swipe actions */}
-                      <div className="absolute right-0 top-0 bottom-0 flex">
-                        <button
-                          onClick={() => setSwipedIdx(null)}
-                          className="w-14 bg-neutral-200 flex items-center justify-center
-                            hover:bg-neutral-300 transition-colors"
-                          aria-label="Bearbeiten"
-                        >
-                          <Pencil className="w-4 h-4 text-black/60" strokeWidth={1.5} />
-                        </button>
-                        <button
-                          onClick={() => deleteOrt(ort.id)}
-                          className="w-14 bg-red-500 flex items-center justify-center rounded-r-xl
-                            hover:bg-red-600 transition-colors"
-                          aria-label="Löschen"
-                        >
-                          <Trash2 className="w-4 h-4 text-white" strokeWidth={1.5} />
-                        </button>
-                      </div>
-
-                      {/* Main row */}
+            {/* Saved locations */}
+            {orte.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground px-4 md:px-6 pt-4 pb-2">
+                  Gespeicherte Standorte
+                </p>
+                <div className="divide-y divide-black/[0.05]">
+                  {orte.map(ort => {
+                    const isActive  = aktiveOrtId === ort.id;
+                    const isNew     = neuerOrtId  === ort.id;
+                    return (
                       <div
-                        style={{
-                          transform: isSwiped ? 'translateX(-112px)' : 'translateX(0)',
-                          transition: 'transform 0.2s ease',
-                        }}
-                        onTouchStart={onTouchStart}
-                        onTouchEnd={e => onTouchEnd(e, idx)}
-                        onClick={() => handleOrtTap(idx, ort.id)}
-                        className={`group flex items-center gap-3 px-3.5 py-3.5 rounded-xl cursor-pointer border
-                          transition-all select-none active:scale-[0.99] ${
-                          isActive
-                            ? 'bg-[#eef2fd] border-[#325cda]/30'
-                            : 'bg-white border-black/[0.06] hover:border-black/20 hover:bg-neutral-50 active:bg-neutral-100'
+                        key={ort.id}
+                        className={`flex items-center gap-3 px-4 md:px-6 py-3.5 transition-colors cursor-pointer ${
+                          isActive ? 'bg-[#eef2fd]' : 'hover:bg-neutral-50'
                         }`}
+                        onClick={() => { setAktiveOrtId(ort.id); markSaved(); }}
+                        role="button"
+                        aria-pressed={isActive}
                       >
                         <MapPin
-                          className={`w-4 h-4 flex-shrink-0 transition-colors ${isActive ? 'text-[#325cda]' : 'text-black/60'}`}
+                          className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#325cda]' : 'text-muted-foreground/50'}`}
                           strokeWidth={1.5}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm leading-tight transition-colors ${isActive ? 'font-semibold text-[#1d3fa3]' : 'text-black/80'}`}>
-                            {ort.name}
-                          </p>
-                          <p className={`text-xs mt-0.5 transition-colors ${isActive ? 'text-[#325cda]' : 'text-black/60'}`}>
-                            {ort.city}
-                          </p>
+                          <p className={`text-sm font-semibold leading-tight ${
+                            isActive ? 'text-[#1d3fa3]' : 'text-black/80'
+                          }`}>{ort.name}</p>
+                          {isNew ? (
+                            <span className="text-xs font-semibold tracking-wide uppercase text-emerald-700">
+                              Gerade gespeichert
+                            </span>
+                          ) : (
+                            <p className="text-xs text-muted-foreground mt-0.5">{ort.city}</p>
+                          )}
                         </div>
-                        {isActive ? (
+                        {isActive && (
                           <span className="text-xs font-semibold bg-[#325cda]/10 text-[#1d3fa3] border border-[#325cda]/20 px-2 py-0.5 rounded-full flex-shrink-0">
                             Aktiv
                           </span>
-                        ) : (
-                          <ChevronRight
-                            className="w-4 h-4 text-black/60 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            strokeWidth={1.5}
-                          />
                         )}
+                        <button
+                          onClick={e => { e.stopPropagation(); deleteOrt(ort.id); }}
+                          className="p-1.5 rounded-lg text-muted-foreground/50 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                          aria-label={`${ort.name} löschen`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
+            )}
 
-              {/* Add location */}
-              <button
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl
-                  border-2 border-dashed border-black/20 text-sm font-medium text-black/60
-                  hover:border-[#325cda]/50 hover:text-[#325cda] hover:bg-[#eef2fd]/40
-                  active:scale-[0.99] active:bg-[#eef2fd]/60 transition-all"
-              >
-                <Plus className="w-4 h-4" strokeWidth={2.5} />
-                Ort hinzufügen
-              </button>
+          </div>
+        </section>
+
+        {/* ── SECTION 3: Benachrichtigungen ───────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <Bell className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Benachrichtigungen</p>
+          </div>
+
+          <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06]">
+            <div className="flex items-center justify-between p-4 md:p-6">
+              <div className="flex-1 min-w-0 pr-4">
+                <p className="text-sm font-semibold text-black">Push-Benachrichtigungen</p>
+                <p className="text-xs mt-1 leading-relaxed">
+                  {benachrichtigungen ? (
+                    <><span className="font-semibold text-[#166534]">An</span><span className="text-muted-foreground"> · Hinweise bei Hitze, Unwetter und Arbeitsschutzempfehlungen</span></>
+                  ) : (
+                    <><span className="font-semibold text-muted-foreground">Aus</span><span className="text-muted-foreground"> · Du erhältst keine Hinweise</span></>
+                  )}
+                </p>
+              </div>
+              <Switch
+                checked={benachrichtigungen}
+                onCheckedChange={(val) => { setBenachrichtigungen(val); markSaved(); }}
+                aria-label="Push-Benachrichtigungen aktivieren"
+                className="data-[state=checked]:bg-[#325cda] flex-shrink-0 h-6 w-11"
+              />
             </div>
-
           </div>
         </section>
 

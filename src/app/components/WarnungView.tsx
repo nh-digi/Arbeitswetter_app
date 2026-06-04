@@ -1,7 +1,7 @@
-import { MapPin, Clock, Sun, Zap, Wind, CloudRain, ExternalLink, ChevronDown } from 'lucide-react';
+import { MapPin, Clock, Sun, Zap, Wind, CloudRain, ExternalLink, ChevronDown, Thermometer, Sunrise } from 'lucide-react';
 import PageHeader from './PageHeader';
 
-type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
+type View = 'heute' | 'planung' | 'warnung' | 'einstellungen';
 
 export default function WarnungView({ onNavigate }: { onNavigate: (view: View) => void }) {
   const warnings = [
@@ -15,6 +15,10 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
       timeStart: '09:42',
       timeEnd: '20:00',
       description: 'Extreme Hitzebelastung erwartet. Direkte Sonneneinstrahlung sollte möglichst vermieden werden. Die Warnung gilt für alle Landkreise in der genannten Region. Es ist mit einer erhöhten Waldbrandgefahr zu rechnen.',
+      factors: [
+        { label: 'Hitze', Icon: Thermometer },
+        { label: 'UV-Strahlung', Icon: Sunrise },
+      ],
       recommendations: [
         'Tätigkeiten im Freien in den Mittags- und Nachmittagsstunden nach Möglichkeit vermeiden',
         'Kopfbedeckung und leichte, luftdurchlässige Kleidung empfohlen',
@@ -86,13 +90,12 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 pb-28">
+    <div className="min-h-screen pb-28" style={{ backgroundColor: 'var(--neutral-950)' }}>
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-neutral-100/95 backdrop-blur-sm border-b border-black/[0.06]">
+      <div className="sticky top-0 z-10 backdrop-blur-sm border-b" style={{ backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(255,255,255,0.08)' }}>
         <PageHeader
           title="Warnungen für Berlin & Brandenburg"
-          variant="light"
-          showSettings
+          variant="dark"
           showLocationButton
           onNavigate={onNavigate}
         />
@@ -118,16 +121,30 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
                 >
                   <Icon className="w-6 h-6 text-black" strokeWidth={2} />
                 </div>
-                <div
-                  className={`${config.tagBg} px-2 py-1 rounded border ${config.tagBorder} flex-shrink-0`}
-                >
-                  <p className="text-xs leading-[1.3] text-black" style={{ fontWeight: 600 }}>
-                    {warning.severityLabel}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div
+                      className={`${config.tagBg} px-2 py-1 rounded border ${config.tagBorder} flex-shrink-0`}
+                    >
+                      <p className="text-xs leading-[1.3] text-black" style={{ fontWeight: 600 }}>
+                        {warning.severityLabel}
+                      </p>
+                    </div>
+                    <p className="text-base leading-normal text-[var(--neutral-950)]" style={{ fontWeight: 600 }}>
+                      {warning.title}
+                    </p>
+                  </div>
+                  {warning.factors && warning.factors.length > 0 && (
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      {warning.factors.map(({ label, Icon: FIcon }) => (
+                        <span key={label} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs" style={{ fontWeight: 500, backgroundColor: 'rgba(255,255,255,0.12)', color: 'var(--neutral-600)', border: '1px solid var(--neutral-100)' }}>
+                          <FIcon className="w-3 h-3" strokeWidth={2} />
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <p className="text-base leading-normal text-[var(--neutral-950)] flex-1 min-w-0" style={{ fontWeight: 600 }}>
-                  {warning.title}
-                </p>
               </div>
 
               {/* Location & Time */}

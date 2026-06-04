@@ -11,6 +11,7 @@
   --neutral-700:     #2D2D2D;
   --neutral-600:     #3F3F3F;
   --neutral-500:     #64748B;
+  --neutral-400:     #7F8EA3;
   --neutral-300:     #94A3B8;
   --neutral-100:     #E2E8F0;
   --neutral-50:      #F8FAFC;
@@ -25,8 +26,10 @@
   --status-critical:       #E8193C;
   --status-critical-tint:  #FF878A;
   --status-critical-bg:    #FFEEEF;
-  --status-warning:        #FEBB6A;
-  --status-warning-bg:     #FFEDD4;
+  --status-warning:        #F8D74A;
+  --status-warning-bg:     #FEFCE8;
+  --status-strong:         #FEBB6A;
+  --status-strong-bg:      #FFF4E0;
   --status-caution:        #F8D74A;
   --status-success:        #10B981;
   --status-success-bg:     #ECFDF5;
@@ -49,7 +52,7 @@
   --secondary:             #F8FAFC;
   --secondary-foreground:  #222222;
   --muted:                 #F8FAFC;
-  --muted-foreground:      #64748B;
+  --muted-foreground:      #3F3F3F;
   --accent:                #E2E8F0;
   --accent-foreground:     #222222;
   --destructive:           #E8193C;
@@ -215,11 +218,11 @@
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translate(-50%, 1rem);
+    translate: 0 1rem;
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    translate: 0 0;
   }
 }
 

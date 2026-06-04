@@ -1,15 +1,24 @@
 import { useState } from 'react';
-import { Home, Calendar, AlertTriangle, Settings, BookOpen } from 'lucide-react';
+import { Home, Calendar, AlertTriangle, Settings } from 'lucide-react';
 import HeuteView from './components/HeuteView';
 import PlanungView from './components/PlanungView';
 import WarnungView from './components/WarnungView';
 import EinstellungenView from './components/EinstellungenView';
-import StyleguideView from './components/StyleguideView';
-
-type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
+type View = 'heute' | 'planung' | 'warnung' | 'einstellungen';
+interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 
 export default function App() {
   const [activeView, setActiveView] = useState<View>('heute');
+  const [startZeit,    setStartZeit]    = useState('06:00');
+  const [endZeit,      setEndZeit]      = useState('14:00');
+  const [schwere,      setSchwere]      = useState<'leicht' | 'mittel' | 'schwer'>('mittel');
+  const [orte,         setOrte]         = useState<Ort[]>([
+    { id: 1, name: 'Berlin Ost', city: 'Baustelle A10', lat: 52.5200, lng: 13.4050 },
+    { id: 2, name: 'Hamburg',    city: 'Lager Nord',    lat: 53.5511, lng: 9.9937  },
+  ]);
+  const [aktiveOrtId,  setAktiveOrtId]  = useState<number | null>(null);
+  const activeOrt = orte.find(o => o.id === aktiveOrtId) ?? null;
+  const SCHWERE_SHORT: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
 
   const navItems = [
     { id: 'heute'         as View, label: 'Heute',          icon: Home,          dot: false },
@@ -22,11 +31,10 @@ export default function App() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Main Content */}
       <main className="flex-1 pb-20 md:pb-0">
-        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} />}
+        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_SHORT[schwere]} />}
         {activeView === 'planung'       && <PlanungView onNavigate={setActiveView} />}
         {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} />}
-        {activeView === 'einstellungen' && <EinstellungenView />}
-        {activeView === 'styleguide'    && <StyleguideView />}
+        {activeView === 'einstellungen' && <EinstellungenView startZeit={startZeit} setStartZeit={setStartZeit} endZeit={endZeit} setEndZeit={setEndZeit} orte={orte} setOrte={setOrte} aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId} schwere={schwere} setSchwere={setSchwere} />}
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -49,27 +57,12 @@ export default function App() {
                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#E8193C] border border-white" />
                   )}
                 </span>
-                <span className="text-xs leading-none">{item.label}</span>
+                <span className="text-xs leading-none hidden min-[400px]:inline">{item.label}</span>
               </button>
             );
           })}
         </div>
       </nav>
-
-      {/* Mobile styleguide icon — floating, above nav */}
-      <button
-        onClick={() => setActiveView(activeView === 'styleguide' ? 'heute' : 'styleguide')}
-        className={`md:hidden fixed bottom-[72px] right-4 w-9 h-9 rounded-full border shadow-sm
-          flex items-center justify-center transition-all z-20 ${
-          activeView === 'styleguide'
-            ? 'bg-[#325cda] border-[#325cda] text-white'
-            : 'bg-white border-black/10 text-black/40 hover:text-black/60'
-        }`}
-        title="Design System"
-        aria-label="Design System"
-      >
-        <BookOpen className="w-4 h-4" strokeWidth={1.5} />
-      </button>
 
       {/* Desktop Side Navigation */}
       <nav className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-[#e2e8f0]">
@@ -109,21 +102,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Desktop styleguide link — bottom of sidebar */}
-        <div className="px-3 pb-4 border-t border-[#e2e8f0] pt-3">
-          <button
-            onClick={() => setActiveView(activeView === 'styleguide' ? 'heute' : 'styleguide')}
-            className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors ${
-              activeView === 'styleguide'
-                ? 'bg-[#eef2fd] text-[#1d3fa3]'
-                : 'text-[#64748b] hover:bg-[#f1f5f9] hover:text-black/80'
-            }`}
-            title="Design System"
-          >
-            <BookOpen className="w-[18px] h-[18px] flex-shrink-0" strokeWidth={1.5} />
-            <span className="text-sm">Design System</span>
-          </button>
-        </div>
       </nav>
 
       {/* Desktop Content Offset */}

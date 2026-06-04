@@ -19,18 +19,20 @@ export default function UndoToast({ message, onUndo, onDismiss, duration = 5000 
 
   return (
     <div
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up"
-      style={{ maxWidth: 'calc(100vw - 2rem)' }}
+      className="fixed left-3 right-3 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2 z-50 animate-slide-up"
+      style={{
+        bottom: 'calc(72px + 12px)', /* clear the mobile nav bar */
+      }}
     >
       <div
-        className="flex items-center gap-4 px-4 py-3 rounded-lg shadow-lg"
+        className="flex items-center gap-2 px-3 py-2.5 rounded-xl shadow-lg"
         style={{
           backgroundColor: 'var(--neutral-950)',
           border: '1px solid var(--neutral-800)',
         }}
       >
         <p
-          className="text-sm flex-1"
+          className="text-sm flex-1 whitespace-nowrap overflow-hidden text-ellipsis"
           style={{
             color: 'white',
             fontFamily: 'var(--font-family)',
@@ -41,13 +43,14 @@ export default function UndoToast({ message, onUndo, onDismiss, duration = 5000 
 
         <button
           onClick={onUndo}
-          className="px-3 py-1.5 rounded-md hover:opacity-80 transition-opacity"
+          className="flex-shrink-0 px-3 py-1.5 rounded-lg hover:opacity-80 transition-opacity"
           style={{
             backgroundColor: 'var(--brand-primary)',
             color: 'white',
             fontFamily: 'var(--font-family)',
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 600,
+            lineHeight: 1.4,
           }}
         >
           Rückgängig
@@ -55,9 +58,10 @@ export default function UndoToast({ message, onUndo, onDismiss, duration = 5000 
 
         <button
           onClick={onDismiss}
-          className="flex-shrink-0 hover:opacity-80 transition-opacity"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-md hover:opacity-80 transition-opacity"
+          style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
         >
-          <X className="w-4 h-4" style={{ color: 'var(--neutral-500)' }} strokeWidth={1.5} />
+          <X className="w-3.5 h-3.5" style={{ color: 'var(--neutral-400)' }} strokeWidth={1.5} />
         </button>
       </div>
     </div>

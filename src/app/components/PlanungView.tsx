@@ -369,12 +369,12 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
           <div className="pt-3 md:pt-5 gap-3 md:gap-5 flex flex-col md:flex-row">
 
             {/* ── LEFT: Plan content ── */}
-            <div className="bg-white rounded-2xl md:rounded-3xl pt-5 md:pt-8 px-5 md:px-7 pb-6 md:pb-9 space-y-3 md:space-y-4 flex-1">
+            <div className="bg-white rounded-2xl md:rounded-3xl pt-4 md:pt-8 px-4 md:px-7 pb-5 md:pb-9 space-y-2.5 md:space-y-4 flex-1">
 
               {/* Date heading */}
               <div className="space-y-0.5 md:space-y-1">
                 <p className="text-[11px] md:text-xs text-[var(--neutral-500)]">Hinweise zur Arbeitsplanung:</p>
-                <h2 className="text-[var(--neutral-950)] text-xl md:text-2xl">
+                <h2 className="text-[var(--neutral-950)] text-lg md:text-2xl">
                   {d.date}
                 </h2>
               </div>
@@ -382,11 +382,11 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
               {/* Time blocks */}
               <div>
                 <p className="text-[11px] md:text-xs font-semibold uppercase tracking-wider mb-2 md:mb-4 text-[var(--neutral-500)]">Planung</p>
-                <div className="space-y-3 md:space-y-5">
+                <div className="space-y-2.5 md:space-y-5">
                   {d.actionBlocks.map((block, bi) => (
                     <div key={bi}>
-                      <div className="flex items-center gap-2 mb-1.5 md:mb-2 flex-wrap">
-                        <h3 className={`text-lg md:text-xl ${
+                      <div className="flex items-center gap-2 mb-1 md:mb-2 flex-wrap">
+                        <h3 className={`text-base md:text-xl ${
                           block.status === 'kritisch' ? 'text-[var(--status-critical)]' : 'text-[var(--neutral-950)]'
                         }`}>
                           {block.timeLabel}
@@ -439,7 +439,7 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
                         }
                       </button>
                       {isOpen && (
-                        <p className="text-[11px] md:text-xs leading-relaxed pb-2 md:pb-3 pl-5 md:pl-7 text-white/50">{hazard.detail}</p>
+                        <p className="text-[11px] md:text-xs leading-relaxed pb-2 md:pb-3 text-white/50">{hazard.detail}</p>
                       )}
                     </div>
                   );

@@ -1,6 +1,6 @@
-import { ChevronDown, Thermometer, Droplet, Wind, Sun, Shield, Clock, AlertCircle, Info, HardHat, Shirt, X } from 'lucide-react';
+import React from 'react';
+import { ChevronDown, Thermometer, Droplet, Wind, Sun, Shield, Clock, AlertCircle, AlertTriangle, Info, CheckCircle, HardHat, Shirt, X } from 'lucide-react';
 import { useState } from 'react';
-import { StatusIconCircle } from './StatusBadge';
 
 interface BeurteilungstemperaturDetailViewProps {
   onClose: () => void;
@@ -31,10 +31,10 @@ const hourlyData = [
 ];
 
 function getLevelInfo(temp: number) {
-  if (temp < 25) return { label: 'Gering',  barBg: 'var(--status-success-bg)',  solidColor: 'var(--status-success)',   textColor: 'var(--status-success-text)' };
-  if (temp < 28) return { label: 'Mäßig',   barBg: 'var(--status-caution)',     solidColor: 'var(--status-caution)',   textColor: 'var(--neutral-600)' };
-  if (temp < 32) return { label: 'Stark',   barBg: 'var(--status-warning)',     solidColor: 'var(--status-warning)',   textColor: 'var(--neutral-600)' };
-  return          { label: 'Kritisch', barBg: 'var(--status-critical)',    solidColor: 'var(--status-critical)',  textColor: 'var(--status-critical)' };
+  if (temp < 25) return { level: 1, label: 'Gering',   barBg: 'var(--status-success-bg)',  solidColor: 'var(--status-icon-ok)',      textColor: 'var(--status-success-text)' };
+  if (temp < 28) return { level: 2, label: 'Mäßig',    barBg: 'var(--status-warning-bg)',  solidColor: 'var(--status-warning)',      textColor: 'var(--neutral-600)' };
+  if (temp < 32) return { level: 3, label: 'Stark',    barBg: 'var(--status-strong-bg)',   solidColor: 'var(--status-strong)',       textColor: 'var(--neutral-600)' };
+  return          { level: 4, label: 'Kritisch',  barBg: 'var(--status-critical-bg)', solidColor: 'var(--status-critical-tint)', textColor: 'var(--status-critical)' };
 }
 
 function getRealHour(): number { return new Date().getHours(); }
@@ -44,11 +44,11 @@ function getCurrentTemp(hour: number): number {
   return found ? found.temp : 20;
 }
 
-const waermestufen: { status: 'ok' | 'maessig' | 'warnung' | 'kritisch'; label: string; range: string }[] = [
-  { status: 'ok',       label: 'Gering',   range: 'Unter 25°C' },
-  { status: 'maessig',  label: 'Mäßig',    range: '25–28°C'   },
-  { status: 'warnung',  label: 'Stark',    range: '28–32°C'   },
-  { status: 'kritisch', label: 'Kritisch', range: 'Über 32°C'  },
+const waermestufen: { bg: string; Icon: React.ElementType; label: string; range: string }[] = [
+  { bg: 'var(--status-icon-ok)',       Icon: CheckCircle,   label: 'Gering',   range: 'Unter 25°C' },
+  { bg: 'var(--status-warning)',       Icon: Info,          label: 'Mäßig',    range: '25–28°C'   },
+  { bg: 'var(--status-strong)',        Icon: AlertCircle,   label: 'Stark',    range: '28–32°C'   },
+  { bg: 'var(--status-critical-tint)', Icon: AlertTriangle, label: 'Kritisch', range: 'Über 32°C'  },
 ];
 
 const einflussfaktoren = [
@@ -206,11 +206,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
               const barHeightPx = Math.max(12, ((temp - minTemp) / (maxTemp - minTemp)) * 80);
               const hourNum = parseInt(hour);
               const isNow = hourNum === currentHour;
-              const isCritical = temp >= 32;
-              const isWarning = temp >= 28 && temp < 32;
-
-              const isOk = temp < 25;
-              const isMaessig = temp >= 25 && temp < 28;
+              const isOk = level.level === 1;
 
               return (
                 <div
@@ -219,19 +215,11 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                 >
                   {/* Status icon in circle */}
                   <div style={{ height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {isCritical && (
-                      <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--status-icon-critical)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <AlertCircle className="w-2 h-2 text-black" strokeWidth={2.5} />
-                      </div>
-                    )}
-                    {isWarning && (
-                      <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--status-icon-warning)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <AlertCircle className="w-2 h-2 text-black" strokeWidth={2.5} />
-                      </div>
-                    )}
-                    {isMaessig && (
-                      <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--status-caution)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Info className="w-2 h-2 text-black" strokeWidth={2.5} />
+                    {level.level >= 2 && (
+                      <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: level.solidColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {level.level === 2 && <Info className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                        {level.level === 3 && <AlertCircle className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                        {level.level === 4 && <AlertTriangle className="w-2 h-2 text-black" strokeWidth={2.5} />}
                       </div>
                     )}
                   </div>
@@ -285,7 +273,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
             Wärmestufen
           </p>
           <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
-            {waermestufen.map(({ status, label, range }, i) => (
+            {waermestufen.map(({ bg, Icon, label, range }, i) => (
               <div
                 key={label}
                 className="flex items-center px-4 py-3 lg:py-4"
@@ -294,7 +282,9 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                   borderBottom: i < waermestufen.length - 1 ? '1px solid var(--border)' : 'none',
                 }}
               >
-                <StatusIconCircle status={status} className="w-7 h-7 mr-3" iconClassName="w-3.5 h-3.5" />
+                <div className="w-7 h-7 mr-3 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: bg }}>
+                  <Icon className="w-3.5 h-3.5" style={{ color: 'var(--neutral-black)' }} strokeWidth={2} />
+                </div>
                 <p className="flex-1 text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                   {label}
                 </p>
