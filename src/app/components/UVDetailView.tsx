@@ -1,5 +1,6 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronDown, Sun, ClipboardList, User, X } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ReferenceLine, Tooltip } from 'recharts';
+import { useState } from 'react';
 
 interface UVDetailViewProps {
   onClose: () => void;
@@ -37,9 +38,44 @@ const uvData = [
   { hour: 23, uv: 0, time: '11PM' },
 ];
 
+const uvSunRecommendations = [
+  {
+    Icon: ClipboardList,
+    label: 'Sonnencreme LSF 50+ empfohlen',
+    detail: 'Es empfiehlt sich, vor dem Aufenthalt im Freien aufzutragen und alle 2 Stunden sowie nach dem Schwitzen zu erneuern.',
+  },
+  {
+    Icon: User,
+    label: 'Schutzkleidung und Kopfbedeckung empfohlen',
+    detail: 'Hut mit breiter Krempe, langärmlige Kleidung und Sonnenbrille können Haut und Augen wirksam schützen.',
+  },
+  {
+    Icon: Sun,
+    label: 'Mittagssonne möglichst meiden (11–15 Uhr)',
+    detail: 'In diesem Zeitfenster ist die UV-Strahlung am intensivsten. Schattige Bereiche werden empfohlen.',
+  },
+  {
+    Icon: ClipboardList,
+    label: 'Regelmäßige Pausen im Schatten empfohlen',
+    detail: 'Bei UV-Index 7 und höher empfiehlt es sich, alle 45–60 Minuten Schatten aufzusuchen und ausreichend zu trinken.',
+  },
+];
+
 export default function UVDetailView({ onClose }: UVDetailViewProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   return (
-    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+    <div className="fixed inset-0 z-50">
+      {/* Desktop backdrop */}
+      <div
+        className="hidden lg:block absolute inset-0"
+        style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Panel — full-screen on mobile, right drawer on desktop */}
+      <div className="absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
+
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b" style={{ borderColor: '#E5E7EB' }}>
         <div className="flex items-center gap-2 px-4 py-3">
@@ -54,22 +90,25 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
         </div>
       </div>
 
-      {/* Desktop Breadcrumb */}
-      <div className="hidden lg:block bg-white">
-        <div className="flex items-center px-8 py-5">
-          <button
-            onClick={onClose}
-            style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)' }}
-          >
-            Übersicht
-          </button>
-          <ChevronRight className="w-3 h-3 mx-2" style={{ color: '#6B7280' }} strokeWidth={2} />
-          <p style={{ fontSize: 12, color: '#111827', fontFamily: 'var(--font-family)' }}>UV-Index</p>
-        </div>
+      {/* Desktop Header */}
+      <div
+        className="hidden lg:flex items-center justify-between px-6 py-4 sticky top-0 z-10 bg-white border-b"
+        style={{ borderColor: '#E5E7EB' }}
+      >
+        <p style={{ fontWeight: 600, fontSize: 16, color: '#111827', fontFamily: 'var(--font-family)' }}>
+          UV-Index
+        </p>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/[0.06] transition-colors"
+          aria-label="Schließen"
+        >
+          <X className="w-4 h-4" style={{ color: '#6B7280' }} strokeWidth={2} />
+        </button>
       </div>
 
       {/* Content */}
-      <div className="bg-white px-4 lg:px-16 pt-4 pb-10 max-w-7xl mx-auto">
+      <div className="bg-white px-4 lg:px-6 pt-4 pb-10">
         {/* Large Number Display */}
         <div className="mb-6 lg:mb-8">
           <div className="flex items-baseline gap-3 lg:gap-4">
@@ -247,12 +286,53 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Jetzt, 13:06 Uhr
           </p>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
+          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Sonnenschutz wird dringend empfohlen. UV-Werte von Mäßig oder höher werden von 10:00 bis 18:00 Uhr erreicht.
           </p>
           <p style={{ fontSize: 12, lineHeight: 1.3, color: '#3F3F3F', fontFamily: 'var(--font-family)' }}>
-            Quelle: DWD
+            Quelle: <a href="https://www.dwd.de" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>DWD</a>
           </p>
+        </div>
+
+        <div className="h-px bg-[#E5E7EB] my-8" />
+
+        {/* Sun Exposure Recommendations */}
+        <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: '#F9FAFB' }}>
+          <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
+            <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: '#111827', fontFamily: 'var(--font-family)' }}>
+              Sonnenschutz-Empfehlungen bei hohem UV-Index
+            </p>
+            {uvSunRecommendations.map(({ Icon, label, detail }, i) => (
+              <div key={label}>
+                <button
+                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                  className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-3 rounded-lg cursor-pointer lg:min-h-[44px] text-left"
+                  style={{ minHeight: 40, background: 'none', border: 'none' }}
+                >
+                  <div
+                    className="flex items-center justify-center rounded-lg flex-shrink-0 lg:w-[28px] lg:h-[28px]"
+                    style={{ width: 24, height: 24, backgroundColor: '#F3F4F6' }}
+                  >
+                    <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: '#6B7280' }} strokeWidth={1.5} />
+                  </div>
+                  <p className="flex-1 text-xs lg:text-sm" style={{ color: '#111827', fontFamily: 'var(--font-family)' }}>{label}</p>
+                  <ChevronDown
+                    className="w-3.5 lg:w-4 h-3.5 lg:h-4 flex-shrink-0 transition-transform"
+                    style={{ color: '#6B7280', transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    strokeWidth={1.5}
+                  />
+                </button>
+                {openIndex === i && (
+                  <p className="pb-2 text-xs lg:text-sm" style={{ color: '#6B7280', fontFamily: 'var(--font-family)', lineHeight: 1.6, paddingLeft: 36 }}>
+                    {detail}
+                  </p>
+                )}
+                {i < uvSunRecommendations.length - 1 && (
+                  <div className="w-full h-px" style={{ backgroundColor: '#F3F4F6' }} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="h-px bg-[#E5E7EB] my-8" />
@@ -262,7 +342,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Tagesvergleich
           </p>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 16 }}>
+          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 16 }}>
             Der UV-Index-Höchstwert heute ist ähnlich wie gestern.
           </p>
 
@@ -307,10 +387,12 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 8 }}>
             Über den UV-Index
           </p>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)' }}>
+          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)' }}>
             Der UV-Index (UVI) der Weltgesundheitsorganisation misst ultraviolette Strahlung. Je höher der UVI, desto größer ist das Schadenspotenzial und desto schneller können Schäden entstehen. Der UVI hilft Ihnen zu entscheiden, wie und wann Sie das Aufhalten im Freien einschränken sollten. Die WHO empfiehlt bei Werten ab 3 (Mäßig) Schatten, Sonnencreme, Hüte und Schutzkleidung zu verwenden.
           </p>
         </div>
+
+      </div>
       </div>
     </div>
   );

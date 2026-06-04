@@ -32,6 +32,11 @@
   --status-success-bg:     #ECFDF5;
   --status-success-text:   #166534;
 
+  /* ── Status icon circle fills ── */
+  --status-icon-ok:        #85D7A2;
+  --status-icon-warning:   #FFB530;
+  --status-icon-critical:  #FF878A;
+
   /* ── Semantic tokens ── */
   --background:            #FFFFFF;
   --foreground:            #222222;

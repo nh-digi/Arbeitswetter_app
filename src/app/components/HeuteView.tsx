@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, type RefObject } from 'react';
 import DWDWarningBanner from './DWDWarningBanner';
 import UndoToast from './UndoToast';
 import UVDetailView from './UVDetailView';
+import BeurteilungstemperaturDetailView from './BeurteilungstemperaturDetailView';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -153,6 +154,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
   const [dwdWarningVisible, setDwdWarningVisible] = useState(true);
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [uvDetailOpen, setUvDetailOpen] = useState(false);
+  const [beurtDetailOpen, setBeurtDetailOpen] = useState(false);
 
   const handleDismissWarning = () => {
     setDwdWarningVisible(false);
@@ -368,7 +370,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
         <div className="flex-1 min-w-0 self-center">
           <p className="leading-snug mb-0.5 lg:mb-1 lg:text-base"
             style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
-            {status.alertTitle}
+            {scrubbingHour !== null ? status.alertTitle : `Jetzt, ${formatHH(clampWorkday(realtimeHour))} Uhr`}
           </p>
           <p className="text-[11px] lg:text-sm leading-snug"
             style={{ fontFamily: 'var(--font-family)', color: T.n100 }}>
@@ -531,7 +533,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
       return [
         { Icon: Wrench,        label: 'Schattenplätze empfohlen' },
         { Icon: ClipboardList, label: 'Verlängerte Pausen empfohlen' },
-        { Icon: User,          label: 'Ausreichend Getränke bereitstellen' },
+        { Icon: User,          label: 'Ausreichend Getränke empfohlen' },
       ];
     } else if (status.level >= 2) {
       return [
@@ -552,7 +554,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
     <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n50 }}>
       <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
         <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
-          Handlungsempfehlungen für {Math.floor(currentHour)}:00 – {Math.floor(currentHour) + 2}:00 Uhr
+          Handlungsempfehlungen {scrubbingHour !== null ? `für ${Math.floor(currentHour)}:00 – ${Math.floor(currentHour) + 2}:00 Uhr` : 'aktuell'}
         </p>
         {actionRows.map(({ Icon, label }, i) => (
           <div key={label}>
@@ -619,7 +621,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
       if (multiFactors.length > 1) {
         rows.push({ Icon: AlertTriangle, label: `Mehrfachbelastung: ${multiFactors.join(' + ')}` });
       }
-      rows.push({ Icon: User, label: 'Vermeiden Sie schwere Arbeit in der Sonne' });
+      rows.push({ Icon: User, label: 'Schwere Arbeit in der Sonne nach Möglichkeit vermeiden' });
       return rows;
     } else if (status.level >= 3) {
       const rows = [
@@ -749,7 +751,9 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
             )}
           </button>
         ))}
-        <div className="flex-1 rounded-[10px] flex items-center gap-2 px-2.5 py-2.5 relative"
+        <button
+          onClick={() => setBeurtDetailOpen(true)}
+          className="flex-1 rounded-[10px] flex items-center gap-2 px-2.5 py-2.5 relative text-left hover:opacity-90 transition-opacity"
           style={{ backgroundColor: T.brand, minWidth: 260 }}>
           <Wind className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.6)' }} strokeWidth={1.5} />
           <div className="flex-1">
@@ -761,7 +765,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
               <AlertTriangle className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.7)' }} strokeWidth={2} />
             </div>
           )}
-        </div>
+        </button>
       </div>
 
       {/* Desktop: grid layout with 2x2 on left, big card on right */}
@@ -794,7 +798,9 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
         </div>
 
         {/* Right: large Beurteilungstemperatur card */}
-        <div className="rounded-[10px] flex items-center gap-3 px-4 py-4 relative"
+        <button
+          onClick={() => setBeurtDetailOpen(true)}
+          className="rounded-[10px] flex items-center gap-3 px-4 py-4 relative text-left hover:opacity-90 transition-opacity"
           style={{ backgroundColor: T.brand, minWidth: 340, maxWidth: 340 }}>
           <Wind className="w-6 h-6 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.6)' }} strokeWidth={1.5} />
           <div className="flex-1">
@@ -806,7 +812,7 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
               <AlertTriangle className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.7)' }} strokeWidth={2} />
             </div>
           )}
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -980,6 +986,11 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
       {/* ── UV DETAIL VIEW ──────────────────────────────────────────────── */}
       {uvDetailOpen && (
         <UVDetailView onClose={() => setUvDetailOpen(false)} />
+      )}
+
+      {/* ── BEURTEILUNGSTEMPERATUR DETAIL VIEW ──────────────────────── */}
+      {beurtDetailOpen && (
+        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} />
       )}
     </div>
   );

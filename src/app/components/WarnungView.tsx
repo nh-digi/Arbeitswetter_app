@@ -14,12 +14,12 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
       location: 'Brandenburg',
       timeStart: '09:42',
       timeEnd: '20:00',
-      description: 'Extreme Hitzebelastung erwartet. Vermeiden Sie direkte Sonneneinstrahlung. Die Warnung gilt für alle Landkreise in der genannten Region. Es ist mit einer erhöhten Waldbrandgefahr zu rechnen.',
+      description: 'Extreme Hitzebelastung erwartet. Direkte Sonneneinstrahlung sollte möglichst vermieden werden. Die Warnung gilt für alle Landkreise in der genannten Region. Es ist mit einer erhöhten Waldbrandgefahr zu rechnen.',
       recommendations: [
-        'Vermeiden Sie nach Möglichkeit Tätigkeiten im Freien in den Mittags- und Nachmittagsstunden',
-        'Tragen Sie eine Kopfbedeckung und leichte, luftdurchlässige Kleidung',
-        'Arbeiten Sie im Schatten und richten Sie bei Bedarf schattenspendende Maßnahmen ein',
-        'Stellen Sie ausreichend Trinkwasser bereit und achten Sie auf regelmäßige Flüssigkeitsaufnahme',
+        'Tätigkeiten im Freien in den Mittags- und Nachmittagsstunden nach Möglichkeit vermeiden',
+        'Kopfbedeckung und leichte, luftdurchlässige Kleidung empfohlen',
+        'Arbeiten im Schatten empfohlen – schattenspendende Maßnahmen bei Bedarf sinnvoll',
+        'Ausreichend Trinkwasser bereithalten – regelmäßige Flüssigkeitsaufnahme wird empfohlen',
       ],
     },
     {
@@ -31,11 +31,11 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
       location: 'Spandau',
       timeStart: '14:00',
       timeEnd: '22:00',
-      description: 'Schwere Unwetter mit Starkregen und Sturmböen erwartet. Schützen Sie sich und meiden Sie betroffene Gebiete im Einzugsbereich.',
+      description: 'Schwere Unwetter mit Starkregen und Sturmböen erwartet. Betroffene Gebiete im Einzugsbereich sollten möglichst gemieden werden.',
       recommendations: [
-        'Sichern Sie Gegenstände im Freien',
-        'Halten Sie Abstand von Gebäuden, Bäumen, Gerüsten und Hochspannungsleitungen',
-        'Vermeiden Sie Aufenthalte im Freien',
+        'Gegenstände im Freien möglichst sichern',
+        'Abstand von Gebäuden, Bäumen, Gerüsten und Hochspannungsleitungen empfohlen',
+        'Aufenthalte im Freien möglichst vermeiden',
       ],
     },
     {
@@ -86,10 +86,9 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Main Content */}
-      <div className="max-w-[760px] mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
-        {/* Page Header */}
+    <div className="min-h-screen bg-neutral-100 pb-28">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-neutral-100/95 backdrop-blur-sm border-b border-black/[0.06]">
         <PageHeader
           title="Warnungen für Berlin & Brandenburg"
           variant="light"
@@ -97,6 +96,10 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
           showLocationButton
           onNavigate={onNavigate}
         />
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-[760px] mx-auto px-4 md:px-10 py-6 md:py-12 space-y-6">
 
         {/* Warning Cards */}
         {warnings.map((warning) => {

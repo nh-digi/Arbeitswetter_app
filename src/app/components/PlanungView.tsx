@@ -5,6 +5,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import PageHeader from './PageHeader';
+import { StatusIconCircle } from './StatusBadge';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -58,30 +59,31 @@ const DAYS: Day[] = [
       {
         timeLabel: 'Bis 12:00 Uhr',
         status: 'ok',
-        actions: ['Schwere Arbeiten abschließen', 'Materialien vorbereiten'],
+        actions: ['Schwere Arbeiten möglichst abschließen', 'Materialien vorbereiten empfohlen'],
+
       },
       {
         timeLabel: '12:00 – 14:00',
         status: 'eingeschraenkt',
-        actions: ['Nur leichte Tätigkeiten ausführen', '15 Min. Pause pro Stunde einhalten', 'Trinkwasser bereitstellen'],
+        actions: ['Leichte Tätigkeiten empfohlen', '15 Min. Pause pro Stunde empfohlen', 'Ausreichend Trinkwasser empfohlen'],
       },
       {
         timeLabel: '14:00 – 16:00',
         status: 'kritisch',
-        actions: ['Technische Maßnahmen', 'Organisatorische Maßnahmen', 'Persönliche Maßnahmen', 'Weitere Maßnahmen'],
+        actions: ['Aufenthalt im Freien möglichst vermeiden', 'Schattenplätze nutzen empfohlen', 'Verlängerte Pausen empfohlen', 'Ausreichend Trinkwasser empfohlen'],
       },
       {
         timeLabel: 'Ab 16:00',
         status: 'ok',
-        actions: ['Leichte Außenarbeiten wieder möglich', 'Regelmäßige Pausen einhalten'],
+        actions: ['Leichte Außenarbeiten wieder möglich', 'Regelmäßige Pausen empfohlen'],
       },
     ],
     hazards: [
       { iconType: 'thermometer', text: 'Hitze: 34°C am Nachmittag', detail: 'Extreme Belastung für körperliche Arbeit ab 12 Uhr' },
-      { iconType: 'sun', text: 'UV-Index: 7 (hoch)', detail: 'Sonnenschutz Klasse 50+ obligatorisch' },
+      { iconType: 'sun', text: 'UV-Index: 7 (hoch)', detail: 'Sonnenschutz Klasse 50+ empfohlen' },
       { iconType: 'scale', text: 'Schwere Arbeit + direkte Sonne', detail: 'Kreislaufbelastung stark erhöht' },
     ],
-    conditions: { lufttemp: '34°C', feuchtigkeit: '45%', wind: '8 km/h', uv: '7 (Hoch)', beurteilungsTemp: '36°C', assessmentAlert: true },
+    conditions: { lufttemp: '34°C', feuchtigkeit: '45%', wind: '8 km/h, Böen: 22 km/h', uv: '7 (Hoch)', beurteilungsTemp: '36°C', assessmentAlert: true },
   },
   {
     date: 'Mittwoch, 7. Mai',
@@ -95,27 +97,27 @@ const DAYS: Day[] = [
         timeLabel: 'Bis 10:00 Uhr',
         status: 'ok',
         actions: [
-          'Außenarbeiten möglichst auf das Nötigste reduzieren',
-          'Leichtere Tätigkeiten bevorzugen',
+          'Außenarbeiten möglichst auf das Nötigste beschränken',
+          'Leichtere Tätigkeiten empfohlen',
         ],
       },
       {
         timeLabel: '10:00 – 17:00',
         status: 'kritisch',
-        actions: ['Technische Maßnahmen', 'Organisatorische Maßnahmen', 'Persönliche Maßnahmen', 'Weitere Maßnahmen'],
+        actions: ['Außenarbeiten möglichst vermeiden', 'Schattenplätze nutzen empfohlen', 'Verlängerte Pausen empfohlen', 'Ausreichend Trinkwasser empfohlen'],
       },
       {
         timeLabel: 'Ab 17:00',
         status: 'ok',
-        actions: ['Beispielhafte Hinweise zu Maßnahmen', 'Beispielhafte Hinweise zu Maßnahmen'],
+        actions: ['Leichte Außenarbeiten wieder möglich', 'Regelmäßige Pausen empfohlen'],
       },
     ],
     hazards: [
       { iconType: 'thermometer', text: 'Hitze: 34°C am Nachmittag', detail: 'Extreme Hitzebelastung ganztägig ab 10 Uhr' },
-      { iconType: 'sun', text: 'UV-Index: 8 (sehr hoch)', detail: 'Maximaler Sonnenschutz erforderlich' },
-      { iconType: 'scale', text: 'Schwere Arbeit + direkte Sonne', detail: 'Sehr hohe Kreislaufbelastung — Außenarbeiten einstellen' },
+      { iconType: 'sun', text: 'UV-Index: 8 (sehr hoch)', detail: 'Maximaler Sonnenschutz empfohlen' },
+      { iconType: 'scale', text: 'Schwere Arbeit + direkte Sonne', detail: 'Sehr hohe Kreislaufbelastung — Außenarbeiten möglichst vermeiden' },
     ],
-    conditions: { lufttemp: '34°C', feuchtigkeit: '38%', wind: '5 km/h', uv: '8 (Sehr hoch)', beurteilungsTemp: '34°C', assessmentAlert: true },
+    conditions: { lufttemp: '34°C', feuchtigkeit: '38%', wind: '5 km/h, Böen: 18 km/h', uv: '8 (Sehr hoch)', beurteilungsTemp: '34°C', assessmentAlert: true },
   },
   {
     date: 'Donnerstag, 8. Mai',
@@ -128,17 +130,17 @@ const DAYS: Day[] = [
       {
         timeLabel: 'Bis 11:00 Uhr',
         status: 'ok',
-        actions: ['Schwere Arbeiten abschließen', 'Volle Produktivität möglich'],
+        actions: ['Schwere Arbeiten möglichst abschließen', 'Volle Produktivität möglich'],
       },
       {
         timeLabel: '11:00 – 15:00',
         status: 'eingeschraenkt',
-        actions: ['Nur leichte Tätigkeiten', 'Pausen verlängern', 'Getränke bereitstellen'],
+        actions: ['Leichte Tätigkeiten empfohlen', 'Verlängerte Pausen empfohlen', 'Ausreichend Getränke empfohlen'],
       },
       {
         timeLabel: '15:00 – 17:00',
         status: 'kritisch',
-        actions: ['Technische Maßnahmen', 'Organisatorische Maßnahmen', 'Persönliche Maßnahmen'],
+        actions: ['Aufenthalt im Freien möglichst vermeiden', 'Schattenplätze nutzen empfohlen', 'Ausreichend Trinkwasser empfohlen'],
       },
       {
         timeLabel: 'Ab 17:00',
@@ -148,10 +150,10 @@ const DAYS: Day[] = [
     ],
     hazards: [
       { iconType: 'thermometer', text: 'Hitze: 35°C am Nachmittag', detail: 'Extreme Hitzebelastung am Nachmittag' },
-      { iconType: 'sun', text: 'UV-Index: 7 (hoch)', detail: 'Sonnenschutz obligatorisch' },
+      { iconType: 'sun', text: 'UV-Index: 7 (hoch)', detail: 'Sonnenschutz empfohlen' },
       { iconType: 'scale', text: 'Schwere Arbeit bei Hitze', detail: 'Kreislaufbelastung stark erhöht nachmittags' },
     ],
-    conditions: { lufttemp: '35°C', feuchtigkeit: '41%', wind: '10 km/h', uv: '7 (Hoch)', beurteilungsTemp: '37°C', assessmentAlert: true },
+    conditions: { lufttemp: '35°C', feuchtigkeit: '41%', wind: '10 km/h, Böen: 28 km/h', uv: '7 (Hoch)', beurteilungsTemp: '37°C', assessmentAlert: true },
   },
   {
     date: 'Freitag, 9. Mai',
@@ -162,13 +164,13 @@ const DAYS: Day[] = [
       {
         timeLabel: 'Ganztägig',
         status: 'ok',
-        actions: ['Normale Arbeitsplanung möglich', 'Sonnenschutz nutzen', 'Reguläre Pausen einhalten'],
+        actions: ['Normale Arbeitsplanung möglich', 'Sonnenschutz empfohlen', 'Reguläre Pausen empfohlen'],
       },
     ],
     hazards: [
       { iconType: 'thermometer', text: 'Angenehme Temperaturen', detail: 'Keine besondere Hitzebelastung erwartet' },
     ],
-    conditions: { lufttemp: '28°C', feuchtigkeit: '52%', wind: '14 km/h', uv: '5 (Mittel)', beurteilungsTemp: '28°C', assessmentAlert: false },
+    conditions: { lufttemp: '28°C', feuchtigkeit: '52%', wind: '14 km/h, Böen: 35 km/h', uv: '5 (Mittel)', beurteilungsTemp: '28°C', assessmentAlert: false },
   },
   {
     date: 'Samstag, 10. Mai',
@@ -179,13 +181,13 @@ const DAYS: Day[] = [
       {
         timeLabel: 'Ganztägig',
         status: 'ok',
-        actions: ['Keine besonderen Maßnahmen nötig', 'Reguläre Pausen einhalten', 'Sonnenschutz empfohlen'],
+        actions: ['Keine besonderen Maßnahmen nötig', 'Reguläre Pausen empfohlen', 'Sonnenschutz empfohlen'],
       },
     ],
     hazards: [
       { iconType: 'thermometer', text: 'Optimale Bedingungen', detail: 'Normale Arbeitsplanung ohne Einschränkungen möglich' },
     ],
-    conditions: { lufttemp: '26°C', feuchtigkeit: '55%', wind: '18 km/h', uv: '4 (Mittel)', beurteilungsTemp: '25°C', assessmentAlert: false },
+    conditions: { lufttemp: '26°C', feuchtigkeit: '55%', wind: '18 km/h, Böen: 42 km/h', uv: '4 (Mittel)', beurteilungsTemp: '25°C', assessmentAlert: false },
   },
 ];
 
@@ -248,20 +250,11 @@ function DayCard({ day, active, onClick }: { day: Day; active: boolean; onClick:
       {/* Content */}
       <div className="flex flex-col md:flex-row items-center gap-0.5 md:gap-3 px-2 py-1.5 md:px-4 md:py-3.5">
         {/* Icon */}
-        <div
-          className="w-[32px] h-[32px] md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{
-            backgroundColor:
-              day.status === 'gut' ? '#85D7A2' :
-              day.status === 'eingeschraenkt' ? '#FFB530' :
-              '#FF878A'
-          }}
-        >
-          <cfg.Icon
-            className="w-[15px] h-[15px] md:w-5 md:h-5 text-black"
-            strokeWidth={2}
-          />
-        </div>
+        <StatusIconCircle
+          status={day.status === 'gut' ? 'ok' : day.status === 'eingeschraenkt' ? 'warnung' : 'kritisch'}
+          className="w-[32px] h-[32px] md:w-10 md:h-10"
+          iconClassName="w-[15px] h-[15px] md:w-5 md:h-5"
+        />
 
         {/* Text - Mobile: stacked center, Desktop: horizontal left */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left w-full md:w-auto">
@@ -338,7 +331,6 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
       <PageHeader
         title="Planung"
         variant="dark"
-        showSettings
         showLocationButton
         onNavigate={onNavigate}
       />
@@ -458,7 +450,7 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
             {/* Current conditions */}
             <div className="rounded-xl md:rounded-2xl p-4 md:p-5 bg-[var(--neutral-800)]">
               <p className="text-sm md:text-base font-semibold mb-3 md:mb-4 text-white">
-                Aktuelle Bedingungen
+                Prognose für {d.date.split(',')[0]}
               </p>
               <div className="grid grid-cols-2 gap-1.5 md:gap-2 mb-1.5 md:mb-2">
                 <MetricTile icon={Thermometer} label="Lufttemperatur" value={d.conditions.lufttemp} />
