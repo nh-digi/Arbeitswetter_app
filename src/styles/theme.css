@@ -5,8 +5,8 @@
   --font-family: 'Inter', system-ui, sans-serif;
 
   /* ── DS Neutral primitives ── */
-  --neutral-black:   hsl(0, 85%, 49%);
-  --neutral-950:     #222222;
+  --neutral-black:   #000000;
+  --neutral-950:     #000000;
   --neutral-800:     #1A1A1A;
   --neutral-700:     #2D2D2D;
   --neutral-600:     #3F3F3F;

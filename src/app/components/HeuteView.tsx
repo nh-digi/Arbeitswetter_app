@@ -938,8 +938,8 @@ export default function HeuteView({ onNavigate }: { onNavigate: (view: View) => 
             <div className="w-full">
               <div className="flex justify-end mb-1"><ViewToggle compact /></div>
               {mobileView === 'clock' && (
-                <div className="flex justify-center mb-3" style={{ height: 240, overflow: 'visible' }}>
-                  <div style={{ transform: 'scale(0.88)', transformOrigin: 'top center' }}>
+                <div className="flex justify-center mb-3">
+                  <div style={{ transform: 'scale(0.88)', transformOrigin: 'top center', marginBottom: `${-(SIZE * 0.12)}px` }}>
                     {makeClockSVG(clockRefMobile)}
                   </div>
                 </div>
