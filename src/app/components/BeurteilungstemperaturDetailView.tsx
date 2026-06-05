@@ -125,14 +125,14 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
     <div className="fixed inset-0 z-50">
       {/* Desktop backdrop */}
       <div
-        className="hidden lg:block absolute inset-0"
+        className="modal-backdrop hidden lg:block absolute inset-0"
         style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Panel — full-screen on mobile, right drawer on desktop */}
-      <div className="absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
+      <div className="modal-panel absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
 
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b" style={{ borderColor: 'var(--border)' }}>
@@ -206,7 +206,6 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
               const barHeightPx = Math.max(12, ((temp - minTemp) / (maxTemp - minTemp)) * 80);
               const hourNum = parseInt(hour);
               const isNow = hourNum === currentHour;
-              const isOk = level.level === 1;
 
               return (
                 <div
@@ -240,25 +239,46 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                     className="w-full rounded-sm"
                     style={{
                       height: barHeightPx,
-                      backgroundColor: isNow ? level.solidColor : level.barBg,
-                      boxShadow: isNow
-                        ? `0 0 0 1.5px ${level.solidColor}`
-                        : isOk
-                          ? `0 0 0 1px var(--status-success)`
-                          : 'none',
+                      backgroundColor: level.solidColor,
+                      boxShadow: isNow ? `0 0 0 1.5px var(--foreground)` : 'none',
                     }}
                   />
                   {/* Hour label */}
-                  <p style={{
-                    fontSize: 8,
-                    fontWeight: isNow ? 600 : 400,
-                    color: isNow ? 'var(--foreground)' : 'var(--muted-foreground)',
-                    fontFamily: 'var(--font-family)',
-                    marginTop: 2,
-                    lineHeight: 1,
-                  }}>
-                    {hour}
-                  </p>
+                  {isNow ? (
+                    <div
+                      style={{
+                        marginTop: 3,
+                        paddingLeft: 4,
+                        paddingRight: 4,
+                        paddingTop: 1,
+                        paddingBottom: 1,
+                        borderRadius: 999,
+                        backgroundColor: 'var(--neutral-black, #000)',
+                        lineHeight: 1,
+                      }}
+                    >
+                      <p style={{
+                        fontSize: 8,
+                        fontWeight: 700,
+                        color: '#fff',
+                        fontFamily: 'var(--font-family)',
+                        lineHeight: 1,
+                      }}>
+                        Jetzt
+                      </p>
+                    </div>
+                  ) : (
+                    <p style={{
+                      fontSize: 8,
+                      fontWeight: 400,
+                      color: 'var(--muted-foreground)',
+                      fontFamily: 'var(--font-family)',
+                      marginTop: 2,
+                      lineHeight: 1,
+                    }}>
+                      {hour}
+                    </p>
+                  )}
                 </div>
               );
             })}

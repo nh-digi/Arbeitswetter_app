@@ -67,14 +67,14 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
     <div className="fixed inset-0 z-50">
       {/* Desktop backdrop */}
       <div
-        className="hidden lg:block absolute inset-0"
+        className="modal-backdrop hidden lg:block absolute inset-0"
         style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Panel — full-screen on mobile, right drawer on desktop */}
-      <div className="absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
+      <div className="modal-panel absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
 
       {/* Mobile Header */}
       <div className="lg:hidden bg-white border-b" style={{ borderColor: '#E5E7EB' }}>

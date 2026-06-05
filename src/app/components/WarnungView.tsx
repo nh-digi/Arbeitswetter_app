@@ -3,7 +3,7 @@ import PageHeader from './PageHeader';
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen';
 
-export default function WarnungView({ onNavigate }: { onNavigate: (view: View) => void }) {
+export default function WarnungView({ onNavigate, onOpenSettings }: { onNavigate: (view: View) => void; onOpenSettings?: () => void }) {
   const warnings = [
     {
       id: 1,
@@ -98,6 +98,7 @@ export default function WarnungView({ onNavigate }: { onNavigate: (view: View) =
           variant="dark"
           showLocationButton
           onNavigate={onNavigate}
+          onOpenSettings={onOpenSettings}
         />
       </div>
 

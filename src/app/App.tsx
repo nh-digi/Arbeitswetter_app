@@ -1,40 +1,79 @@
-import { useState } from 'react';
-import { Home, Calendar, AlertTriangle, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Home, Calendar, AlertTriangle, Settings, LayoutDashboard } from 'lucide-react';
+import StartseiteView from './components/StartseiteView';
 import HeuteView from './components/HeuteView';
 import PlanungView from './components/PlanungView';
 import WarnungView from './components/WarnungView';
 import EinstellungenView from './components/EinstellungenView';
-type View = 'heute' | 'planung' | 'warnung' | 'einstellungen';
+import EinstellungenModal from './components/EinstellungenModal';
+type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'startseite';
 interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 
 export default function App() {
   const [activeView, setActiveView] = useState<View>('heute');
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [startZeit,    setStartZeit]    = useState('06:00');
   const [endZeit,      setEndZeit]      = useState('14:00');
   const [schwere,      setSchwere]      = useState<'leicht' | 'mittel' | 'schwer'>('mittel');
+  const [bekleidung,   setBekleidung]   = useState<'leicht' | 'mittel' | 'schwer'>('mittel');
   const [orte,         setOrte]         = useState<Ort[]>([
     { id: 1, name: 'Berlin Ost', city: 'Baustelle A10', lat: 52.5200, lng: 13.4050 },
     { id: 2, name: 'Hamburg',    city: 'Lager Nord',    lat: 53.5511, lng: 9.9937  },
   ]);
-  const [aktiveOrtId,  setAktiveOrtId]  = useState<number | null>(null);
+  const [aktiveOrtId,  setAktiveOrtId]  = useState<number | null>(1);
   const activeOrt = orte.find(o => o.id === aktiveOrtId) ?? null;
-  const SCHWERE_SHORT: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
 
-  const navItems = [
-    { id: 'heute'         as View, label: 'Heute',          icon: Home,          dot: false },
-    { id: 'planung'       as View, label: 'Planung',        icon: Calendar,      dot: false },
-    { id: 'warnung'       as View, label: 'DWD Warnungen',  icon: AlertTriangle, dot: true  },
-    { id: 'einstellungen' as View, label: 'Einstellungen',  icon: Settings,      dot: false },
-  ];
+  // ── Experiment toggle (press "A" outside inputs) ──────────────────────────
+  const [experimentMode, setExperimentMode] = useState(false);
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement &&
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (e.key !== 'a' && e.key !== 'A') return;
+      const next = !experimentMode;
+      setExperimentMode(next);
+      if (next  && (activeView === 'heute' || activeView === 'planung')) setActiveView('startseite');
+      if (!next && activeView === 'startseite') setActiveView('heute');
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [experimentMode, activeView]);
+  const SCHWERE_ARBEIT_LABEL: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte Arbeit', mittel: 'Mittlere Arbeit', schwer: 'Schwere Arbeit' };
+  const BEKLEIDUNG_SHORT: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte Arbeitskleidung', mittel: 'Mittlere Arbeitskleidung', schwer: 'Schwere Arbeitskleidung' };
+
+  const navItems = experimentMode
+    ? [
+        { id: 'startseite'    as View, label: 'Startseite',    icon: LayoutDashboard, dot: false },
+        { id: 'warnung'       as View, label: 'DWD Warnungen', icon: AlertTriangle,   dot: true  },
+        { id: 'einstellungen' as View, label: 'Einstellungen', icon: Settings,        dot: false },
+      ]
+    : [
+        { id: 'heute'         as View, label: 'Heute',          icon: Home,          dot: false },
+        { id: 'planung'       as View, label: 'Planung',        icon: Calendar,      dot: false },
+        { id: 'warnung'       as View, label: 'DWD Warnungen',  icon: AlertTriangle, dot: true  },
+        { id: 'einstellungen' as View, label: 'Einstellungen',  icon: Settings,      dot: false },
+      ];
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Main Content */}
       <main className="flex-1 pb-20 md:pb-0">
-        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_SHORT[schwere]} />}
-        {activeView === 'planung'       && <PlanungView onNavigate={setActiveView} />}
-        {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} />}
-        {activeView === 'einstellungen' && <EinstellungenView startZeit={startZeit} setStartZeit={setStartZeit} endZeit={endZeit} setEndZeit={setEndZeit} orte={orte} setOrte={setOrte} aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId} schwere={schwere} setSchwere={setSchwere} />}
+        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'planung'       && <PlanungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} activeLocation={activeOrt?.name ?? null} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} />}
+        {activeView === 'startseite'    && <StartseiteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'einstellungen' && <EinstellungenView startZeit={startZeit} setStartZeit={setStartZeit} endZeit={endZeit} setEndZeit={setEndZeit} orte={orte} setOrte={setOrte} aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId} schwere={schwere} setSchwere={setSchwere} bekleidung={bekleidung} setBekleidung={setBekleidung} />}
+        {settingsModalOpen && (
+          <EinstellungenModal
+            onClose={() => setSettingsModalOpen(false)}
+            startZeit={startZeit} setStartZeit={setStartZeit}
+            endZeit={endZeit} setEndZeit={setEndZeit}
+            orte={orte} setOrte={setOrte}
+            aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId}
+            schwere={schwere} setSchwere={setSchwere}
+            bekleidung={bekleidung} setBekleidung={setBekleidung}
+          />
+        )}
       </main>
 
       {/* Mobile Bottom Navigation */}

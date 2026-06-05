@@ -7,9 +7,10 @@ import {
 import PageHeader from './PageHeader';
 import { Switch } from './ui/switch';
 
-type Schwere  = 'leicht' | 'mittel' | 'schwer';
-type Umgebung = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
-type Schicht  = 'früh' | 'tag' | 'nacht';
+type Schwere    = 'leicht' | 'mittel' | 'schwer';
+type Bekleidung = 'leicht' | 'mittel' | 'schwer';
+type Umgebung   = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
+type Schicht    = 'früh' | 'tag' | 'nacht';
 
 interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 interface OrtVorschlag { id: string; name: string; region: string; lat: number; lng: number; }
@@ -19,7 +20,9 @@ interface EinstellungenProps {
   endZeit: string;   setEndZeit:   (v: string) => void;
   orte: Ort[];       setOrte:      React.Dispatch<React.SetStateAction<Ort[]>>;
   aktiveOrtId: number | null; setAktiveOrtId: (id: number | null) => void;
-  schwere: Schwere;  setSchwere:   (v: Schwere) => void;
+  schwere: Schwere;       setSchwere:    (v: Schwere) => void;
+  bekleidung: Bekleidung; setBekleidung: (v: Bekleidung) => void;
+  onClose?: () => void;
 }
 
 const MOCK_VORSCHLÄGE: OrtVorschlag[] = [
@@ -43,6 +46,12 @@ const SCHWERE_LABEL: Record<Schwere, string> = {
   leicht: 'Für leichte Tätigkeiten, z. B. Inspektionen',
   mittel: 'Mittel für typische körperliche Arbeit',
   schwer: 'Für schwere körperliche Arbeit, z. B. Bauarbeiten',
+};
+
+const BEKLEIDUNG_LABEL: Record<Bekleidung, string> = {
+  leicht: 'Leichte Arbeitskleidung, z. B. T-Shirt und dünne Hose',
+  mittel: 'Typische Arbeitskleidung, z. B. Arbeitshose und Hemd',
+  schwer: 'Schwere Schutzkleidung, z. B. Warnweste, Helm, Sicherheitsschuhe',
 };
 
 const UMGEBUNG_OPTIONS: { id: Umgebung; label: string; sub: string; Icon: React.ElementType }[] = [
@@ -216,7 +225,7 @@ function ShiftTimeline({
   );
 }
 
-export default function EinstellungenView({ startZeit, setStartZeit, endZeit, setEndZeit, orte, setOrte, aktiveOrtId, setAktiveOrtId, schwere, setSchwere }: EinstellungenProps) {
+export default function EinstellungenView({ startZeit, setStartZeit, endZeit, setEndZeit, orte, setOrte, aktiveOrtId, setAktiveOrtId, schwere, setSchwere, bekleidung, setBekleidung, onClose }: EinstellungenProps) {
   const [umgebung,      setUmgebung]      = useState<Umgebung>('sonne');
   const [schicht,       setSchicht]       = useState<Schicht>('tag');
   const [startZeitDraft, setStartZeitDraft] = useState<string | null>(null);
@@ -308,10 +317,21 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
 
       {/* Header */}
       <div className="sticky top-0 z-10 bg-neutral-100/95 backdrop-blur-sm border-b border-black/[0.06]">
-        <PageHeader
-          title="Einstellungen"
-          variant="light"
-        />
+        <div className="relative">
+          <PageHeader
+            title="Einstellungen"
+            variant="light"
+          />
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/[0.06] transition-colors"
+              aria-label="Schließen"
+            >
+              <X className="w-4 h-4" style={{ color: 'var(--neutral-600)' }} strokeWidth={2} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Autosave feedback - now outside header */}
@@ -330,154 +350,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
 
       <div className="px-4 md:px-8 pt-6 space-y-8 max-w-4xl mx-auto">
 
-        {/* ── SECTION 1: Arbeitsprofil ─────────────────────────────── */}
-        <section>
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
-            <p className="text-xs text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
-          </div>
-
-          <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] divide-y divide-black/[0.05]">
-
-            {/* Arbeitsschwere */}
-            <div className="p-4 md:p-6">
-              <div className="flex items-center gap-1.5 mb-3">
-                <p className="text-sm font-semibold text-black">Arbeitsschwere</p>
-                <button aria-label="Info zur Arbeitsschwere" className="rounded p-0.5 hover:bg-black/[0.04] transition-colors">
-                  <Info className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
-                </button>
-              </div>
-              <div className="flex gap-2 md:gap-3">
-                <Chip label="Leicht" selected={schwere === 'leicht'} onClick={() => change(setSchwere)('leicht')} />
-                <Chip label="Mittel" selected={schwere === 'mittel'} onClick={() => change(setSchwere)('mittel')} />
-                <Chip label="Schwer" selected={schwere === 'schwer'} onClick={() => change(setSchwere)('schwer')} />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
-            </div>
-
-            {/* Arbeitsumgebung */}
-            <div className="p-4 md:p-6">
-              <p className="text-sm font-semibold text-black mb-3">Arbeitsumgebung</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-                {UMGEBUNG_OPTIONS.map(({ id, label, sub, Icon }) => {
-                  const sel = umgebung === id;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => change(setUmgebung)(id)}
-                      className={`relative p-3.5 md:p-4 rounded-xl text-left transition-all border ${
-                        sel
-                          ? `${SEL}`
-                          : 'bg-neutral-50 border-black/[0.08] hover:border-black/20'
-                      }`}
-                    >
-                      {sel && (
-                        <div className="absolute top-2.5 right-2.5">
-                          <Check className="w-3.5 h-3.5 text-[#325cda]" strokeWidth={2.5} />
-                        </div>
-                      )}
-                      <Icon
-                        className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}
-                        strokeWidth={1.5}
-                      />
-                      <p className={`text-xs font-semibold leading-tight ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
-                        {label}
-                      </p>
-                      <p className={`text-xs mt-1 leading-tight ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
-                        {sub}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Typische Arbeitszeiten */}
-            <div className="p-4 md:p-6">
-              <p className="text-sm font-semibold text-black mb-3">Typische Arbeitszeiten</p>
-
-              {/* Shift chips */}
-              <div className="flex gap-2 md:gap-3 mb-4">
-                <Chip label="Früh"  selected={schicht === 'früh'}  onClick={() => handleSchicht('früh')}  />
-                <Chip label="Tag"   selected={schicht === 'tag'}   onClick={() => handleSchicht('tag')}   />
-                <Chip label="Nacht" selected={schicht === 'nacht'} onClick={() => handleSchicht('nacht')} />
-              </div>
-
-              {/* Timeline */}
-              <ShiftTimeline
-                start={startZeit}
-                end={endZeit}
-                schicht={schicht}
-                onStartChange={setStartZeit}
-                onEndChange={setEndZeit}
-                onCommit={markSaved}
-              />
-
-              {/* Time inputs */}
-              <div className="flex items-center gap-3 mb-3">
-                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
-                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
-                  cursor-text">
-                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={startZeitDraft ?? startZeit}
-                    placeholder="HH:MM"
-                    maxLength={5}
-                    onChange={e => setStartZeitDraft(formatTimeInput(e.target.value))}
-                    onFocus={e => { setStartZeitDraft(startZeit); e.target.select(); }}
-                    onBlur={() => {
-                      const val = startZeitDraft ?? startZeit;
-                      if (isValidTime(val)) { setStartZeit(val); markSaved(); }
-                      setStartZeitDraft(null);
-                    }}
-                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
-                    aria-label="Arbeitsbeginn"
-                  />
-                </label>
-
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <div className="w-4 h-px bg-current" />
-                  <div className="w-1 h-1 rounded-full bg-current" />
-                  <div className="w-4 h-px bg-current" />
-                </div>
-
-                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
-                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
-                  cursor-text">
-                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={endZeitDraft ?? endZeit}
-                    placeholder="HH:MM"
-                    maxLength={5}
-                    onChange={e => setEndZeitDraft(formatTimeInput(e.target.value))}
-                    onFocus={e => { setEndZeitDraft(endZeit); e.target.select(); }}
-                    onBlur={() => {
-                      const val = endZeitDraft ?? endZeit;
-                      if (isValidTime(val)) { setEndZeit(val); markSaved(); }
-                      setEndZeitDraft(null);
-                    }}
-                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
-                    aria-label="Arbeitsende"
-                  />
-                </label>
-              </div>
-
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Frühere Arbeitszeiten werden bei Hitze empfohlen
-              </p>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ── SECTION 2: Standort ─────────────────────────────────── */}
+        {/* ── SECTION 1: Standort ─────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-3 px-1">
             <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
@@ -647,6 +520,169 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 </div>
               </div>
             )}
+
+          </div>
+        </section>
+
+        {/* ── SECTION 2: Arbeitsprofil ─────────────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
+            <p className="text-xs text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
+          </div>
+
+          <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] divide-y divide-black/[0.05]">
+
+            {/* Arbeitsschwere */}
+            <div className="p-4 md:p-6">
+              <div className="flex items-center gap-1.5 mb-3">
+                <p className="text-sm font-semibold text-black">Arbeitsschwere</p>
+                <button aria-label="Info zur Arbeitsschwere" className="rounded p-0.5 hover:bg-black/[0.04] transition-colors">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                </button>
+              </div>
+              <div className="flex gap-2 md:gap-3">
+                <Chip label="Leicht" selected={schwere === 'leicht'} onClick={() => change(setSchwere)('leicht')} />
+                <Chip label="Mittel" selected={schwere === 'mittel'} onClick={() => change(setSchwere)('mittel')} />
+                <Chip label="Schwer" selected={schwere === 'schwer'} onClick={() => change(setSchwere)('schwer')} />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
+            </div>
+
+            {/* Arbeitskleidung */}
+            <div className="p-4 md:p-6">
+              <div className="flex items-center gap-1.5 mb-3">
+                <p className="text-sm font-semibold text-black">Arbeitskleidung</p>
+                <button aria-label="Info zur Arbeitskleidung" className="rounded p-0.5 hover:bg-black/[0.04] transition-colors">
+                  <Info className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+                </button>
+              </div>
+              <div className="flex gap-2 md:gap-3">
+                <Chip label="Leicht" selected={bekleidung === 'leicht'} onClick={() => change(setBekleidung)('leicht')} />
+                <Chip label="Mittel" selected={bekleidung === 'mittel'} onClick={() => change(setBekleidung)('mittel')} />
+                <Chip label="Schwer" selected={bekleidung === 'schwer'} onClick={() => change(setBekleidung)('schwer')} />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{BEKLEIDUNG_LABEL[bekleidung]}</p>
+            </div>
+
+            {/* Arbeitsumgebung */}
+            <div className="p-4 md:p-6">
+              <p className="text-sm font-semibold text-black mb-3">Arbeitsumgebung</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                {UMGEBUNG_OPTIONS.map(({ id, label, sub, Icon }) => {
+                  const sel = umgebung === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => change(setUmgebung)(id)}
+                      className={`relative p-3.5 md:p-4 rounded-xl text-left transition-all border ${
+                        sel
+                          ? `${SEL}`
+                          : 'bg-neutral-50 border-black/[0.08] hover:border-black/20'
+                      }`}
+                    >
+                      {sel && (
+                        <div className="absolute top-2.5 right-2.5">
+                          <Check className="w-3.5 h-3.5 text-[#325cda]" strokeWidth={2.5} />
+                        </div>
+                      )}
+                      <Icon
+                        className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}
+                        strokeWidth={1.5}
+                      />
+                      <p className={`text-xs font-semibold leading-tight break-words ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
+                        {label}
+                      </p>
+                      <p className={`text-xs mt-1 leading-tight break-words ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
+                        {sub}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Typische Arbeitszeiten */}
+            <div className="p-4 md:p-6">
+              <p className="text-sm font-semibold text-black mb-3">Typische Arbeitszeiten</p>
+
+              {/* Shift chips */}
+              <div className="flex gap-2 md:gap-3 mb-4">
+                <Chip label="Früh"  selected={schicht === 'früh'}  onClick={() => handleSchicht('früh')}  />
+                <Chip label="Tag"   selected={schicht === 'tag'}   onClick={() => handleSchicht('tag')}   />
+                <Chip label="Nacht" selected={schicht === 'nacht'} onClick={() => handleSchicht('nacht')} />
+              </div>
+
+              {/* Timeline */}
+              <ShiftTimeline
+                start={startZeit}
+                end={endZeit}
+                schicht={schicht}
+                onStartChange={setStartZeit}
+                onEndChange={setEndZeit}
+                onCommit={markSaved}
+              />
+
+              {/* Time inputs */}
+              <div className="flex items-center gap-3 mb-3">
+                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
+                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
+                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  cursor-text">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={startZeitDraft ?? startZeit}
+                    placeholder="HH:MM"
+                    maxLength={5}
+                    onChange={e => setStartZeitDraft(formatTimeInput(e.target.value))}
+                    onFocus={e => { setStartZeitDraft(startZeit); e.target.select(); }}
+                    onBlur={() => {
+                      const val = startZeitDraft ?? startZeit;
+                      if (isValidTime(val)) { setStartZeit(val); markSaved(); }
+                      setStartZeitDraft(null);
+                    }}
+                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+                    aria-label="Arbeitsbeginn"
+                  />
+                </label>
+
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <div className="w-4 h-px bg-current" />
+                  <div className="w-1 h-1 rounded-full bg-current" />
+                  <div className="w-4 h-px bg-current" />
+                </div>
+
+                <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
+                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
+                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  cursor-text">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={endZeitDraft ?? endZeit}
+                    placeholder="HH:MM"
+                    maxLength={5}
+                    onChange={e => setEndZeitDraft(formatTimeInput(e.target.value))}
+                    onFocus={e => { setEndZeitDraft(endZeit); e.target.select(); }}
+                    onBlur={() => {
+                      const val = endZeitDraft ?? endZeit;
+                      if (isValidTime(val)) { setEndZeit(val); markSaved(); }
+                      setEndZeitDraft(null);
+                    }}
+                    className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+                    aria-label="Arbeitsende"
+                  />
+                </label>
+              </div>
+
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Frühere Arbeitszeiten werden bei Hitze empfohlen
+              </p>
+            </div>
 
           </div>
         </section>

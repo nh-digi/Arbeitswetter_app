@@ -1,5 +1,5 @@
-import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, X } from 'lucide-react';
-import { ArrowsOutCardinal, CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
+import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X } from 'lucide-react';
+import { CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
 import { useState, useRef, useEffect, type RefObject } from 'react';
 import DWDWarningBanner from './DWDWarningBanner';
 import UndoToast from './UndoToast';
@@ -7,10 +7,7 @@ import UVDetailView from './UVDetailView';
 import BeurteilungstemperaturDetailView from './BeurteilungstemperaturDetailView';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
-
-const WORKDAY_START  = 6;
-const WORKDAY_END    = 18;
-const WORKDAY_HOURS  = WORKDAY_END - WORKDAY_START;
+// Solar-based heat windows (independent of user work schedule)
 const CRITICAL_START = 13;
 const CRITICAL_END   = 17;
 
@@ -21,8 +18,11 @@ const getRealHour = () => {
   return n.getHours() + n.getMinutes() / 60;
 };
 
-const clampWorkday = (h: number) =>
-  Math.max(WORKDAY_START, Math.min(WORKDAY_END, h));
+// Parse "HH:MM" string → decimal hour number
+const parseHour = (s: string): number => {
+  const [h, m] = s.split(':').map(Number);
+  return h + (isNaN(m) ? 0 : m) / 60;
+};
 
 const formatHH = (h: number) => {
   const hh = Math.floor(h);
@@ -48,6 +48,7 @@ const T = {
   n500:     'var(--neutral-500)',
   n400:     'var(--neutral-400)',
   n300:     'var(--neutral-300)',
+  n200:     'var(--neutral-200)',
   mutedFg:  'var(--muted-foreground)',
   n100:     'var(--neutral-100)',
   n50:      'var(--neutral-50)',
@@ -73,12 +74,22 @@ const T = {
 // ── Beurteilungstemperatur calculation ───────────────────────────────────────
 // Simplified calculation: Lufttemperatur + corrections for work/sun/humidity - wind/shade
 
-function getBeurteilungstemperatur(hour: number): number {
-  const h = clampWorkday(hour);
+function getBeurteilungstemperatur(hour: number, wStart: number, wEnd: number): number {
+  // Outside work hours: return ambient air temperature only (no work corrections)
+  if (hour < wStart) {
+    const morning = hour >= 6 ? 18 + (hour - 6) * 1.5 : 18;
+    return Math.round(morning);
+  }
+  if (hour >= wEnd) {
+    const evening = Math.max(22, 30 - (hour - wEnd) * 2);
+    return Math.round(evening);
+  }
+
+  const h = hour;
 
   // Base air temperature (varies by hour - peak in afternoon)
   let lufttemp = 22;
-  if (h >= 6 && h < 9) lufttemp = 24;
+  if (h >= 8 && h < 9) lufttemp = 24;
   if (h >= 9 && h < 11) lufttemp = 28;
   if (h >= 11 && h < 13) lufttemp = 31;
   if (h >= 13 && h < 17) lufttemp = 34;
@@ -100,9 +111,65 @@ function getBeurteilungstemperatur(hour: number): number {
 
 // ── Status config (4 states) ──────────────────────────────────────────────────
 
-function getStatus(hour: number) {
-  const h = clampWorkday(hour);
-  const beurteilungsTemp = getBeurteilungstemperatur(hour);
+function getStatus(hour: number, wStart: number, wEnd: number) {
+  const isWorkHour = hour >= wStart && hour < wEnd;
+  const beurteilungsTemp = getBeurteilungstemperatur(hour, wStart, wEnd);
+
+  // Outside work hours: classify by ambient air temperature
+  if (!isWorkHour) {
+    let level: number;
+    if (beurteilungsTemp >= 33) level = 4;
+    else if (beurteilungsTemp >= 29) level = 3;
+    else if (beurteilungsTemp >= 25) level = 2;
+    else level = 1;
+
+    if (level === 4) return {
+      level: 4, label: 'Kritisch',
+      badgeBg: T.criticalBg, badgeDot: T.critical, badgeText: T.critical, ringColor: T.critical,
+      badgeLabel: `${beurteilungsTemp}°C`,
+      beurteilungstemperatur: beurteilungsTemp,
+      alertBg: T.black,
+      alertIconCircle: T.criticalTint, alertIconColor: T.n600,
+      alertTitle: 'Extreme Hitze außerhalb der Arbeitszeit',
+      alertBody: 'Extreme Hitze- und UV-Belastung erwartet',
+      dotFill: T.critical, labelColor: T.critical,
+    };
+    if (level === 3) return {
+      level: 3, label: 'Stark',
+      badgeBg: T.strongBg, badgeDot: T.strong, badgeText: T.n950, ringColor: T.strong,
+      badgeLabel: `${beurteilungsTemp}°C`,
+      beurteilungstemperatur: beurteilungsTemp,
+      alertBg: T.black,
+      alertIconCircle: T.strong, alertIconColor: T.n600,
+      alertTitle: 'Hohe Hitzebelastung außerhalb der Arbeitszeit',
+      alertBody: 'Erhöhte Hitze- und UV-Belastung erwartet',
+      dotFill: T.strong, labelColor: T.critical,
+    };
+    if (level === 2) return {
+      level: 2, label: 'Mäßig',
+      badgeBg: T.warningBg, badgeDot: T.warning, badgeText: T.n950, ringColor: T.warning,
+      badgeLabel: `${beurteilungsTemp}°C`,
+      beurteilungstemperatur: beurteilungsTemp,
+      alertBg: T.black,
+      alertIconCircle: T.warning, alertIconColor: T.n600,
+      alertTitle: 'Mittlere Hitzebelastung außerhalb der Arbeitszeit',
+      alertBody: 'Erhöhte Hitze- und UV-Belastung erwartet',
+      dotFill: T.warning, labelColor: T.warning,
+    };
+    return {
+      level: 1, label: 'Gering',
+      badgeBg: T.successBg, badgeDot: T.success, badgeText: T.successText, ringColor: null,
+      badgeLabel: `${beurteilungsTemp}°C`,
+      beurteilungstemperatur: beurteilungsTemp,
+      alertBg: T.black,
+      alertIconCircle: T.success, alertIconColor: T.n600,
+      alertTitle: 'Angenehme Bedingungen',
+      alertBody: 'Keine erhöhte Hitzebelastung erwartet',
+      dotFill: T.n100, labelColor: T.success,
+    };
+  }
+
+  const h = hour;
 
   if (h >= CRITICAL_START && h < CRITICAL_END) return {
     level: 4, label: 'Kritisch',
@@ -111,7 +178,7 @@ function getStatus(hour: number) {
     beurteilungstemperatur: beurteilungsTemp,
     alertBg: T.black,
     alertIconCircle: T.criticalTint, alertIconColor: T.n600,
-    alertTitle: `Warnung für ${CRITICAL_START}:00 bis ${CRITICAL_END}:00 Uhr`,
+    alertTitle: `Warnung für ${CRITICAL_START}:00 bis ${CRITICAL_END}:00`,
     alertBody: 'Extreme Hitze- und UV-Belastung erwartet',
     dotFill: T.critical,
     labelColor: T.critical,
@@ -123,7 +190,7 @@ function getStatus(hour: number) {
     beurteilungstemperatur: beurteilungsTemp,
     alertBg: T.black,
     alertIconCircle: T.strong, alertIconColor: T.n600,
-    alertTitle: `Warnung für 11:00–13:00 und 17:00–18:00 Uhr`,
+    alertTitle: `Warnung für 11:00–13:00 und 17:00–18:00`,
     alertBody: 'Erhöhte Hitze- und UV-Belastung erwartet',
     labelColor: T.critical,
   };
@@ -134,7 +201,7 @@ function getStatus(hour: number) {
     beurteilungstemperatur: beurteilungsTemp,
     alertBg: T.black,
     alertIconCircle: T.warning, alertIconColor: T.n600,
-    alertTitle: `Warnung für 09:00–11:00 Uhr`,
+    alertTitle: `Warnung für 09:00–11:00`,
     alertBody: 'Erhöhte Hitze- und UV-Belastung erwartet',
     dotFill: T.warning,
     labelColor: T.warning,
@@ -153,13 +220,21 @@ function getStatus(hour: number) {
   };
 }
 
+// ── Status description helper ──────────────────────────────────────────────────
+function getStatusDescription(label: string): string {
+  if (label === 'Kritisch') return 'Sehr hohe Belastung';
+  if (label === 'Stark')    return 'Hohe Belastung';
+  if (label === 'Mäßig')   return 'Mittlere Belastung';
+  return 'Niedrige Belastung';
+}
+
 // ── Day peak helper ─────────────────────────────────────────────────────────────
 // Samples every workday hour and returns the hour with the highest stress level.
-function getDayPeakHour(): number {
+function getDayPeakHour(wStart: number, wEnd: number): number {
   let peakLevel = 0;
-  let peakHour  = WORKDAY_START;
-  for (let h = WORKDAY_START; h < WORKDAY_END; h++) {
-    const lvl = getStatus(h + 0.5).level;
+  let peakHour  = wStart;
+  for (let h = Math.floor(wStart); h < wEnd; h++) {
+    const lvl = getStatus(h + 0.5, wStart, wEnd).level;
     if (lvl > peakLevel) { peakLevel = lvl; peakHour = h; }
   }
   return peakHour;
@@ -169,12 +244,14 @@ function getDayPeakHour(): number {
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
 
-export default function HeuteView({ onNavigate, activeLocation, workStart, workEnd, schwere }: {
+export default function HeuteView({ onNavigate, activeLocation, workStart, workEnd, schwere, bekleidung, onOpenSettings }: {
   onNavigate: (view: View) => void;
   activeLocation?: string | null;
   workStart?: string;
   workEnd?: string;
   schwere?: string;
+  bekleidung?: string;
+  onOpenSettings?: () => void;
 }) {
   const [realtimeHour, setRealtimeHour]   = useState(getRealHour);
   const [scrubbingHour, setScrubbingHour] = useState<number | null>(null);
@@ -202,21 +279,43 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const clockRefMobile  = useRef<SVGSVGElement>(null);
   const isDragging      = useRef(false);
   const returnTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const actionsCardRef  = useRef<HTMLDivElement>(null);
+
+  // Smooth-scroll the recommendations card into view on mobile after a list selection,
+  // so the cause (tapped row) and effect (updated card) are visible together.
+  const scrollActionsIntoView = () => {
+    if (typeof window === 'undefined' || window.innerWidth >= 1024) return;
+    requestAnimationFrame(() => {
+      actionsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   // ── Geometry ────────────────────────────────────────────────────────────────
+  // Parse user work-hour settings → decimal hour numbers
+  const wStart = parseHour(workStart ?? '09:00');
+  const wEnd   = parseHour(workEnd   ?? '18:00');
+  const wStartH = Math.round(wStart); // integer hour for clock dot/label snapping
+  const wEndH   = Math.round(wEnd);
+
   const SIZE    = 340;
   const C       = 170;
   const R       = 120;
   const SW      = 28;
   const LABEL_R = R - SW / 2 - 14;
-  const PILL_R  = R + SW / 2 + 20;
+  const PILL_R  = R + SW / 2 + 38;
 
   // Viewport-aware sizing — read once at render time (CSR-only app)
+  // Fluid clamp: visualization is supporting content, never dominate.
+  // Width budget = viewport − page padding (16×2) − card padding (16×2) − handle/pill safety (~20 each side)
+  const VIEWPORT_W      = typeof window !== 'undefined' ? window.innerWidth  : 390;
   const VIEWPORT_H      = typeof window !== 'undefined' ? window.innerHeight : 844;
   const isTinyScreen    = VIEWPORT_H < 700; // iPhone SE (667px) and shorter phones
-  const mobileClockSize = Math.round(SIZE * (isTinyScreen ? 0.72 : 0.88));
+  const widthBudget     = Math.max(200, Math.min(VIEWPORT_W, 480) - 32 - 32 - 40);
+  const heightBudget    = Math.round(VIEWPORT_H * 0.33);
+  const mobileClockSize = Math.max(200, Math.min(260, widthBudget, heightBudget));
 
-  const hourToAngle = (h: number) => ((clampWorkday(h) - WORKDAY_START) / WORKDAY_HOURS) * 360;
+  // True clock-face mapping: (h % 12) * 30°  →  8→240°, 12→0°(top), 15→90°(right), 18→180°(bottom)
+  const hourToAngle = (h: number) => (h % 12) * 30;
 
   const polar = (r: number, deg: number) => {
     const rad = ((deg - 90) * Math.PI) / 180;
@@ -226,18 +325,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const makeArc = (h1: number, h2: number) => {
     const s    = polar(R, hourToAngle(h1));
     const e    = polar(R, hourToAngle(h2));
-    const span = hourToAngle(h2) - hourToAngle(h1);
+    // Use modular arithmetic so clockwise span is always positive
+    const span = ((hourToAngle(h2) - hourToAngle(h1)) + 360) % 360;
     return `M ${s.x} ${s.y} A ${R} ${R} 0 ${span > 180 ? 1 : 0} 1 ${e.x} ${e.y}`;
   };
 
   // ── Position → hour via SVG coordinate space ───────────────────────────────
-  // Reads the viewBox directly from the SVG element so this stays correct even
-  // if the rendered size changes. NEVER use a CSS scale() transform on the SVG —
-  // pass a different width/height to makeClockSVG instead.
   const calcHour = useRef((_cx: number, _cy: number, _svg: SVGSVGElement): number | null => null);
   calcHour.current = (clientX: number, clientY: number, svg: SVGSVGElement): number | null => {
     const rect   = svg.getBoundingClientRect();
-    const vb     = svg.viewBox.baseVal;          // always 0 0 340 340
+    const vb     = svg.viewBox.baseVal;
     const scaleX = vb.width  / rect.width;
     const scaleY = vb.height / rect.height;
     const svgX   = (clientX - rect.left) * scaleX;
@@ -246,18 +343,29 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     const dy     = svgY - C;
     let deg      = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
     if (deg < 0) deg += 360;
-    return clampWorkday(WORKDAY_START + (deg / 360) * WORKDAY_HOURS);
+    // Main arc: 8:00@240° → 12:00@0°(top) → 18:00@180° (300° clockwise)
+    if (deg >= 240 || deg <= 180) {
+      const h = deg >= 240 ? deg / 30 : deg / 30 + 12;
+      return h;
+    }
+    // Evening gap (180°–240°): maps to 18:00–20:00 (post-work hours)
+    return 18 + (deg - 180) / 30;
   };
 
   // ── Real-time tick ─────────────────────────────────────────────────────────
   useEffect(() => {
     const tick = setInterval(() => setRealtimeHour(getRealHour()), 30_000);
-    return () => clearInterval(tick);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') setRealtimeHour(getRealHour());
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(tick);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
-  // ── Native drag listeners ───────────────────────────────────────────────────
-  // Re-runs whenever mobileView changes so listeners bind to the freshly-mounted
-  // SVG element (conditional rendering unmounts/remounts the SVG on view toggle).
+  // ── Native drag listeners ──────────────────────────────────────────────────
   function attachDrag(svg: SVGSVGElement) {
     const onDown = (e: PointerEvent) => {
       e.preventDefault();
@@ -276,7 +384,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       if (!isDragging.current) return;
       svg.releasePointerCapture(e.pointerId);
       isDragging.current = false;
-      // Stay at scrubbed position — no auto-reset
     };
     svg.addEventListener('pointerdown', onDown);
     svg.addEventListener('pointermove', onMove);
@@ -297,106 +404,158 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileView]);
 
-  // Outside work hours the ring snaps to the peak hour so the user sees
-  // where the danger is before / after their shift.
-  const dayPeakHour   = getDayPeakHour();
-  const dayPeakStatus = getStatus(dayPeakHour);
-  const isOutsideWork = realtimeHour < WORKDAY_START || realtimeHour >= WORKDAY_END;
-  const currentHour   = scrubbingHour !== null ? scrubbingHour
-    : isOutsideWork ? dayPeakHour
-    : clampWorkday(realtimeHour);
-  const status        = getStatus(currentHour);
+  const dayPeakHour   = getDayPeakHour(wStart, wEnd);
+  const dayPeakStatus = getStatus(dayPeakHour, wStart, wEnd);
+  const isOutsideWork = realtimeHour < wStart || realtimeHour >= wEnd;
+  // Show actual real-time position even outside work hours; scrubbing always takes priority.
+  const currentHour   = scrubbingHour !== null ? scrubbingHour : realtimeHour;
+  const status        = getStatus(currentHour, wStart, wEnd);
 
-  // ── Derived positions ──────────────────────────────────────────────────────
-  const handleAngle = hourToAngle(currentHour);
-  const handlePos   = polar(R, handleAngle);
-  const pillPos     = polar(PILL_R, handleAngle);
-  // overflow-visible on the SVG lets the pill render outside the viewBox.
-  // The card has no overflow:hidden so nothing clips it.
-  // Do NOT clamp — clamping pulls the pill onto the handle icon.
-  const clampedPillPos = pillPos;
+  // ── Derived handle position ────────────────────────────────────────────────
+  const handlePos = polar(R, hourToAngle(currentHour));
 
-  // Warn segments: yellow (9-11), orange (11-13, 17-18), red (13-17)
-  const warnSegments = [
-    { h1:  9, h2: 11, color: T.warning  },
-    { h1: 11, h2: 13, color: T.strong   },
-    { h1: 13, h2: 17, color: T.critical },
-    { h1: 17, h2: 18, color: T.strong   },
-  ];
+  // Warn segments: dynamically derived for all visible clock hours (9–20),
+  // including off-hours evening based on ambient temperature.
+  const warnSegments = (() => {
+    const segs: { h1: number; h2: number; color: string }[] = [];
+    for (let h = wStartH; h < wStartH + 12; h++) {
+      const color = getStatus(h + 0.5, wStart, wEnd).ringColor;
+      if (!color) continue;
+      const last = segs[segs.length - 1];
+      if (last && last.color === color && last.h2 === h) {
+        last.h2 = h + 1;
+      } else {
+        segs.push({ h1: h, h2: h + 1, color });
+      }
+    }
+    return segs;
+  })();
 
   // ── Inlined SVG clock ──────────────────────────────────────────────────────
-  // Returns a new SVG element bound to the given ref so desktop + mobile each
-  // get their own DOM node (sharing one ref would wire events to only one).
-  // To resize for mobile: pass a displaySize — do NOT wrap in a CSS scale() transform.
-  const makeClockSVG = (ref: RefObject<SVGSVGElement>, displaySize?: number) => (
+  // Scales fluidly: caller wraps in a container with width + aspect-ratio.
+  // viewBox stays at 340×340 so all internal coordinates are stable.
+  const makeClockSVG = (ref: RefObject<SVGSVGElement | null>) => (
     <svg
       ref={ref}
-      width={displaySize ?? SIZE} height={displaySize ?? SIZE}
+      width="100%" height="100%"
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       className="select-none touch-none overflow-visible"
       style={{ touchAction: 'none', display: 'block' }}
     >
-      {/* Background ring */}
+      {/* Full 360° background ring */}
       <circle cx={C} cy={C} r={R} fill="none" stroke={T.n100} strokeWidth={SW} />
 
-      {/* Warning arcs */}
+      {/* Stress-zone arcs (work-hour profile) */}
       {warnSegments.map(({ h1, h2, color }) => (
         <path key={h1} d={makeArc(h1, h2)} fill="none"
           stroke={color} strokeWidth={SW} strokeLinecap="round" />
       ))}
 
-      {/* Hour labels — 6..17 only (18 overlaps 6 at 0°) */}
-      {Array.from({ length: WORKDAY_HOURS }, (_, i) => {
-        const h   = WORKDAY_START + i;
-        const pos = polar(LABEL_R, hourToAngle(h));
+      {/* Clockwise direction arrowhead — sits on the arc just past "Start" */}
+      {(() => {
+        const arrowDeg = hourToAngle(wStartH) + 14;
+        const arrowRad = ((arrowDeg - 90) * Math.PI) / 180;
+        const ax  = C + R * Math.cos(arrowRad);
+        const ay  = C + R * Math.sin(arrowRad);
+        const tx  = -Math.sin(arrowRad);  // clockwise tangent x
+        const ty  =  Math.cos(arrowRad);  // clockwise tangent y
+        const lx  = -ty;                  // left-perpendicular x
+        const ly  =  tx;                  // left-perpendicular y
+        const half = 4.5, W = 3.5;
+        return (
+          <polygon
+            points={`${ax + tx * half},${ay + ty * half} ${ax - tx * half + lx * W},${ay - ty * half + ly * W} ${ax - tx * half - lx * W},${ay - ty * half - ly * W}`}
+            fill={T.n800}
+            opacity={0.35}
+            style={{ pointerEvents: 'none' }}
+          />
+        );
+      })()}
+
+      {/* All 12 clock positions (9→8 in 12h format) */}
+      {Array.from({ length: 12 }, (_, i) => wStartH + i).map(h => {
+        const angle   = hourToAngle(h);
+        const display = h === 12 ? 12 : h > 12 ? h - 12 : h;
+
+        if (h === wStartH) {
+          const dotPos      = polar(R, angle);
+          const numPos      = polar(LABEL_R, angle);
+          const sublabelPos = polar(R + SW / 2 + 16, angle);
+          return (
+            <g key={h} style={{ pointerEvents: 'none' }}>
+              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
+              <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.n800}
+                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                {display}
+              </text>
+              <text x={sublabelPos.x} y={sublabelPos.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.n800}
+                style={{ fontSize: '9px', fontWeight: 400, fontFamily: 'var(--font-family)' }}>
+                Start
+              </text>
+            </g>
+          );
+        }
+
+        if (h === wEndH) {
+          const dotPos      = polar(R, angle);
+          const numPos      = polar(LABEL_R, angle);
+          const sublabelPos = polar(R + SW / 2 + 16, angle);
+          return (
+            <g key={h} style={{ pointerEvents: 'none' }}>
+              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
+              <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.n800}
+                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                {display}
+              </text>
+              <text x={sublabelPos.x} y={sublabelPos.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.n800}
+                style={{ fontSize: '9px', fontWeight: 400, fontFamily: 'var(--font-family)' }}>
+                Feierabend
+              </text>
+            </g>
+          );
+        }
+
+        const pos = polar(LABEL_R, angle);
         return (
           <text key={h} x={pos.x} y={pos.y}
             textAnchor="middle" dominantBaseline="middle"
             fill={T.n500}
-            style={{ fontSize: '10px', fontWeight: 500, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-            {h}
+            style={{ fontSize: '12px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
+            {display}
           </text>
         );
       })}
 
-      {/* Center: time */}
-      <text x={C} y={C - 52} textAnchor="middle" dominantBaseline="middle"
-        fill={T.n500}
-        style={{ fontSize: '12px', fontWeight: 600, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-        {formatHH(currentHour)} Uhr
-      </text>
-
-      {/* Center: Belastungsstufe */}
-      <text x={C} y={C + 4} textAnchor="middle" dominantBaseline="middle"
+      {/* Center: time — HH:MM, 32 px semi-bold */}
+      <text x={C} y={C - 23} textAnchor="middle" dominantBaseline="middle"
         fill={T.n950}
-        style={{ fontSize: '80px', fontWeight: 600, letterSpacing: '-1px', pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-        {status.level}
+        style={{ fontSize: '32px', fontWeight: 600, pointerEvents: 'none', fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}>
+        {formatHH(currentHour)}
       </text>
 
-
-      {/* Status label */}
-      <text x={C} y={C + 56} textAnchor="middle" dominantBaseline="middle"
-        style={{ fontSize: '11px', fontWeight: 700, pointerEvents: 'none', fontFamily: 'var(--font-family)', fill: T.n950 }}>
+      {/* Center: status label — 18 px semi-bold, always dark */}
+      <text x={C} y={C + 6} textAnchor="middle" dominantBaseline="middle"
+        fill={T.n950}
+        style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.3px', pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
         {status.label}
       </text>
 
-      {/* Handle */}
-      <g className="ring-handle-hint">
-        <circle cx={handlePos.x} cy={handlePos.y} r={24}
-          fill={T.white} stroke={T.n800} strokeWidth={2.5}
-          style={{ cursor: 'grab', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))' }} />
-        <foreignObject x={handlePos.x - 10} y={handlePos.y - 10} width={20} height={20} style={{ pointerEvents: 'none' }}>
-          <ArrowsOutCardinal size={20} weight="regular" color={T.n300} />
-        </foreignObject>
-      </g>
-
-      {/* Pill label */}
-      <rect x={clampedPillPos.x - 26} y={clampedPillPos.y - 11} width={52} height={22} rx={11} fill={T.n800} />
-      <text x={clampedPillPos.x} y={clampedPillPos.y} textAnchor="middle" dominantBaseline="middle"
-        fill={T.white}
-        style={{ fontSize: '11px', fontWeight: 600, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-        {Math.floor(currentHour)} Uhr
+      {/* Center: description — 12 px regular */}
+      <text x={C} y={C + 26} textAnchor="middle" dominantBaseline="middle"
+        fill={T.mutedFg}
+        style={{ fontSize: '12px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
+        {getStatusDescription(status.label)}
       </text>
+
+      {/* Drag handle — plain white circle, no icon */}
+      <circle cx={handlePos.x} cy={handlePos.y} r={14}
+        fill={T.white} stroke={T.n800} strokeWidth={2.5}
+        style={{ cursor: 'grab', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))' }}
+      />
     </svg>
   );
 
@@ -407,7 +566,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       <div className="flex items-center gap-2.5 lg:gap-4 p-2.5 lg:p-4 rounded-2xl" style={{ backgroundColor: status.alertBg, minHeight: '60px' }}>
         <div className="flex items-center justify-center flex-shrink-0 rounded-3xl w-8 h-8 lg:w-12 lg:h-12"
           style={{ backgroundColor: status.alertIconCircle }}>
-          {status.level === 1
+          {status.level <= 1
             ? <CheckCircle className="w-3.5 lg:w-5 h-3.5 lg:h-5" style={{ color: T.black }} strokeWidth={2} />
             : status.level === 2
               ? <span style={{ fontSize: 14, fontWeight: 700, color: T.black, fontFamily: 'var(--font-family)', lineHeight: 1 }} className="lg:text-lg">i</span>
@@ -419,7 +578,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="flex-1 min-w-0">
           <p className="leading-snug mb-0.5 lg:mb-1 lg:text-base"
             style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
-            {scrubbingHour !== null ? status.alertTitle : `Jetzt, ${formatHH(clampWorkday(realtimeHour))} Uhr`}
+            {scrubbingHour !== null ? status.alertTitle : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
           </p>
           <p className="text-[11px] lg:text-sm leading-snug"
             style={{ fontFamily: 'var(--font-family)', color: T.n100 }}>
@@ -435,7 +594,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const CardHeader = ({ compact = false, tiny = false }: { compact?: boolean; tiny?: boolean }) => {
     // Header always reflects the whole day (peak), never the scrubbed hour.
     const dayLabel = dayPeakStatus.level >= 4
-      ? 'Kritisches Fenster heute'
+      ? 'Heute Kritisch'
       : dayPeakStatus.level >= 3
         ? 'Erhöhte Belastung heute'
         : dayPeakStatus.level >= 2
@@ -458,7 +617,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                   {formatGermanDate(now)} · {formatHH(h)} Uhr
                 </span>
               </div>
-              {compact && <ViewToggle compact />}
+              <ViewToggle compact={compact} />
             </div>
           );
         })()}
@@ -477,21 +636,18 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             {dayLabel}
           </h1>
         ) : (
-          <div className="flex items-center justify-between gap-3">
-            <h1 style={{
-              fontSize: 20,
-              fontWeight: 700,
-              lineHeight: 1.1,
-              letterSpacing: '-0.3px',
-              color: T.n950,
-              fontFamily: 'var(--font-family)',
-              margin: 0,
-              whiteSpace: 'nowrap',
-            }}>
-              {dayLabel}
-            </h1>
-            <ViewToggle compact={false} />
-          </div>
+          <h1 style={{
+            fontSize: 20,
+            fontWeight: 700,
+            lineHeight: 1.1,
+            letterSpacing: '-0.3px',
+            color: T.n950,
+            fontFamily: 'var(--font-family)',
+            margin: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            {dayLabel}
+          </h1>
         )}
 
         {/* Row 2: peak temp badge (left) · settings button (right, aligned) */}
@@ -504,7 +660,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </span>
           </div>
           <button
-            onClick={() => onNavigate('einstellungen')}
+            onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
             className="relative z-10 inline-flex items-center gap-1.5 rounded-lg transition-all cursor-pointer min-w-0 max-w-[55%]
               hover:bg-neutral-100 hover:border-neutral-400
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
@@ -516,7 +672,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           >
             <Edit3 size={compact ? 11 : 12} style={{ color: T.mutedFg, flexShrink: 0 }} strokeWidth={1.5} />
             <span style={{ fontSize: compact ? 10 : 11, color: T.mutedFg, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-              {activeLocation ?? 'Kein Standort'}{schwere ? ` · Arbeit: ${schwere}` : ''}
+              {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
             </span>
           </button>
         </div>
@@ -528,7 +684,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
   const LocationButton = () => (
     <button
-      onClick={() => onNavigate('einstellungen')}
+      onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
       className="inline-flex items-center gap-1.5 w-full rounded-2xl transition-all duration-200 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background overflow-hidden lg:min-h-[52px]"
       style={{
         backgroundColor: 'var(--muted)',
@@ -537,7 +693,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     >
       <Edit3 className="w-3 lg:w-4 h-3 lg:h-4 flex-shrink-0 transition-colors" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
       <span className="truncate" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-        {activeLocation ?? 'Kein Standort'}{schwere ? ` · Arbeit: ${schwere}` : ''}
+        {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
       </span>
     </button>
   );
@@ -545,68 +701,109 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // ── Time-block list ───────────────────────────────────────────────────────
 
   const timeBlocks = [
-    { start: '06:00', end: '09:00', startH: 6,  label: 'Gering',   sublabel: 'Geringe Belastung',  level: 1 },
+    { start: '08:00', end: '09:00', startH: 8,  label: 'Gering',   sublabel: 'Geringe Belastung',  level: 1 },
     { start: '09:00', end: '11:00', startH: 9,  label: 'Mäßig',    sublabel: 'Mittlere Belastung', level: 2 },
     { start: '11:00', end: '13:00', startH: 11, label: 'Stark',     sublabel: 'Hohe Belastung',     level: 3 },
     { start: '13:00', end: '17:00', startH: 13, label: 'Kritisch',  sublabel: 'Nicht arbeiten',     level: 4 },
     { start: '17:00', end: '18:00', startH: 17, label: 'Stark',     sublabel: 'Hohe Belastung',     level: 3 },
   ];
 
+  // Block index that matches realtime (the "Jetzt" row) — independent of selection.
+  const nowIdx = isOutsideWork
+    ? -1
+    : timeBlocks.findIndex((b, i) =>
+        realtimeHour >= b.startH && realtimeHour < (timeBlocks[i + 1]?.startH ?? wEnd)
+      );
+
+  // Block index that matches the currently selected hour (drives the recommendations).
+  const activeBlockIdx = timeBlocks.findIndex((b, i) =>
+    currentHour >= b.startH && currentHour < (timeBlocks[i + 1]?.startH ?? wEnd)
+  );
+  const activeBlock = activeBlockIdx >= 0 ? timeBlocks[activeBlockIdx] : null;
+
   const ListBlocks = ({ compact = false }: { compact?: boolean }) => {
-    const activeIdx = timeBlocks.findIndex((b, i) =>
-      currentHour >= b.startH && currentHour < (timeBlocks[i + 1]?.startH ?? WORKDAY_END)
-    );
     return (
-      <div className={compact ? 'mb-3 px-1' : 'mb-6 px-1'}>
+      <div className={compact ? 'mb-3' : 'mb-6'}>
+        {/* Intent header — mirrors the clock view's "Griff ziehen…" hint */}
+        <div className="flex items-center justify-between gap-2 px-1 mb-1.5">
+          <p className="text-[11px] lg:text-xs" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>
+            Zeitraum tippen, um Empfehlungen anzupassen
+          </p>
+          {scrubbingHour !== null && (
+            <button
+              onClick={() => { if (returnTimer.current) clearTimeout(returnTimer.current); setScrubbingHour(null); }}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded transition-opacity hover:opacity-70"
+              style={{ color: T.n600, fontFamily: 'var(--font-family)', fontSize: 11, fontWeight: 500 }}
+            >
+              <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
+              Zurück zu jetzt
+            </button>
+          )}
+        </div>
+
         {timeBlocks.map((block, i) => {
-          const isActive    = i === activeIdx;
-          const isCrit      = block.level >= 4;
-          const isWarn      = block.level >= 3;
-          const blockStatus = getStatus(block.startH);
+          const isActive = i === activeBlockIdx;
+          const isNow    = i === nowIdx;
           return (
-            <div key={i} className="flex gap-3 items-stretch">
-              <div className="flex flex-col items-center w-5 flex-shrink-0">
-                <div className="w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 mt-3.5"
-                  style={{
-                    backgroundColor: isActive ? T.n950 : T.white,
-                    borderColor: isActive ? T.n950 : T.n100,
-                  }} />
-                {i < timeBlocks.length - 1 && <div className="w-px flex-1 my-0.5" style={{ backgroundColor: T.n100 }} />}
-              </div>
-              <button
-                onClick={() => { if (returnTimer.current) clearTimeout(returnTimer.current); setScrubbingHour(block.startH); }}
-                className="flex-1 flex items-start gap-3 py-2.5 min-h-[44px] text-left rounded-xl transition-colors hover:bg-muted">
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <p className="text-xs tabular-nums mb-0.5" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>
+            <button
+              key={i}
+              onClick={() => {
+                if (returnTimer.current) clearTimeout(returnTimer.current);
+                setScrubbingHour(block.startH);
+                scrollActionsIntoView();
+              }}
+              aria-pressed={isActive}
+              className="w-full flex items-center gap-3 px-2 py-2.5 min-h-[48px] text-left rounded-xl transition-colors hover:bg-muted"
+              style={{
+                backgroundColor: isActive ? 'var(--muted)' : 'transparent',
+              }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="text-sm tabular-nums font-medium" style={{ color: T.n800, fontFamily: 'var(--font-family)' }}>
                     {block.start} – {block.end}
                   </p>
-                  <p className="text-sm leading-tight"
-                    style={{
-                      fontWeight: block.level >= 3 ? 600 : block.level >= 2 ? 500 : 400,
-                      color: T.n950,
-                      fontFamily: 'var(--font-family)',
-                    }}>
-                    {block.label}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>{block.sublabel}</p>
+                  {isNow && (
+                    <span className="inline-flex items-center px-1.5 py-px rounded-full"
+                      style={{ backgroundColor: T.n100, color: T.n800, fontSize: 10, fontWeight: 600, fontFamily: 'var(--font-family)', lineHeight: 1.4 }}>
+                      Jetzt
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center justify-center flex-shrink-0 mt-1 rounded-full"
-                  style={{ width: 28, height: 28, backgroundColor:
-                    block.level >= 4 ? T.criticalTint
-                    : block.level >= 3 ? T.strong
-                    : block.level >= 2 ? T.warning
-                    : T.iconOk }}>
-                  {block.level >= 4
-                    ? <AlertTriangle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
-                    : block.level >= 3
-                      ? <AlertCircle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
-                      : block.level >= 2
-                        ? <span style={{ fontSize: 13, fontWeight: 700, color: T.black, fontFamily: 'var(--font-family)', lineHeight: 1 }}>i</span>
-                        : <CheckCircle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
-                  }
-                </div>
-              </button>
-            </div>
+                <p className="text-sm leading-tight"
+                  style={{
+                    fontWeight: isActive ? 600 : block.level >= 3 ? 600 : 500,
+                    color: T.n950,
+                    fontFamily: 'var(--font-family)',
+                  }}>
+                  {block.label}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>{block.sublabel}</p>
+              </div>
+
+              <div className="flex items-center justify-center flex-shrink-0 rounded-full"
+                style={{ width: 28, height: 28, backgroundColor:
+                  block.level >= 4 ? T.criticalTint
+                  : block.level >= 3 ? T.strong
+                  : block.level >= 2 ? T.warning
+                  : T.iconOk }}>
+                {block.level >= 4
+                  ? <AlertTriangle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
+                  : block.level >= 3
+                    ? <AlertCircle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
+                    : block.level >= 2
+                      ? <span style={{ fontSize: 13, fontWeight: 700, color: T.black, fontFamily: 'var(--font-family)', lineHeight: 1 }}>i</span>
+                      : <CheckCircle className="w-3.5 h-3.5" style={{ color: T.black }} strokeWidth={2.5} />
+                }
+              </div>
+
+              <ChevronRight
+                className="flex-shrink-0"
+                style={{ color: isActive ? T.n600 : T.n300 }}
+                strokeWidth={1.5}
+                size={16}
+              />
+            </button>
           );
         })}
       </div>
@@ -642,17 +839,49 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     { cat: 'organisatorisch' as const, short: 'Rotationspläne einführen',           long: 'Prüfung einer Aussetzung oder Anpassung von Leistungslohn- und Akkordsystemen, um Überanstrengung zu verhindern. Organisation von Arbeitsplatzrotation.' },
     { cat: 'personenbezogen' as const, short: 'Kühlwesten nutzen',                  long: 'Einsatz von aktiv kühlenden Maßnahmen wie Kühlwesten oder Belüftungssystemen mit gekühlter Luft bei geschlossenen Schutzanzügen.' },
     { cat: 'personenbezogen' as const, short: 'Erste-Hilfe-Bereitschaft',           long: 'Sofortige Umsetzung von Erste-Hilfe-Maßnahmen bei Hitzeerkrankungen (Lagerung im Schatten, feuchte Tücher, Rettungsdienst alarmieren).' },
+    { cat: 'personenbezogen' as const, short: 'Schwere Arbeit in der Sonne nach Möglichkeit vermeiden', long: 'Bei kritischer Hitzebelastung sollte schwere körperliche Arbeit in direkter Sonneneinstrahlung nach Möglichkeit vermieden oder auf kühlere Tageszeiten (früher Morgen, später Abend) verlagert werden.' },
   ];
 
   const ACTIONS_L1 = [
     { cat: 'organisatorisch' as const, short: 'Normale Arbeitsplanung möglich',    long: 'Keine besonderen Schutzmaßnahmen erforderlich. Reguläre Pausen und Sonnenschutz werden empfohlen.' },
   ];
 
+  const ACTIONS_L0 = [
+    { cat: 'organisatorisch' as const, short: 'Außerhalb der Arbeitszeit', long: 'Die Arbeitszeit hat noch nicht begonnen oder ist bereits beendet. Für die aktuelle Uhrzeit sind keine Schutzmaßnahmen erforderlich. Sie können die Zeitleiste ziehen, um Empfehlungen für bestimmte Arbeitsstunden zu sehen.' },
+  ];
+
   const getActionItems = () => {
+    if (status.level === 0) return ACTIONS_L0;
     if (status.level >= 4) return ACTIONS_L4;
     if (status.level >= 3) return ACTIONS_L3;
     if (status.level >= 2) return ACTIONS_L2;
     return ACTIONS_L1;
+  };
+
+  // ── Factor pills ──────────────────────────────────────────────────────────
+
+  const FACTOR_ICON_MAP = { hitze: Thermometer, uv: Sun, trockenheit: Droplet } as const;
+  const FACTOR_LABEL_MAP = { hitze: 'Hitze', uv: 'UV', trockenheit: 'Trockenheit' } as const;
+  type FactorKind = 'hitze' | 'uv' | 'trockenheit';
+
+  const getFactors = (): FactorKind[] => {
+    if (status.level >= 4) return ['hitze', 'uv', 'trockenheit'];
+    if (status.level >= 2) return ['hitze', 'uv'];
+    return [];
+  };
+
+  const FactorChip = ({ kind }: { kind: FactorKind }) => {
+    const Icon = FACTOR_ICON_MAP[kind];
+    const bg = status.level >= 4 ? T.criticalTint : status.level >= 3 ? T.strong : T.warning;
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 lg:gap-1 text-[11px] lg:text-xs font-semibold px-1.5 lg:px-2 py-0.5 rounded-full flex-shrink-0"
+        style={{ backgroundColor: bg, color: T.black }}
+      >
+        <Icon className="w-2.5 lg:w-3 h-2.5 lg:h-3" strokeWidth={2} />
+        {FACTOR_LABEL_MAP[kind]}
+      </span>
+    );
   };
 
   // ── Actions card (light) ──────────────────────────────────────────────────
@@ -660,12 +889,30 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const ActionsCard = () => {
     const [openIdx, setOpenIdx] = useState<number | null>(null);
     const items = getActionItems();
+    const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
     return (
-      <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n50 }}>
+      <div ref={actionsCardRef} className="rounded-[16px] overflow-hidden scroll-mt-4" style={{ backgroundColor: T.n50 }}>
         <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4">
+          {/* Period chip */}
+          {rangeLabel && (
+            <div className="inline-flex items-center px-2.5 py-1 rounded-full mb-2"
+              style={{ backgroundColor: T.n100 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.n800, fontFamily: 'var(--font-family)' }}>
+                {rangeLabel} · {status.label}
+              </span>
+            </div>
+          )}
           <p className="pb-2 lg:pb-3 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
-            Handlungsempfehlungen {scrubbingHour !== null ? `für ${Math.floor(currentHour)}:00 – ${Math.floor(currentHour) + 2}:00` : 'aktuell'}
+            Handlungsempfehlungen für diesen Zeitraum
           </p>
+          {/* Factor pills — below headline */}
+          {getFactors().length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {getFactors().map((f) => (
+                <FactorChip key={f} kind={f} />
+              ))}
+            </div>
+          )}
           {items.map((item, i) => {
             const Icon = CATEGORY_ICON[item.cat];
             const isOpen = openIdx === i;
@@ -687,7 +934,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                   />
                 </button>
                 {isOpen && (
-                  <p className="leading-relaxed pb-2 lg:pb-3" style={{ fontSize: 12, color: T.n600, fontFamily: 'var(--font-family)' }}>
+                  <p className="text-xs lg:text-sm leading-relaxed pb-2 lg:pb-3" style={{ color: T.n600, fontFamily: 'var(--font-family)' }}>
                     {item.long}
                   </p>
                 )}
@@ -702,11 +949,12 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // ── Hazard card (dark) ────────────────────────────────────────────────────
 
   const getHazardRows = () => {
-    const h = clampWorkday(currentHour);
+    if (status.level === 0) return [{ Icon: Sun, label: 'Keine Hitzebelastung außerhalb der Arbeitszeit' }];
+    const h = currentHour;
 
     // Calculate temp
     let temp = 22;
-    if (h >= 6 && h < 9) temp = 24;
+    if (h >= 8 && h < 9)  temp = 24;
     if (h >= 9 && h < 11) temp = 28;
     if (h >= 11 && h < 13) temp = 31;
     if (h >= 13 && h < 17) temp = 34;
@@ -745,7 +993,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       if (multiFactors.length > 1) {
         rows.push({ Icon: AlertTriangle, label: `Mehrfachbelastung: ${multiFactors.join(' + ')}` });
       }
-      rows.push({ Icon: User, label: 'Schwere Arbeit in der Sonne nach Möglichkeit vermeiden' });
       return rows;
     } else if (status.level >= 3) {
       const rows = [
@@ -770,11 +1017,21 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
   const hazardRows = getHazardRows();
 
-  const HazardCard = () => (
+  const HazardCard = () => {
+    const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
+    return (
     <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
       <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
+        {rangeLabel && (
+          <div className="inline-flex self-start items-center px-2.5 py-1 rounded-full mb-1"
+            style={{ backgroundColor: T.n600 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: T.white, fontFamily: 'var(--font-family)' }}>
+              {rangeLabel} · {status.label}
+            </span>
+          </div>
+        )}
         <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
-          Belastungsfaktoren für {Math.floor(currentHour)}:00 – {Math.floor(currentHour) + 2}:00
+          Belastungsfaktoren in diesem Zeitraum
         </p>
         {hazardRows.map(({ Icon, label }, i) => (
           <div key={label}>
@@ -793,16 +1050,17 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         ))}
       </div>
     </div>
-  );
+    );
+  };
 
   // ── Weather section (full-width dark) ────────────────────────────────────
 
   const getWeatherStats = () => {
-    const h = clampWorkday(currentHour);
+    const h = currentHour;
 
     // Air temperature varies by hour
     let temp = 22;
-    if (h >= 6 && h < 9) temp = 24;
+    if (h >= 8 && h < 9)  temp = 24;
     if (h >= 9 && h < 11) temp = 28;
     if (h >= 11 && h < 13) temp = 31;
     if (h >= 13 && h < 17) temp = 34;
@@ -1026,25 +1284,24 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="grid grid-cols-12 gap-6">
 
           {/* Clock card */}
-          <div className="col-span-7 row-span-2 bg-card rounded-[24px] shadow-lg p-8 flex flex-col gap-3.5">
+          <div className="col-span-7 self-start bg-card rounded-[24px] shadow-lg p-8 flex flex-col gap-3.5">
             <CardHeader />
             <div className="w-full">
               {mobileView === 'clock' && (
-                <div className="flex justify-center -mt-8">{makeClockSVG(clockRefDesktop)}</div>
+                <div className="flex justify-center">
+                  <div style={{ width: '100%', maxWidth: '440px', aspectRatio: '1 / 1' }}>
+                    {makeClockSVG(clockRefDesktop)}
+                  </div>
+                </div>
               )}
               {mobileView === 'list' && <ListBlocks />}
             </div>
             <DaySummary />
-            {mobileView === 'clock' && (
-              <p className="text-center text-xs" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>
-                Griff ziehen um andere Zeiten zu prüfen
-              </p>
-            )}
             <AlertBanner />
           </div>
 
           {/* Right column */}
-          <div className="col-span-5 flex flex-col gap-4">
+          <div className="col-span-5 self-start flex flex-col gap-4">
             <ActionsCard />
             <HazardCard />
           </div>
@@ -1062,36 +1319,36 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
         {/* Main card */}
         <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-2 pb-2 min-[390px]:pt-3 min-[390px]:pb-3 flex flex-col gap-1.5 min-[390px]:gap-2">
+          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-3">
             <CardHeader compact tiny={isTinyScreen} />
             <div className="w-full">
               {mobileView === 'clock' && (
-                <div className="flex justify-center -mt-6">
-                  {makeClockSVG(clockRefMobile, mobileClockSize)}
+                <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', margin: '0 auto' }}>
+                  {makeClockSVG(clockRefMobile)}
                 </div>
               )}
               {mobileView === 'list' && <ListBlocks compact />}
             </div>
             <DaySummary />
-            {mobileView === 'clock' && (
-              <div className="hidden min-[390px]:flex items-center justify-center gap-1.5 pb-2">
-                <svg className="w-3.5 h-3.5 flex-shrink-0" style={{ color: T.n500 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                </svg>
-                <p className="text-[11px]" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>
-                  Griff ziehen um andere Zeiten zu prüfen
-                </p>
-              </div>
-            )}
             <AlertBanner />
+            {status.level >= 1 && (
+              <button
+                onClick={scrollActionsIntoView}
+                className="flex items-center justify-center gap-1 w-full py-0.5 rounded-lg transition-opacity active:opacity-50"
+                style={{ color: T.n400, fontFamily: 'var(--font-family)' }}
+              >
+                <span style={{ fontSize: 11 }}>{getActionItems().length} Empfehlungen · {status.label}</span>
+                <ChevronDown size={11} strokeWidth={1.75} style={{ color: T.n400 }} />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Weather + cards */}
         <div className="px-4 mb-3 max-w-xl mx-auto flex flex-col gap-3">
-          <WeatherSection />
           <ActionsCard />
           <HazardCard />
+          <WeatherSection />
           <InfoAccordion />
         </div>
       </div>

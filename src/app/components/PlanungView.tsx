@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Clock, Wrench, User, Check, CheckCircle, AlertTriangle,
+  Clock, Check, CheckCircle, AlertTriangle,
   ChevronDown, ChevronUp, Thermometer, Droplet, Wind, Sun, Scale,
-  ClipboardList,
 } from 'lucide-react';
 import PageHeader from './PageHeader';
 import { StatusIconCircle } from './StatusBadge';
+import UVDetailViewWeekly from './UVDetailViewWeekly';
+import BeurteilungstemperaturDetailViewWeekly from './BeurteilungstemperaturDetailViewWeekly';
+import ActionList, { type ActionItem } from './ActionList';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,7 +26,7 @@ interface Hazard {
   detail: string;
 }
 
-interface Day {
+export interface Day {
   date: string;
   shortDate: string;
   status: DayStatus;
@@ -207,6 +209,7 @@ const T = {
   brand:       'var(--brand-primary)',
   critical:    'var(--status-critical)',
   criticalBg:  'var(--status-critical-bg)',
+  criticalTint:'var(--status-critical-tint)',
   warning:     'var(--status-warning)',
   warningBg:   'var(--status-warning-bg)',
   success:     'var(--status-success)',
@@ -227,13 +230,38 @@ const HAZARD_ICONS = {
   scale: Scale,
 };
 
-const ACTION_ICONS_KRITISCH = [Wrench, ClipboardList, User, Clock];
-const ACTION_ICONS_DEFAULT  = [Clock, Wrench, Check, ClipboardList];
+// Handlungsempfehlungen — same data as HeuteView's ActionsCard.
+// Order within each level: technisch → organisatorisch → personenbezogen
+const ACTIONS_L1: ActionItem[] = [
+  { cat: 'organisatorisch', short: 'Normale Arbeitsplanung möglich', long: 'Keine besonderen Schutzmaßnahmen erforderlich. Reguläre Pausen und Sonnenschutz werden empfohlen.' },
+];
 
-function getActionIcon(status: BlockStatus, index: number) {
-  if (status === 'kritisch') return ACTION_ICONS_KRITISCH[index % ACTION_ICONS_KRITISCH.length];
-  return ACTION_ICONS_DEFAULT[index % ACTION_ICONS_DEFAULT.length];
-}
+const ACTIONS_L2: ActionItem[] = [
+  { cat: 'technisch',       short: 'Sonnenschutz aufstellen',           long: 'Aufstellen von Sonnensegeln, Überdachungen oder provisorischen Abschirmwänden direkt über dem Arbeitsplatz.' },
+  { cat: 'technisch',       short: 'Lüftung / Ventilatoren nutzen',     long: 'Einsatz von Ventilatoren zur Durchlüftung, um die Schweißverdunstung zu unterstützen.' },
+  { cat: 'organisatorisch', short: 'Getränke bereitstellen',            long: 'Kostenfreie Bereitstellung von geeignetem Mineralwasser oder abgekühlten Tees in ausreichender Menge.' },
+  { cat: 'organisatorisch', short: 'Arbeitstempo flexibilisieren',      long: 'Erlaubnis und Ermöglichung einer selbstständigen, verantwortungsvollen Anpassung von Arbeitsschwere und Arbeitstempo.' },
+  { cat: 'personenbezogen', short: 'Viel trinken',                      long: 'Regelmäßig kleine Mengen trinken – als Orientierung gilt etwa ein Glas (100–150 ml) alle 15 bis 30 Minuten.' },
+  { cat: 'personenbezogen', short: 'Luftige Kleidung & Kopfbedeckung', long: 'Tragen von atmungsaktiver, heller Kleidung und Kopfbedeckung. Vorgeschriebene Schutzkleidung muss getragen werden, aber die Isolation darunter sollte reduziert werden.' },
+];
+
+const ACTIONS_L3: ActionItem[] = [
+  { cat: 'technisch',       short: 'Kühlung verstärken',                long: 'Aktivierung von Wasserservern, Luftduschen oder mobilen Kühlgeräten im betroffenen Arbeitsbereich.' },
+  { cat: 'technisch',       short: 'Sonnenschutz intensivieren',        long: 'Zwingende Intensivierung und lückenlose Umsetzung aller Verschattungsmaßnahmen aus Stufe 2.' },
+  { cat: 'organisatorisch', short: 'Schwere Arbeit in kühlere Stunden', long: 'Verlegung schwerer körperlicher Arbeiten in die kühleren Morgen- oder Abendstunden (z. B. durch Gleitzeit oder Schichtverlegung).' },
+  { cat: 'organisatorisch', short: 'Entwärmungspausen einführen',       long: 'Einplanung zusätzlicher Tätigkeitsunterbrechungen und passiver Entwärmungsphasen. Viele kurze Pausen sind effektiver als wenige lange.' },
+  { cat: 'personenbezogen', short: 'Pausen im Schatten verbringen',     long: 'Ruhepausen dürfen nicht am aufgeheizten Arbeitsplatz verbracht werden, sondern in schattigen oder extra gekühlten Bereichen.' },
+  { cat: 'personenbezogen', short: 'Kollegen aktiv im Blick behalten',  long: 'Gegenseitige Beobachtung der Beschäftigten auf erste Anzeichen von Hitzeerkrankungen (Schwindel, Erschöpfung, Sonnenstich).' },
+];
+
+const ACTIONS_BY_STATUS: Record<BlockStatus, ActionItem[]> = {
+  ok: ACTIONS_L1,
+  eingeschraenkt: ACTIONS_L2,
+  kritisch: ACTIONS_L3,
+};
+
+// Unused references retained for legacy data shape
+void Check;
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -282,7 +310,12 @@ function DayCard({ day, active, onClick }: { day: Day; active: boolean; onClick:
 }
 
 function StatusBadge({ status }: { status: BlockStatus }) {
-  if (status === 'ok') return null;
+  if (status === 'ok') return (
+    <span className="inline-flex items-center gap-0.5 md:gap-1 text-[11px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 rounded-full flex-shrink-0 text-[var(--status-success-text)] bg-[var(--status-success-bg)]">
+      <CheckCircle className="w-2.5 md:w-3 h-2.5 md:h-3" strokeWidth={2} />
+      Gering
+    </span>
+  );
   if (status === 'kritisch') return (
     <span className="inline-flex items-center gap-0.5 md:gap-1 text-[11px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 rounded-full flex-shrink-0 text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20">
       <AlertTriangle className="w-2.5 md:w-3 h-2.5 md:h-3" strokeWidth={2} />
@@ -297,11 +330,44 @@ function StatusBadge({ status }: { status: BlockStatus }) {
   );
 }
 
-function MetricTile({
-  icon: Icon, label, value, alert = false,
-}: { icon: React.ElementType; label: string; value: string; alert?: boolean }) {
+const FACTOR_ICON: Record<string, React.ElementType> = {
+  hitze: Thermometer,
+  uv: Sun,
+  trockenheit: Droplet,
+};
+const FACTOR_LABEL: Record<string, string> = {
+  hitze: 'Hitze',
+  uv: 'UV',
+  trockenheit: 'Trockenheit',
+};
+
+function FactorChip({ kind, status }: { kind: 'hitze' | 'uv' | 'trockenheit'; status: BlockStatus }) {
+  const Icon = FACTOR_ICON[kind];
+  const bg = status === 'kritisch' ? T.criticalTint : T.warning;
   return (
-    <div className="rounded-lg md:rounded-xl p-2.5 md:p-3 relative bg-[var(--neutral-950)]">
+    <span className="inline-flex items-center gap-0.5 md:gap-1 text-[11px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 rounded-full flex-shrink-0"
+      style={{ backgroundColor: bg, color: '#000000' }}>
+      <Icon className="w-2.5 md:w-3 h-2.5 md:h-3" strokeWidth={2} />
+      {FACTOR_LABEL[kind]}
+    </span>
+  );
+}
+
+function getBlockFactors(block: ActionBlock, _day: Day): ('hitze' | 'uv' | 'trockenheit')[] {
+  // Mirror the HeuteView simulation: factors scale with the block's status level.
+  // - ok           → none
+  // - eingeschraenkt (mäßig/stark) → Hitze + UV
+  // - kritisch     → Hitze + UV + Trockenheit
+  if (block.status === 'ok') return [];
+  if (block.status === 'kritisch') return ['hitze', 'uv', 'trockenheit'];
+  return ['hitze', 'uv'];
+}
+
+function MetricTile({
+  icon: Icon, label, value, alert = false, onClick,
+}: { icon: React.ElementType; label: string; value: string; alert?: boolean; onClick?: () => void }) {
+  const content = (
+    <>
       <div className="flex items-center gap-1 md:gap-1.5 mb-1 md:mb-1.5">
         <Icon className="w-3 md:w-3.5 h-3 md:h-3.5 text-[#E2E8F0]" strokeWidth={1.5} />
         <p className="text-[10px] md:text-xs leading-tight text-[#E2E8F0]">{label}</p>
@@ -310,17 +376,48 @@ function MetricTile({
       {alert && (
         <AlertTriangle className="absolute bottom-2 md:bottom-2.5 right-2 md:right-2.5 w-3 md:w-3.5 h-3 md:h-3.5 text-white/30" strokeWidth={1.5} />
       )}
+    </>
+  );
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="rounded-lg md:rounded-xl p-2.5 md:p-3 relative bg-[var(--neutral-950)] text-left transition-opacity hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--neutral-800)]"
+      >
+        {content}
+      </button>
+    );
+  }
+  return (
+    <div className="rounded-lg md:rounded-xl p-2.5 md:p-3 relative bg-[var(--neutral-950)]">
+      {content}
     </div>
   );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function PlanungView({ onNavigate }: { onNavigate: (view: View) => void }) {
+export default function PlanungView({ onNavigate, onOpenSettings, activeLocation, schwere, bekleidung }: { onNavigate: (view: View) => void; onOpenSettings?: () => void; activeLocation?: string | null; schwere?: string; bekleidung?: string; }) {
   const [selectedDay, setSelectedDay] = useState(1);
   const [expandedHazard, setExpandedHazard] = useState<number | null>(null);
+  const [uvDetailOpen, setUvDetailOpen] = useState(false);
+  const [beurtDetailOpen, setBeurtDetailOpen] = useState(false);
+  const [expandedBlocks, setExpandedBlocks] = useState<Set<number>>(
+    () => new Set(DAYS[1].actionBlocks.map((_, i) => i).filter(i => DAYS[1].actionBlocks[i].status !== 'ok'))
+  );
 
   const d = DAYS[selectedDay];
+
+  useEffect(() => {
+    setExpandedBlocks(new Set(d.actionBlocks.map((_, i) => i).filter(i => d.actionBlocks[i].status !== 'ok')));
+  }, [selectedDay]);
+
+  const toggleBlock = (i: number) => setExpandedBlocks(prev => {
+    const next = new Set(prev);
+    next.has(i) ? next.delete(i) : next.add(i);
+    return next;
+  });
   const dayCfg = STATUS_CFG[d.status];
   const hasWarning = d.status !== 'gut';
 
@@ -333,6 +430,10 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
         variant="dark"
         showLocationButton
         onNavigate={onNavigate}
+        onOpenSettings={onOpenSettings}
+        activeLocation={activeLocation}
+        schwere={schwere}
+        bekleidung={bekleidung}
       />
 
       {/* ── Day selector & Legend ── */}
@@ -383,32 +484,46 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
               <div>
                 <p className="text-[11px] md:text-xs font-semibold uppercase tracking-wider mb-2 md:mb-4 text-[var(--neutral-500)]">Planung</p>
                 <div className="space-y-2.5 md:space-y-5">
-                  {d.actionBlocks.map((block, bi) => (
-                    <div key={bi}>
-                      <div className="flex items-center gap-2 mb-1 md:mb-2 flex-wrap">
-                        <h3 className={`text-base md:text-xl ${
-                          block.status === 'kritisch' ? 'text-[var(--status-critical)]' : 'text-[var(--neutral-950)]'
-                        }`}>
-                          {block.timeLabel}
-                        </h3>
-                        <StatusBadge status={block.status} />
-                      </div>
-
-                      <div className={block.status === 'kritisch' ? 'rounded-lg md:rounded-xl p-2 md:p-3 space-y-1.5 md:space-y-2 bg-[var(--status-critical-bg)]' : 'space-y-1.5 md:space-y-2'}>
-                        {block.actions.map((action, ai) => {
-                          const Icon = getActionIcon(block.status, ai);
-                          return (
-                            <div key={ai} className="flex items-start gap-2 md:gap-2.5">
-                              <Icon className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0 mt-0.5 text-[var(--neutral-500)]" strokeWidth={1.5} />
-                              <span className="text-[13px] md:text-sm leading-relaxed text-[var(--neutral-600)]">
-                                {action}
-                              </span>
+                  {d.actionBlocks.map((block, bi) => {
+                    const isBlockOpen = expandedBlocks.has(bi);
+                    return (
+                      <div key={bi}>
+                        <button
+                          onClick={() => toggleBlock(bi)}
+                          className="w-full flex items-start gap-2 mb-1 md:mb-2 text-left"
+                        >
+                          <div className="flex flex-col gap-1 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className={`text-base md:text-xl ${
+                                block.status === 'kritisch' ? 'text-[var(--status-critical)]' : 'text-[var(--neutral-950)]'
+                              }`}>
+                                {block.timeLabel}
+                              </h3>
+                              <StatusBadge status={block.status} />
                             </div>
-                          );
-                        })}
+                            {getBlockFactors(block, d).length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {getBlockFactors(block, d).map((f) => (
+                                  <FactorChip key={f} kind={f} status={block.status} />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {isBlockOpen
+                            ? <ChevronUp className="w-4 h-4 flex-shrink-0 mt-1 text-[var(--neutral-400)]" strokeWidth={1.5} />
+                            : <ChevronDown className="w-4 h-4 flex-shrink-0 mt-1 text-[var(--neutral-400)]" strokeWidth={1.5} />
+                          }
+                        </button>
+
+                        {isBlockOpen && (
+                          <ActionList
+                            items={ACTIONS_BY_STATUS[block.status]}
+                            variant={block.status === 'kritisch' ? 'critical' : 'default'}
+                          />
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -439,7 +554,7 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
                         }
                       </button>
                       {isOpen && (
-                        <p className="text-[11px] md:text-xs leading-relaxed pb-2 md:pb-3 text-white/50">{hazard.detail}</p>
+                        <p className="text-xs md:text-sm leading-relaxed pb-2 md:pb-3 text-white/50">{hazard.detail}</p>
                       )}
                     </div>
                   );
@@ -456,11 +571,15 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
                 <MetricTile icon={Thermometer} label="Lufttemperatur" value={d.conditions.lufttemp} />
                 <MetricTile icon={Droplet} label="relative Luftfeuchtigkeit" value={d.conditions.feuchtigkeit} />
                 <MetricTile icon={Wind} label="Wind" value={d.conditions.wind} />
-                <MetricTile icon={Sun} label="UV" value={d.conditions.uv} alert={d.conditions.assessmentAlert} />
+                <MetricTile icon={Sun} label="UV" value={d.conditions.uv} alert={d.conditions.assessmentAlert} onClick={() => setUvDetailOpen(true)} />
               </div>
 
               {/* Assessment temperature — full width blue tile */}
-              <div className="rounded-lg md:rounded-xl p-3 md:p-4 relative bg-[var(--brand-primary)]">
+              <button
+                type="button"
+                onClick={() => setBeurtDetailOpen(true)}
+                className="w-full text-left rounded-lg md:rounded-xl p-3 md:p-4 relative bg-[var(--brand-primary)] transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              >
                 <div className="flex items-center gap-1 md:gap-1.5 mb-0.5 md:mb-1">
                   <Wind className="w-3 md:w-3.5 h-3 md:h-3.5 text-white/80" strokeWidth={1.5} />
                   <p className="text-[10px] md:text-xs text-white/80">Beurteilungstemperatur</p>
@@ -471,13 +590,20 @@ export default function PlanungView({ onNavigate }: { onNavigate: (view: View) =
                 {d.conditions.assessmentAlert && (
                   <AlertTriangle className="absolute bottom-2.5 md:bottom-3 right-2.5 md:right-3 w-3.5 md:w-4 h-3.5 md:h-4 text-white/60" strokeWidth={1.5} />
                 )}
-              </div>
+              </button>
             </div>
 
             </div>
           </div>
         </div>
       </div>
+
+      {uvDetailOpen && (
+        <UVDetailViewWeekly onClose={() => setUvDetailOpen(false)} days={DAYS} selectedDayIndex={selectedDay} />
+      )}
+      {beurtDetailOpen && (
+        <BeurteilungstemperaturDetailViewWeekly onClose={() => setBeurtDetailOpen(false)} days={DAYS} selectedDayIndex={selectedDay} />
+      )}
 
     </div>
   );

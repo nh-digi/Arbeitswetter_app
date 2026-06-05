@@ -19,10 +19,7 @@ export default function UndoToast({ message, onUndo, onDismiss, duration = 5000 
 
   return (
     <div
-      className="fixed left-3 right-3 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2 z-50 animate-slide-up"
-      style={{
-        bottom: 'calc(72px + 12px)', /* clear the mobile nav bar */
-      }}
+      className="fixed left-3 right-3 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2 md:left-[calc(50%+8rem)] bottom-[84px] md:bottom-6 z-50 animate-slide-up"
     >
       <div
         className="flex items-center gap-2 px-3 py-2.5 rounded-xl shadow-lg"

@@ -75,49 +75,57 @@ export default function DWDWarningBanner({ level, onNavigate, onDismiss }: DWDWa
 
   return (
     <div
-      className="px-3 py-3 sm:px-4 sm:py-4"
+      className="px-3 py-2.5 sm:px-4 sm:py-4"
       style={{ backgroundColor: config.bg, borderBottom: `1px solid ${config.border}` }}
     >
-      {/* Mobile layout: stacked */}
-      <div className="flex flex-col gap-2 sm:hidden">
-        {/* Row 1: icon + text + dismiss */}
-        <div className="flex gap-2.5 items-start">
-          <AlertTriangle
-            className="w-4 h-4 flex-shrink-0 mt-0.5"
-            style={{ color: config.iconColor }}
-            strokeWidth={2}
-          />
-          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-            <p
-              className="leading-[1.3]"
-              style={{ fontSize: 14, fontWeight: 700, color: config.textColor, fontFamily: 'var(--font-family)' }}
-            >
-              {config.title}
-            </p>
-            <p
-              className="leading-[1.3] opacity-90"
-              style={{ fontSize: 14, color: config.textColor, fontFamily: 'var(--font-family)' }}
-            >
-              {config.description}
-            </p>
-          </div>
-          {dismissBtn('w-8 h-8')}
+      {/* Mobile layout: single row, compact */}
+      <div className="flex gap-2.5 items-start sm:hidden">
+        <AlertTriangle
+          className="w-4 h-4 flex-shrink-0 mt-0.5"
+          style={{ color: config.iconColor }}
+          strokeWidth={2}
+        />
+        <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+          <p
+            className="leading-[1.3] truncate"
+            style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 700, color: config.textColor, fontFamily: 'var(--font-family)' }}
+          >
+            {config.title}
+          </p>
+          <p
+            className="leading-[1.3] opacity-90"
+            style={{
+              fontSize: 'var(--type-size-body-sm)',
+              color: config.textColor,
+              fontFamily: 'var(--font-family)',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {config.description}
+          </p>
+          <button
+            onClick={() => onNavigate('warnung')}
+            className="self-start mt-0.5 hover:opacity-70 transition-opacity"
+            style={{
+              color: config.textColor,
+              fontFamily: 'var(--font-family)',
+              fontSize: 'var(--type-size-body-sm)',
+              fontWeight: 600,
+              lineHeight: 1.4,
+              textDecoration: 'underline',
+              textUnderlineOffset: 2,
+              background: 'none',
+              border: 'none',
+              padding: 0,
+            }}
+          >
+            Details anzeigen
+          </button>
         </div>
-        {/* Row 2: Details button */}
-        <button
-          onClick={() => onNavigate('warnung')}
-          className="self-start px-3.5 py-2 rounded-lg hover:opacity-90 transition-opacity"
-          style={{
-            backgroundColor: level === 'multiple' ? 'white' : 'black',
-            color: level === 'multiple' ? '#111118' : 'white',
-            fontFamily: 'var(--font-family)',
-            fontSize: 13,
-            fontWeight: 600,
-            lineHeight: 1.4,
-          }}
-        >
-          Details anzeigen
-        </button>
+        {dismissBtn('w-7 h-7')}
       </div>
 
       {/* Desktop layout: side by side */}
@@ -131,13 +139,13 @@ export default function DWDWarningBanner({ level, onNavigate, onDismiss }: DWDWa
           <div className="flex-1 flex flex-col gap-1 min-w-0">
             <p
               className="leading-[1.3]"
-              style={{ fontSize: 16, fontWeight: 700, color: config.textColor, fontFamily: 'var(--font-family)' }}
+              style={{ fontSize: 'var(--type-size-h4)', fontWeight: 700, color: config.textColor, fontFamily: 'var(--font-family)' }}
             >
               {config.title}
             </p>
             <p
               className="leading-[1.3] opacity-90"
-              style={{ fontSize: 14, color: config.textColor, fontFamily: 'var(--font-family)' }}
+              style={{ fontSize: 'var(--type-size-body-sm)', color: config.textColor, fontFamily: 'var(--font-family)' }}
             >
               {config.description}
             </p>
@@ -146,14 +154,14 @@ export default function DWDWarningBanner({ level, onNavigate, onDismiss }: DWDWa
         <div className="flex gap-3 items-center flex-shrink-0">
           <button
             onClick={() => onNavigate('warnung')}
-            className="px-3.5 py-2.5 rounded-lg w-[140px] hover:opacity-90 transition-opacity"
+            className="px-4 py-2.5 rounded-lg whitespace-nowrap hover:opacity-90 transition-opacity"
             style={{
               backgroundColor: level === 'multiple' ? 'white' : 'black',
               color: level === 'multiple' ? '#111118' : 'white',
               fontFamily: 'var(--font-family)',
-              fontSize: 14,
+              fontSize: 'var(--type-size-body-sm)',
               fontWeight: 600,
-              lineHeight: 1.6,
+              lineHeight: 1.4,
             }}
           >
             Details anzeigen

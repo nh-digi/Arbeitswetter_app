@@ -8,8 +8,12 @@ interface PageHeaderProps {
   showSettings?: boolean;
   showLocationButton?: boolean;
   onNavigate?: (view: View) => void;
+  onOpenSettings?: () => void;
   subtitle?: string;
   icon?: React.ElementType;
+  activeLocation?: string | null;
+  schwere?: string;
+  bekleidung?: string;
 }
 
 export default function PageHeader({
@@ -18,14 +22,19 @@ export default function PageHeader({
   showSettings = false,
   showLocationButton = false,
   onNavigate,
+  onOpenSettings,
   subtitle,
   icon: Icon,
+  activeLocation,
+  schwere,
+  bekleidung,
 }: PageHeaderProps) {
   const isDark = variant === 'dark';
+  const handleOpenSettings = () => onOpenSettings ? onOpenSettings() : onNavigate?.('einstellungen');
 
   const LocationButton = () => (
     <button
-      onClick={() => onNavigate?.('einstellungen')}
+      onClick={handleOpenSettings}
       className="inline-flex items-center gap-2 rounded-2xl px-3 md:px-5 py-2 md:py-3.5 h-9 md:h-[52px] border transition-all duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 md:flex-initial overflow-hidden"
       style={{
         backgroundColor: isDark ? 'var(--neutral-800)' : 'var(--muted)',
@@ -44,7 +53,7 @@ export default function PageHeader({
           fontFamily: 'var(--font-family)'
         }}
       >
-        München · Schwere Arbeit · Schwere Arbeitskleidung
+        {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
       </span>
     </button>
   );
@@ -96,7 +105,7 @@ export default function PageHeader({
               {showLocationButton && <LocationButton />}
               {showSettings && (
                 <button
-                  onClick={() => onNavigate?.('einstellungen')}
+                  onClick={handleOpenSettings}
                   className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors border flex-shrink-0"
                   style={{
                     backgroundColor: isDark ? 'var(--neutral-800)' : 'transparent',
@@ -159,7 +168,7 @@ export default function PageHeader({
                   </div>
                   {showSettings && (
                     <button
-                      onClick={() => onNavigate?.('einstellungen')}
+                      onClick={handleOpenSettings}
                       className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border flex-shrink-0 ml-4"
                       style={{
                         backgroundColor: isDark ? 'var(--neutral-800)' : 'transparent',
@@ -177,7 +186,7 @@ export default function PageHeader({
               ) : showSettings ? (
                 <div className="flex justify-end">
                   <button
-                    onClick={() => onNavigate?.('einstellungen')}
+                    onClick={handleOpenSettings}
                     className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors border flex-shrink-0"
                     style={{
                       backgroundColor: isDark ? 'var(--neutral-800)' : 'transparent',

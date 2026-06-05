@@ -7,12 +7,14 @@
   /* ── DS Neutral primitives ── */
   --neutral-black:   #000000;
   --neutral-950:     #000000;
+  --neutral-900:     #111111;
   --neutral-800:     #1A1A1A;
   --neutral-700:     #2D2D2D;
   --neutral-600:     #3F3F3F;
   --neutral-500:     #64748B;
   --neutral-400:     #7F8EA3;
   --neutral-300:     #94A3B8;
+  --neutral-200:     #BDBDBD;
   --neutral-100:     #E2E8F0;
   --neutral-50:      #F8FAFC;
   --neutral-white:   #FFFFFF;
@@ -34,6 +36,9 @@
   --status-success:        #10B981;
   --status-success-bg:     #ECFDF5;
   --status-success-text:   #166534;
+  /* Added from DS spec — new names only, existing values untouched */
+  --status-success-vivid:  #10B981;
+  --status-dwd-extreme:    #FB88FF;
 
   /* ── Status icon circle fills ── */
   --status-icon-ok:        #85D7A2;
@@ -84,6 +89,107 @@
   --sidebar-accent-foreground: #222222;
   --sidebar-border:         #E2E8F0;
   --sidebar-ring:           #325CDA;
+
+  /* ── Semantic background / text / border tokens (new names) ── */
+  --bg-page:               #FFFFFF;
+  --bg-surface:            #F8FAFC;
+  --bg-elevated:           #E2E8F0;
+  --bg-highlight:          #000000;
+  --text-primary:          #222222;
+  --text-secondary:        #3F3F3F;
+  --text-inverse:          #FFFFFF;
+  --text-inverse-secondary: #E2E8F0;
+  --border-soft:           #E2E8F0;
+  --border-hard:           #1A1A1A;
+  --border-focus:          #325CDA;
+  --brand-default:         #325CDA;
+  --brand-pressed:         #1D3FA3;
+  --brand-subtle:          #EEF2FD;
+
+  /* ── Spacing Scale (fluid: 390px mobile → 1280px desktop) ──
+     Use --space-* ONLY for layout: section gaps, card gaps, stack spacing, page layout.
+     For component internal padding use --inset-*. Never mix. Never invent values. */
+  --space-1: clamp(4px,  3.12px + 0.22vw, 6px);
+  --space-2: clamp(8px,  6.25px + 0.45vw, 12px);
+  --space-3: clamp(12px, 10.25px + 0.45vw, 16px);
+  --space-4: clamp(16px, 12.49px + 0.90vw, 24px);
+  --space-5: clamp(24px, 18.74px + 1.35vw, 36px);
+  --space-6: clamp(32px, 24.99px + 1.80vw, 48px);
+  --space-7: clamp(48px, 37.48px + 2.70vw, 72px);
+  --space-8: clamp(80px, 62.47px + 4.49vw, 120px);
+
+  /* Page padding — mobile-first, 16→24px */
+  --page-padding:   clamp(16px, 12.49px + 0.90vw, 24px);
+
+  --margin-page:    clamp(16px, -12.05px + 7.19vw, 80px);
+  --margin-content: clamp(24px, 18.42px + 1.43vw, 96px);
+  --grid-gutter:    clamp(16px, 12.49px + 0.90vw, 24px);
+
+  /* ── Insets / Padding (fixed) ── */
+  --inset-xs:   4px;
+  --inset-sm:   8px;
+  --inset-md:   16px;
+  --inset-lg:   24px;
+  --inset-xl:   32px;
+  --inset-2xl:  48px;
+  --inset-3xl:  64px;
+  --inset-4xl:  80px;
+  --padding-tight: 6px;
+  --padding-micro: 2px;
+
+  /* ── Breakpoints & Layout ── */
+  --breakpoint-mobile-min: 320px;
+  --breakpoint-mobile:     390px;
+  --breakpoint-tablet:     768px;
+  --breakpoint-desktop:    1280px;
+  --layout-max-width:      1440px;
+
+  /* ── Typography tokens ──
+     Hierarchy: Display > H1 > H2 > H3. Mobile H1 capped at 34px.
+     Letter-spacing uses em so it scales with font-size. */
+  --type-display-size:    32px;
+  --type-display-lh:      1.1;
+  --type-display-weight:  600;
+  --type-display-ls:      -0.02em;
+  --type-h1-size:         28px;
+  --type-h1-lh:           1.2;
+  --type-h1-weight:       600;
+  --type-h1-ls:           -0.02em;
+  --type-h2-size:         22px;
+  --type-h2-lh:           1.25;
+  --type-h2-weight:       600;
+  --type-h2-ls:           -0.015em;
+  --type-h3-size:         18px;
+  --type-h3-lh:           1.3;
+  --type-h3-weight:       600;
+  --type-h3-ls:           -0.01em;
+  --type-h4-size:         16px;
+  --type-h4-lh:           1.35;
+  --type-h4-weight:       500;
+  --type-body-lg-size:    17px;
+  --type-body-lg-lh:      1.5;
+  --type-body-size:       17px;
+  --type-body-lh:         1.5;
+  --type-body-sm-size:    15px;
+  --type-body-sm-lh:      1.5;
+  --type-caption-size:    12px;
+  --type-caption-lh:      1.3;
+
+  /* ── Responsive type sizes (fluid, mobile → desktop) ──
+     Aligned with Apple HIG type scale (iOS/iPadOS) for desktop-readable defaults.
+     Fluid ramp interpolates from ~375px viewport (mobile) to ~1440px viewport (desktop):
+     Display 32→48 · H1 28→34 · H2 22→28 · H3 20→22 (Title3) · H4 16→17 (Headline) ·
+     BodyLg 17→20 (Body→Title3) · Body 16→17 (Body) · BodySm 14→15 (Subheadline) ·
+     Caption 12 (Caption1, fixed) */
+  --type-size-display:  clamp(32px, 25.00px + 1.80vw,  48px);
+  --type-size-h1:       clamp(28px, 25.37px + 0.67vw,  34px);
+  --type-size-h2:       clamp(22px, 19.37px + 0.67vw,  28px);
+  --type-size-h3:       clamp(20px, 19.12px + 0.22vw,  22px);
+  --type-size-h4:       clamp(16px, 15.65px + 0.094vw, 17px);
+  --type-size-body-lg:  clamp(17px, 15.69px + 0.34vw,  20px);
+  --type-size-body:     clamp(16px, 15.65px + 0.094vw, 17px);
+  --type-size-body-sm:  clamp(14px, 13.65px + 0.094vw, 15px);
+  --type-size-caption:  12px;
 }
 
 .dark {
@@ -149,6 +255,71 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border:   var(--sidebar-border);
   --color-sidebar-ring:     var(--sidebar-ring);
+
+  /* ── DS status colors (Tailwind: bg-status-critical etc.) ── */
+  --color-status-critical:       var(--status-critical);
+  --color-status-critical-tint:  var(--status-critical-tint);
+  --color-status-critical-bg:    var(--status-critical-bg);
+  --color-status-warning:        var(--status-warning);
+  --color-status-warning-bg:     var(--status-warning-bg);
+  --color-status-strong:         var(--status-strong);
+  --color-status-strong-bg:      var(--status-strong-bg);
+  --color-status-caution:        var(--status-caution);
+  --color-status-success:        var(--status-success);
+  --color-status-success-vivid:  var(--status-success-vivid);
+  --color-status-success-bg:     var(--status-success-bg);
+  --color-status-success-text:   var(--status-success-text);
+  --color-status-dwd-extreme:    var(--status-dwd-extreme);
+  --color-status-icon-ok:        var(--status-icon-ok);
+  --color-status-icon-warning:   var(--status-icon-warning);
+  --color-status-icon-critical:  var(--status-icon-critical);
+
+  /* ── DS neutral colors (Tailwind: text-neutral-500 etc.) ── */
+  --color-neutral-black:  var(--neutral-black);
+  --color-neutral-950:    var(--neutral-950);
+  --color-neutral-900:    var(--neutral-900);
+  --color-neutral-800:    var(--neutral-800);
+  --color-neutral-700:    var(--neutral-700);
+  --color-neutral-600:    var(--neutral-600);
+  --color-neutral-500:    var(--neutral-500);
+  --color-neutral-400:    var(--neutral-400);
+  --color-neutral-300:    var(--neutral-300);
+  --color-neutral-200:    var(--neutral-200);
+  --color-neutral-100:    var(--neutral-100);
+  --color-neutral-50:     var(--neutral-50);
+  --color-neutral-white:  var(--neutral-white);
+
+  /* ── DS brand colors ── */
+  --color-brand-dark:     var(--brand-dark);
+  --color-brand-primary:  var(--brand-primary);
+  --color-brand-tint:     var(--brand-tint);
+  --color-brand-default:  var(--brand-default);
+  --color-brand-pressed:  var(--brand-pressed);
+  --color-brand-subtle:   var(--brand-subtle);
+
+  /* ── Semantic text / bg / border colors ── */
+  --color-bg-page:               var(--bg-page);
+  --color-bg-surface:            var(--bg-surface);
+  --color-bg-elevated:           var(--bg-elevated);
+  --color-bg-highlight:          var(--bg-highlight);
+  --color-text-primary:          var(--text-primary);
+  --color-text-secondary:        var(--text-secondary);
+  --color-text-inverse:          var(--text-inverse);
+  --color-text-inverse-secondary: var(--text-inverse-secondary);
+  --color-border-soft:           var(--border-soft);
+  --color-border-hard:           var(--border-hard);
+  --color-border-focus:          var(--border-focus);
+
+  /* ── DS spacing — prefixed ds-* to avoid overriding Tailwind defaults ── */
+  --spacing-ds-1: var(--space-1);
+  --spacing-ds-2: var(--space-2);
+  --spacing-ds-3: var(--space-3);
+  --spacing-ds-4: var(--space-4);
+  --spacing-ds-5: var(--space-5);
+  --spacing-ds-6: var(--space-6);
+  --spacing-ds-7: var(--space-7);
+  --spacing-ds-8: var(--space-8);
+  --spacing-page: var(--page-padding);
 }
 
 @layer base {
@@ -167,47 +338,48 @@
   }
 
   h1 {
-    font-size: 28px;
+    font-size: var(--type-size-h1);
     font-weight: 600;
     line-height: 1.2;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    font-size: 24px;
+    font-size: var(--type-size-h2);
     font-weight: 600;
     line-height: 1.25;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.015em;
   }
 
   h3 {
-    font-size: 20px;
-    font-weight: 500;
+    font-size: var(--type-size-h3);
+    font-weight: 600;
     line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
   h4 {
-    font-size: 16px;
-    font-weight: 400;
+    font-size: var(--type-size-h4);
+    font-weight: 500;
     line-height: 1.35;
   }
 
   label {
-    font-size: 16px;
+    font-size: var(--type-size-body);
     font-weight: 500;
     line-height: 1.5;
     font-family: var(--font-family);
   }
 
   button {
-    font-size: 16px;
+    font-size: var(--type-size-body);
     font-weight: 500;
     line-height: 1.5;
     font-family: var(--font-family);
   }
 
   input {
-    font-size: 16px;
+    font-size: var(--type-size-body);
     font-weight: 400;
     line-height: 1.5;
     font-family: var(--font-family);
@@ -228,4 +400,23 @@
 
 .animate-slide-up {
   animation: slide-up 0.2s ease-out;
+}
+
+/* Modal panel animations */
+@keyframes modal-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-backdrop {
+  animation: modal-fade-in 0.25s ease;
+}
+
+.modal-panel {
+  animation: modal-slide-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
