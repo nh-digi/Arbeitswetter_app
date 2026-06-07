@@ -336,7 +336,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                     >
                       <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
                     </div>
-                    <p className="flex-1 text-xs lg:text-sm" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
+                    <p className="flex-1 text-base" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                       {label}
                     </p>
                     <ChevronDown

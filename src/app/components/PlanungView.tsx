@@ -286,7 +286,7 @@ function DayCard({ day, active, onClick }: { day: Day; active: boolean; onClick:
 
         {/* Text - Mobile: stacked center, Desktop: horizontal left */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left w-full md:w-auto">
-          <p className="text-sm md:text-[14px] font-semibold leading-[1.5] text-white">
+          <p className="text-sm md:text-base font-semibold leading-[1.5] text-white">
             {day.shortDate}
           </p>
           <p className="text-[11px] md:text-[12px] leading-[1.3] text-white md:hidden">
@@ -547,14 +547,14 @@ export default function PlanungView({ onNavigate, onOpenSettings, activeLocation
                         className="w-full flex items-center gap-2 md:gap-3 py-2 md:py-3 text-left"
                       >
                         <Icon className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0 text-white/50" strokeWidth={1.5} />
-                        <span className="text-[13px] md:text-sm flex-1 leading-snug text-white/80">{hazard.text}</span>
+                        <span className="text-sm md:text-base flex-1 leading-snug text-white/80">{hazard.text}</span>
                         {isOpen
                           ? <ChevronUp className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0 text-white/30" strokeWidth={1.5} />
                           : <ChevronDown className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0 text-white/30" strokeWidth={1.5} />
                         }
                       </button>
                       {isOpen && (
-                        <p className="text-xs md:text-sm leading-relaxed pb-2 md:pb-3 text-white/50">{hazard.detail}</p>
+                        <p className="text-sm md:text-base leading-relaxed pb-2 md:pb-3 text-white/50">{hazard.detail}</p>
                       )}
                     </div>
                   );

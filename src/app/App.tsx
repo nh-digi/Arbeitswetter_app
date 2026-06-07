@@ -6,21 +6,29 @@ import PlanungView from './components/PlanungView';
 import WarnungView from './components/WarnungView';
 import EinstellungenView from './components/EinstellungenView';
 import EinstellungenModal from './components/EinstellungenModal';
+import OnboardingFlow from './components/OnboardingFlow';
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'startseite';
 interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 
 export default function App() {
   const [activeView, setActiveView] = useState<View>('heute');
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [startZeit,    setStartZeit]    = useState('06:00');
-  const [endZeit,      setEndZeit]      = useState('14:00');
-  const [schwere,      setSchwere]      = useState<'leicht' | 'mittel' | 'schwer'>('mittel');
-  const [bekleidung,   setBekleidung]   = useState<'leicht' | 'mittel' | 'schwer'>('mittel');
-  const [orte,         setOrte]         = useState<Ort[]>([
-    { id: 1, name: 'Berlin Ost', city: 'Baustelle A10', lat: 52.5200, lng: 13.4050 },
-    { id: 2, name: 'Hamburg',    city: 'Lager Nord',    lat: 53.5511, lng: 9.9937  },
-  ]);
-  const [aktiveOrtId,  setAktiveOrtId]  = useState<number | null>(1);
+  const [startZeit,    setStartZeit]    = useState(() => localStorage.getItem('startZeit')    ?? '06:00');
+  const [endZeit,      setEndZeit]      = useState(() => localStorage.getItem('endZeit')      ?? '14:00');
+  const [schwere,      setSchwere]      = useState<'leicht' | 'mittel' | 'schwer'>(() => (localStorage.getItem('schwere') as 'leicht' | 'mittel' | 'schwer') ?? 'mittel');
+  const [bekleidung,   setBekleidung]   = useState<'leicht' | 'mittel' | 'schwer'>(() => (localStorage.getItem('bekleidung') as 'leicht' | 'mittel' | 'schwer') ?? 'mittel');
+  const [orte,         setOrte]         = useState<Ort[]>(() => {
+    try { const s = localStorage.getItem('orte'); const parsed = s ? JSON.parse(s) : null; return parsed ?? []; } catch { return []; }
+  });
+  const [aktiveOrtId,  setAktiveOrtId]  = useState<number | null>(() => { const s = localStorage.getItem('aktiveOrtId'); return s ? Number(s) : null; });
+  const [onboardingOpen, setOnboardingOpen] = useState(() => localStorage.getItem('onboardingDone') !== 'true');
+
+  useEffect(() => { localStorage.setItem('startZeit',   startZeit); },   [startZeit]);
+  useEffect(() => { localStorage.setItem('endZeit',     endZeit); },     [endZeit]);
+  useEffect(() => { localStorage.setItem('schwere',     schwere); },     [schwere]);
+  useEffect(() => { localStorage.setItem('bekleidung',  bekleidung); },  [bekleidung]);
+  useEffect(() => { localStorage.setItem('orte',        JSON.stringify(orte)); }, [orte]);
+  useEffect(() => { if (aktiveOrtId !== null) localStorage.setItem('aktiveOrtId', String(aktiveOrtId)); }, [aktiveOrtId]);
   const activeOrt = orte.find(o => o.id === aktiveOrtId) ?? null;
 
   // ── Experiment toggle (press "A" outside inputs) ──────────────────────────
@@ -29,6 +37,7 @@ export default function App() {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement &&
           ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (e.key === 'o' || e.key === 'O') { setOnboardingOpen(true); return; }
       if (e.key !== 'a' && e.key !== 'A') return;
       const next = !experimentMode;
       setExperimentMode(next);
@@ -61,19 +70,8 @@ export default function App() {
         {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
         {activeView === 'planung'       && <PlanungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} activeLocation={activeOrt?.name ?? null} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} />}
         {activeView === 'startseite'    && <StartseiteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
-        {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} activeLocation={activeOrt?.name ?? null} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} />}
         {activeView === 'einstellungen' && <EinstellungenView startZeit={startZeit} setStartZeit={setStartZeit} endZeit={endZeit} setEndZeit={setEndZeit} orte={orte} setOrte={setOrte} aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId} schwere={schwere} setSchwere={setSchwere} bekleidung={bekleidung} setBekleidung={setBekleidung} />}
-        {settingsModalOpen && (
-          <EinstellungenModal
-            onClose={() => setSettingsModalOpen(false)}
-            startZeit={startZeit} setStartZeit={setStartZeit}
-            endZeit={endZeit} setEndZeit={setEndZeit}
-            orte={orte} setOrte={setOrte}
-            aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId}
-            schwere={schwere} setSchwere={setSchwere}
-            bekleidung={bekleidung} setBekleidung={setBekleidung}
-          />
-        )}
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -147,6 +145,30 @@ export default function App() {
       <style>{`
         @media (min-width: 768px) { main { margin-left: 16rem; } }
       `}</style>
+
+      {/* Overlays — rendered last so they paint above nav */}
+      {settingsModalOpen && (
+        <EinstellungenModal
+          onClose={() => setSettingsModalOpen(false)}
+          startZeit={startZeit} setStartZeit={setStartZeit}
+          endZeit={endZeit} setEndZeit={setEndZeit}
+          orte={orte} setOrte={setOrte}
+          aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId}
+          schwere={schwere} setSchwere={setSchwere}
+          bekleidung={bekleidung} setBekleidung={setBekleidung}
+        />
+      )}
+      {onboardingOpen && (
+        <OnboardingFlow
+          schwere={schwere}         setSchwere={setSchwere}
+          bekleidung={bekleidung}   setBekleidung={setBekleidung}
+          startZeit={startZeit}     setStartZeit={setStartZeit}
+          endZeit={endZeit}         setEndZeit={setEndZeit}
+          orte={orte}               setOrte={setOrte}
+          aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId}
+          onClose={() => { setOnboardingOpen(false); localStorage.setItem('onboardingDone', 'true'); }}
+        />
+      )}
     </div>
   );
 }

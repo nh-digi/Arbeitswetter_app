@@ -75,7 +75,7 @@ export default function TimelineRing({ currentHour }: TimelineRingProps) {
         {/* Full background ring (neutral) */}
         <path
           d={fullCircleArc}
-          fill="#E5E7EB"
+          fill="#E2E8F0"
           stroke="#fff"
           strokeWidth="3"
         />
@@ -90,7 +90,7 @@ export default function TimelineRing({ currentHour }: TimelineRingProps) {
         />
 
         {/* Clock face background */}
-        <circle cx={center} cy={center} r={clockFaceRadius} fill="#F8F9FA" stroke="#E5E7EB" strokeWidth="1.5" />
+        <circle cx={center} cy={center} r={clockFaceRadius} fill="#F8F9FA" stroke="#E2E8F0" strokeWidth="1.5" />
 
         {/* Hour tick marks (24h) */}
         {hourTicks.map((hour) => {

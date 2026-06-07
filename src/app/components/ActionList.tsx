@@ -39,7 +39,7 @@ export default function ActionList({ items, variant = 'default' }: ActionListPro
               >
                 <Icon className="w-4 h-4 text-[var(--neutral-600)]" strokeWidth={1.5} />
               </div>
-              <p className="flex-1 text-[13px] md:text-sm leading-snug text-[var(--neutral-950)]">
+              <p className="flex-1 text-sm md:text-base leading-snug font-normal text-[var(--neutral-950)]">
                 {item.short}
               </p>
               {!single && (
@@ -51,7 +51,7 @@ export default function ActionList({ items, variant = 'default' }: ActionListPro
               )}
             </button>
             {isOpen && (
-              <p className="text-xs md:text-sm leading-relaxed pb-2 md:pb-3 text-[var(--neutral-600)]">
+              <p className="text-sm md:text-base leading-relaxed pb-2 md:pb-3 text-[var(--neutral-600)]">
                 {item.long}
               </p>
             )}

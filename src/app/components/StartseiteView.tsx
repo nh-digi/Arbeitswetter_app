@@ -273,7 +273,7 @@ function DarkActionItems({ items }: { items: ActionItem[] }) {
               >
                 <Icon className="w-4 h-4" style={{ color: T.n300 }} strokeWidth={1.5} />
               </div>
-              <p className="flex-1 text-[13px] md:text-sm leading-snug" style={{ color: T.n100, fontFamily: 'var(--font-family)' }}>
+              <p className="flex-1 leading-snug" style={{ fontSize: 'var(--type-size-body)', fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
                 {item.short}
               </p>
               {!single && (
@@ -285,7 +285,7 @@ function DarkActionItems({ items }: { items: ActionItem[] }) {
               )}
             </button>
             {isOpen && (
-              <p className="text-xs md:text-sm leading-relaxed pb-2 md:pb-3" style={{ color: T.n300, fontFamily: 'var(--font-family)' }}>
+              <p className="leading-relaxed pb-2 md:pb-3" style={{ fontSize: 'var(--type-size-body)', color: T.n300, fontFamily: 'var(--font-family)' }}>
                 {item.long}
               </p>
             )}
@@ -378,8 +378,7 @@ export default function StartseiteView({
           {/* Top row: date (left) + chips (right) */}
           <div className="flex items-start justify-between gap-2 mb-3">
             <p
-              className="text-[11px] md:text-xs"
-              style={{ color: T.n500, fontFamily: 'var(--font-family)' }}
+              style={{ fontSize: 'var(--type-size-body-sm)', color: T.n500, fontFamily: 'var(--font-family)' }}
             >
               {formatGermanDate(new Date())}
             </p>
@@ -387,8 +386,9 @@ export default function StartseiteView({
             {/* Status + factor chips */}
             <div className="flex flex-wrap justify-end gap-1.5">
               <span
-                className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                className="inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
                 style={{
+                  fontSize: 'var(--type-size-caption)',
                   backgroundColor: status.badgeBg,
                   color: status.badgeText,
                   border: `1px solid ${status.badgeText}33`,
@@ -413,8 +413,8 @@ export default function StartseiteView({
                 return factors.map(({ Icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: chipBg, color: T.black }}
+                    className="inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ fontSize: 'var(--type-size-caption)', backgroundColor: chipBg, color: T.black }}
                   >
                     <Icon className="w-2.5 h-2.5 flex-shrink-0" strokeWidth={2} />
                     {label}
@@ -461,8 +461,8 @@ export default function StartseiteView({
               )}
             </button>
             <p
-              className="text-xs md:text-sm mt-1"
-              style={{ color: T.n500, fontFamily: 'var(--font-family)' }}
+              className="mt-1"
+              style={{ fontSize: 'var(--type-size-body)', color: T.n500, fontFamily: 'var(--font-family)' }}
             >
               Beurteilungstemperatur
             </p>
@@ -473,12 +473,12 @@ export default function StartseiteView({
             <div className="rounded-lg p-2.5" style={{ backgroundColor: T.n50 }}>
               <div className="flex items-center gap-1 mb-1">
                 <Thermometer className="w-3 h-3 flex-shrink-0" style={{ color: T.n400 }} strokeWidth={1.5} />
-                <p className="text-[10px]" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>Luft</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', color: T.n500, fontFamily: 'var(--font-family)' }}>Luft</p>
                 {weather.tempWarning && (
                   <AlertTriangle className="w-2.5 h-2.5 ml-auto flex-shrink-0" style={{ color: T.n400 }} strokeWidth={2} />
                 )}
               </div>
-              <p className="text-sm font-semibold" style={{ color: T.n950, fontFamily: 'var(--font-family)' }}>
+              <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 600, color: T.n950, fontFamily: 'var(--font-family)' }}>
                 {weather.luft}
               </p>
             </div>
@@ -486,9 +486,9 @@ export default function StartseiteView({
             <div className="rounded-lg p-2.5" style={{ backgroundColor: T.n50 }}>
               <div className="flex items-center gap-1 mb-1">
                 <Droplet className="w-3 h-3 flex-shrink-0" style={{ color: T.n400 }} strokeWidth={1.5} />
-                <p className="text-[10px]" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>Feuchte</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', color: T.n500, fontFamily: 'var(--font-family)' }}>Feuchte</p>
               </div>
-              <p className="text-sm font-semibold" style={{ color: T.n950, fontFamily: 'var(--font-family)' }}>
+              <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 600, color: T.n950, fontFamily: 'var(--font-family)' }}>
                 {weather.feuchtigkeit}
               </p>
             </div>
@@ -496,9 +496,9 @@ export default function StartseiteView({
             <div className="rounded-lg p-2.5" style={{ backgroundColor: T.n50 }}>
               <div className="flex items-center gap-1 mb-1">
                 <Wind className="w-3 h-3 flex-shrink-0" style={{ color: T.n400 }} strokeWidth={1.5} />
-                <p className="text-[10px]" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>Wind</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', color: T.n500, fontFamily: 'var(--font-family)' }}>Wind</p>
               </div>
-              <p className="text-sm font-semibold" style={{ color: T.n950, fontFamily: 'var(--font-family)' }}>
+              <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 600, color: T.n950, fontFamily: 'var(--font-family)' }}>
                 {weather.wind}
               </p>
             </div>
@@ -510,12 +510,12 @@ export default function StartseiteView({
             >
               <div className="flex items-center gap-1 mb-1">
                 <Sun className="w-3 h-3 flex-shrink-0" style={{ color: T.n400 }} strokeWidth={1.5} />
-                <p className="text-[10px]" style={{ color: T.n500, fontFamily: 'var(--font-family)' }}>UV</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', color: T.n500, fontFamily: 'var(--font-family)' }}>UV</p>
                 {weather.uvWarning && (
                   <AlertTriangle className="w-2.5 h-2.5 ml-auto flex-shrink-0" style={{ color: T.n400 }} strokeWidth={2} />
                 )}
               </div>
-              <p className="text-sm font-semibold" style={{ color: T.n950, fontFamily: 'var(--font-family)' }}>
+              <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 600, color: T.n950, fontFamily: 'var(--font-family)' }}>
                 {weather.uv}
               </p>
             </button>
@@ -528,8 +528,8 @@ export default function StartseiteView({
         {/* navigate to Planung for basic daily recommendations.              */}
         <div>
           <p
-            className="text-sm font-semibold mb-3"
-            style={{ color: T.white, fontFamily: 'var(--font-family)' }}
+            className="font-semibold mb-3"
+            style={{ fontSize: 'var(--type-size-body)', color: T.white, fontFamily: 'var(--font-family)' }}
           >
             Tagesplanung
           </p>
@@ -575,8 +575,9 @@ export default function StartseiteView({
 
                     {/* Status label */}
                     <p
-                      className="text-[11px] font-semibold uppercase tracking-wide flex-shrink-0 mr-1 hidden min-[360px]:block"
+                      className="font-semibold uppercase tracking-wide flex-shrink-0 mr-1 hidden min-[360px]:block"
                       style={{
+                        fontSize: 'var(--type-size-caption)',
                         color: BLOCK_STATUS_COLOR[block.status],
                         fontFamily: 'var(--font-family)',
                       }}
@@ -612,8 +613,8 @@ export default function StartseiteView({
         {/* to Planung just to check whether the rest of the week is safe.   */}
         <div className="pb-4">
           <p
-            className="text-sm font-semibold mb-3"
-            style={{ color: T.white, fontFamily: 'var(--font-family)' }}
+            className="font-semibold mb-3"
+            style={{ fontSize: 'var(--type-size-body)', color: T.white, fontFamily: 'var(--font-family)' }}
           >
             Wochenvorschau
           </p>
@@ -646,14 +647,15 @@ export default function StartseiteView({
 
                   <div className="flex-1 min-w-0">
                     <p
-                      className="text-sm font-medium"
-                      style={{ color: T.white, fontFamily: 'var(--font-family)' }}
+                      className="font-medium"
+                      style={{ fontSize: 'var(--type-size-body)', color: T.white, fontFamily: 'var(--font-family)' }}
                     >
                       {day.label}
                     </p>
                     <p
-                      className="text-[11px] leading-tight"
+                      className="leading-tight"
                       style={{
+                        fontSize: 'var(--type-size-body-sm)',
                         color:
                           day.status === 'umplanung'      ? T.criticalTint
                           : day.status === 'eingeschraenkt' ? T.iconWarning
@@ -667,14 +669,13 @@ export default function StartseiteView({
 
                   <div className="text-right flex-shrink-0 mr-1">
                     <p
-                      className="text-sm font-semibold"
-                      style={{ color: T.white, fontFamily: 'var(--font-family)' }}
+                      className="font-semibold"
+                      style={{ fontSize: 'var(--type-size-body)', color: T.white, fontFamily: 'var(--font-family)' }}
                     >
                       {day.temp.max}°
                     </p>
                     <p
-                      className="text-[11px]"
-                      style={{ color: T.n300, fontFamily: 'var(--font-family)' }}
+                      style={{ fontSize: 'var(--type-size-body-sm)', color: T.n300, fontFamily: 'var(--font-family)' }}
                     >
                       {day.temp.min}°
                     </p>
@@ -699,8 +700,8 @@ export default function StartseiteView({
                           style={{ backgroundColor: 'var(--neutral-400)' }}
                         />
                         <p
-                          className="text-[13px] leading-snug"
-                          style={{ color: 'var(--neutral-950)', fontFamily: 'var(--font-family)' }}
+                          className="leading-snug"
+                          style={{ fontSize: 'var(--type-size-body)', color: 'var(--neutral-950)', fontFamily: 'var(--font-family)' }}
                         >
                           {action}
                         </p>
@@ -713,20 +714,6 @@ export default function StartseiteView({
             })}
           </div>
 
-          {/* Explicit CTA to full PlanungView */}
-          <button
-            onClick={() => onNavigate('planung')}
-            className="mt-2 w-full flex items-center justify-center gap-1.5 py-3 rounded-xl transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]"
-            style={{ backgroundColor: T.n700 }}
-          >
-            <span
-              className="text-sm"
-              style={{ color: T.n300, fontFamily: 'var(--font-family)' }}
-            >
-              Vollständige Planung öffnen
-            </span>
-            <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: T.n400 }} strokeWidth={1.5} />
-          </button>
         </div>
 
       </div>{/* /max-w-5xl */}
