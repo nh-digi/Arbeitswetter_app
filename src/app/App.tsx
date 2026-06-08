@@ -64,12 +64,12 @@ export default function App() {
       ];
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--neutral-100)' }}>
       {/* Main Content */}
       <main className="flex-1 pb-20 md:pb-0">
-        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'heute'         && <HeuteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} onShowStartseite={() => setActiveView('startseite')} onShowOnboarding={() => setOnboardingOpen(true)} />}
         {activeView === 'planung'       && <PlanungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} activeLocation={activeOrt?.name ?? null} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} />}
-        {activeView === 'startseite'    && <StartseiteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} />}
+        {activeView === 'startseite'    && <StartseiteView onNavigate={setActiveView} activeLocation={activeOrt?.name ?? null} workStart={startZeit} workEnd={endZeit} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} onOpenSettings={() => setSettingsModalOpen(true)} onShowOnboarding={() => setOnboardingOpen(true)} />}
         {activeView === 'warnung'       && <WarnungView onNavigate={setActiveView} onOpenSettings={() => setSettingsModalOpen(true)} activeLocation={activeOrt?.name ?? null} schwere={SCHWERE_ARBEIT_LABEL[schwere]} bekleidung={BEKLEIDUNG_SHORT[bekleidung]} />}
         {activeView === 'einstellungen' && <EinstellungenView startZeit={startZeit} setStartZeit={setStartZeit} endZeit={endZeit} setEndZeit={setEndZeit} orte={orte} setOrte={setOrte} aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId} schwere={schwere} setSchwere={setSchwere} bekleidung={bekleidung} setBekleidung={setBekleidung} />}
       </main>

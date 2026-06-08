@@ -304,6 +304,7 @@ export default function StartseiteView({
   schwere,
   bekleidung,
   onOpenSettings,
+  onShowOnboarding,
 }: {
   onNavigate: (view: View) => void;
   activeLocation?: string | null;
@@ -312,6 +313,7 @@ export default function StartseiteView({
   schwere?: string;
   bekleidung?: string;
   onOpenSettings?: () => void;
+  onShowOnboarding?: () => void;
 }) {
   const [realtimeHour, setRealtimeHour] = useState(getRealHour);
   const [dwdWarningVisible, setDwdWarningVisible] = useState(true);
@@ -738,6 +740,36 @@ export default function StartseiteView({
         </div>
 
       </div>{/* /max-w-5xl */}
+
+      {/* ── DEV BUTTONS ─────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-center gap-2 py-4">
+        <button
+          onClick={() => setDwdWarningVisible(v => !v)}
+          title="DWD Banner anzeigen"
+          className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+          style={{ width: 32, height: 32, backgroundColor: 'var(--neutral-200)', flexShrink: 0 }}
+        >
+          <AlertTriangle className="w-4 h-4" strokeWidth={2} style={{ color: 'var(--neutral-600)' }} />
+        </button>
+        <button
+          onClick={() => onNavigate('heute')}
+          title="Heute-Ansicht öffnen"
+          className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+          style={{ width: 32, height: 32, backgroundColor: 'var(--neutral-200)', flexShrink: 0 }}
+        >
+          <Sun className="w-4 h-4" strokeWidth={1.5} style={{ color: 'var(--neutral-600)' }} />
+        </button>
+        {onShowOnboarding && (
+          <button
+            onClick={onShowOnboarding}
+            title="Onboarding starten"
+            className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+            style={{ width: 32, height: 32, backgroundColor: 'var(--neutral-200)', flexShrink: 0 }}
+          >
+            <User className="w-4 h-4" strokeWidth={1.5} style={{ color: 'var(--neutral-600)' }} />
+          </button>
+        )}
+      </div>
 
       {/* ── MODALS & TOASTS ─────────────────────────────────────────────── */}
       {showUndoToast && (

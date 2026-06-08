@@ -269,7 +269,7 @@ function getDayPeakHour(wStart: number, wEnd: number): number {
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
 
-export default function HeuteView({ onNavigate, activeLocation, workStart, workEnd, schwere, bekleidung, onOpenSettings }: {
+export default function HeuteView({ onNavigate, activeLocation, workStart, workEnd, schwere, bekleidung, onOpenSettings, onShowStartseite, onShowOnboarding }: {
   onNavigate: (view: View) => void;
   activeLocation?: string | null;
   workStart?: string;
@@ -277,6 +277,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   schwere?: string;
   bekleidung?: string;
   onOpenSettings?: () => void;
+  onShowStartseite?: () => void;
+  onShowOnboarding?: () => void;
 }) {
   const [realtimeHour, setRealtimeHour]   = useState(getRealHour);
   const [scrubbingHour, setScrubbingHour] = useState<number | null>(() => {
@@ -681,7 +683,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           : <AlertTriangle className="w-3.5 lg:w-5 h-3.5 lg:h-5" style={{ color: T.black }} strokeWidth={2} />;
     return (
       <div
-        className={`rounded-2xl overflow-hidden${mobile ? '' : ' flex items-center gap-2.5 lg:gap-4 p-2.5 lg:p-4'}`}
+        className={`overflow-hidden${mobile ? '' : ' rounded-2xl flex items-center gap-2.5 lg:gap-4 p-2.5 lg:p-4'}`}
         style={{ backgroundColor: status.alertBg, minHeight: mobile ? undefined : '60px' }}
       >
         {/* Status row */}
@@ -693,14 +695,14 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           <div className="flex-1 min-w-0">
             <p className="leading-snug mb-0.5 lg:mb-1"
               style={{ fontSize: mobile ? 14 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
-              {isPreShift && scrubbingHour !== null
+              {isPreShift && scrubbingHour !== null && Math.abs(scrubbingHour - wStart) < 0.25
                 ? `Schichtbeginn, ${formatHH(wStart)} Uhr`
                 : scrubbingHour !== null
                   ? status.alertTitle
                   : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
             </p>
             <p className="leading-snug"
-              style={{ fontSize: mobile ? 13 : 'var(--type-size-body)', lineHeight: mobile ? 1.3 : 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
+              style={{ fontSize: mobile ? 14 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
               {status.alertBody}
             </p>
           </div>
@@ -714,7 +716,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               onClick={() => setTrayOpen(o => !o)}
               className="flex items-center justify-between w-full px-3 py-2.5 transition-opacity active:opacity-60"
             >
-              <span style={{ fontSize: 13, fontWeight: 600, color: T.n100, fontFamily: 'var(--font-family)' }}>
+              <span style={{ fontSize: 13, fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
                 Empfehlungen · {status.label}
               </span>
               <div className="flex items-center gap-1.5">
@@ -741,8 +743,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               </div>
             </button>
             {trayOpen && (
-              <div ref={trayRef} className="px-2 pb-2 animate-slide-up">
-                <ActionsCard />
+              <div ref={trayRef} className="pb-3 animate-slide-up">
+                <ActionsCard dark />
               </div>
             )}
           </>
@@ -775,10 +777,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5">
                 <WeatherIcon size={compact ? 13 : 14} weight="regular" color={T.mutedFg} />
-                <span style={{ fontSize: compact ? 10 : 11, color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
-                  {isPreShift
-                    ? `${formatGermanDate(now)} · ${formatHH(h)} · Schicht ${formatHH(wStart)}`
-                    : `${formatGermanDate(now)} · ${formatHH(h)} Uhr`}
+                <span style={{ fontSize: compact ? 12 : 12, color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
+                  {`${formatGermanDate(now)} · ${formatHH(h)} Uhr`}
                 </span>
               </div>
               <ViewToggle compact={compact} />
@@ -846,8 +846,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
           style={{ padding: 0, background: 'none', border: 'none' }}
         >
-          <Edit3 size={compact ? 12 : 14} style={{ color: T.n600, flexShrink: 0 }} strokeWidth={1.5} />
-          <span style={{ fontSize: compact ? 12 : 14, color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Edit3 size={14} style={{ color: T.n600, flexShrink: 0 }} strokeWidth={1.5} />
+          <span style={{ fontSize: 14, color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
           </span>
         </button>
@@ -931,24 +931,12 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const ListBlocks = ({ compact = false }: { compact?: boolean }) => {
     return (
       <div className={compact ? 'mb-3' : 'mb-6'}>
-        {scrubbingHour !== null && (
-          <div className="flex items-center justify-end gap-2 px-1 mb-1.5">
-            <button
-              onClick={() => { if (returnTimer.current) clearTimeout(returnTimer.current); setScrubbingHour(null); }}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded transition-opacity hover:opacity-70"
-              style={{ color: T.n600, fontFamily: 'var(--font-family)', fontSize: 11, fontWeight: 500 }}
-            >
-              <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
-              Zurück zu jetzt
-            </button>
-          </div>
-        )}
-
-        {timeBlocks.filter(b => b.level >= 2).map((block, i) => {
+        {timeBlocks.map((block, i) => {
           const origIdx    = timeBlocks.indexOf(block);
           const isActive   = origIdx === activeBlockIdx;
           const isNow      = origIdx === nowIdx;
-          const isExpanded = compact && listExpandedIdx === origIdx;
+          const isSingle   = timeBlocks.length === 1;
+          const isExpanded = compact && (listExpandedIdx === origIdx || isSingle);
 
           const getActionsForLevel = (level: number) => {
             if (level >= 4) return ACTIONS_L4;
@@ -1025,14 +1013,15 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                   }
                 </div>
 
-                {compact ? (
+                {compact && !isSingle && (
                   <ChevronDown
                     className="flex-shrink-0 transition-transform"
                     style={{ color: isActive ? T.n600 : T.n300, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
                     strokeWidth={1.5}
                     size={16}
                   />
-                ) : (
+                )}
+                {!compact && !isSingle && (
                   <ChevronRight
                     className="flex-shrink-0"
                     style={{ color: isActive ? T.n600 : T.n300 }}
@@ -1050,28 +1039,43 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                       const isActionOpen = listOpenActionIdx === j;
                       return (
                         <div key={j} className={j > 0 ? 'border-t' : ''} style={{ borderColor: T.n100 }}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setListOpenActionIdx(isActionOpen ? null : j);
-                            }}
-                            className="w-full flex items-center gap-2.5 py-2 text-left min-h-[44px] transition-opacity hover:opacity-75"
-                          >
-                            <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                              style={{ width: 24, height: 24, backgroundColor: T.n100 }}>
-                              <Icon className="w-3 h-3" style={{ color: T.n600 }} strokeWidth={1.5} />
+                          {isSingle ? (
+                            <div className="flex items-center gap-2.5 py-2 min-h-[44px]">
+                              <div className="flex items-center justify-center rounded-lg flex-shrink-0"
+                                style={{ width: 24, height: 24, backgroundColor: T.n100 }}>
+                                <Icon className="w-3 h-3" style={{ color: T.n600 }} strokeWidth={1.5} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm leading-snug" style={{ color: T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
+                                <p className="text-sm leading-relaxed mt-0.5" style={{ color: T.n600, fontFamily: 'var(--font-family)' }}>{item.long}</p>
+                              </div>
                             </div>
-                            <p className="flex-1 text-sm leading-snug" style={{ color: T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
-                            <ChevronDown
-                              className="w-3.5 h-3.5 flex-shrink-0 transition-transform"
-                              style={{ color: T.n400, transform: isActionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                              strokeWidth={1.5}
-                            />
-                          </button>
-                          {isActionOpen && (
-                            <p className="text-sm leading-relaxed pb-2" style={{ color: T.n600, fontFamily: 'var(--font-family)' }}>
-                              {item.long}
-                            </p>
+                          ) : (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setListOpenActionIdx(isActionOpen ? null : j);
+                                }}
+                                className="w-full flex items-center gap-2.5 py-2 text-left min-h-[44px] transition-opacity hover:opacity-75"
+                              >
+                                <div className="flex items-center justify-center rounded-lg flex-shrink-0"
+                                  style={{ width: 24, height: 24, backgroundColor: T.n100 }}>
+                                  <Icon className="w-3 h-3" style={{ color: T.n600 }} strokeWidth={1.5} />
+                                </div>
+                                <p className="flex-1 text-sm leading-snug" style={{ color: T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
+                                <ChevronDown
+                                  className="w-3.5 h-3.5 flex-shrink-0 transition-transform"
+                                  style={{ color: T.n400, transform: isActionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                  strokeWidth={1.5}
+                                />
+                              </button>
+                              {isActionOpen && (
+                                <p className="text-sm leading-relaxed pb-2" style={{ color: T.n600, fontFamily: 'var(--font-family)' }}>
+                                  {item.long}
+                                </p>
+                              )}
+                            </>
                           )}
                         </div>
                       );
@@ -1162,28 +1166,31 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
   // ── Actions card (light) ──────────────────────────────────────────────────
 
-  const ActionsCard = () => {
+  const ActionsCard = ({ dark = false }: { dark?: boolean }) => {
     const [openIdx, setOpenIdx] = useState<number | null>(null);
     const items = getActionItems();
     const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
     return (
-      <div ref={actionsCardRef} className="rounded-[16px] overflow-hidden scroll-mt-4" style={{ backgroundColor: T.n50 }}>
-        <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4">
+      <div ref={actionsCardRef} className={dark ? 'scroll-mt-4' : 'rounded-[16px] overflow-hidden scroll-mt-4'} style={dark ? undefined : { backgroundColor: T.n50 }}>
+        <div className={dark ? 'px-3 pt-2 pb-2' : 'px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4'}>
           {/* Period chip */}
           {rangeLabel && (
             <div className="inline-flex items-center px-2.5 py-1 rounded-full mb-2"
-              style={{ backgroundColor: T.n100 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: T.n800, fontFamily: 'var(--font-family)' }}>
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: dark ? T.n100 : T.n800, fontFamily: 'var(--font-family)' }}>
                 {rangeLabel} · {status.label}
               </span>
             </div>
           )}
-          <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
-            Handlungsempfehlungen für diesen Zeitraum
-          </p>
+          {/* Headline — hidden in dark/mobile tray (redundant with banner) */}
+          {!dark && (
+            <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
+              Handlungsempfehlungen für diesen Zeitraum
+            </p>
+          )}
           {/* Factor pills — below headline */}
           {getFactors().length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
               {getFactors().map((f) => (
                 <FactorChip key={f} kind={f} />
               ))}
@@ -1193,24 +1200,24 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             const Icon = CATEGORY_ICON[item.cat];
             const isOpen = openIdx === i;
             return (
-              <div key={i} className={i > 0 ? 'border-t' : ''} style={{ borderColor: T.n100 }}>
+              <div key={i} className={i > 0 ? 'border-t' : ''} style={{ borderColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
                 <button
                   onClick={() => setOpenIdx(isOpen ? null : i)}
                   className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-2.5 text-left min-h-[44px] transition-opacity hover:opacity-75"
                 >
                   <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                    style={{ width: 24, height: 24, backgroundColor: T.n100 }}>
-                    <Icon className="w-3 h-3" style={{ color: T.n600 }} strokeWidth={1.5} />
+                    style={{ width: 24, height: 24, backgroundColor: dark ? 'rgba(255,255,255,0.12)' : T.n100 }}>
+                    <Icon className="w-3 h-3" style={{ color: dark ? T.n300 : T.n600 }} strokeWidth={1.5} />
                   </div>
-                  <p className="flex-1 text-sm lg:text-base leading-snug" style={{ color: T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
+                  <p className="flex-1 text-sm lg:text-base leading-snug" style={{ color: dark ? T.white : T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
                   <ChevronDown
                     className="w-3.5 h-3.5 flex-shrink-0 transition-transform"
-                    style={{ color: T.n400, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    style={{ color: dark ? T.n300 : T.n400, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                     strokeWidth={1.5}
                   />
                 </button>
                 {isOpen && (
-                  <p className="text-sm lg:text-base leading-relaxed pb-2 lg:pb-3" style={{ color: T.n600, fontFamily: 'var(--font-family)' }}>
+                  <p className="text-sm lg:text-base leading-relaxed pb-2 lg:pb-3" style={{ color: dark ? T.n200 : T.n600, fontFamily: 'var(--font-family)' }}>
                     {item.long}
                   </p>
                 )}
@@ -1503,6 +1510,36 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               Die angezeigten Werte sind Richtwerte und sollten mit den tatsächlichen Bedingungen vor Ort
               abgeglichen werden. Bei kritischen Situationen kontaktieren Sie bitte Ihre Arbeitsschutzbeauftragten.
             </p>
+            <div className="flex items-center gap-2 mt-3 pt-3" style={{ borderTop: `1px solid ${T.n600}` }}>
+                <button
+                  onClick={() => setDwdWarningVisible(v => !v)}
+                  title="DWD Banner anzeigen"
+                  className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+                  style={{ width: 32, height: 32, backgroundColor: T.n600, flexShrink: 0 }}
+                >
+                  <AlertTriangle className="w-4 h-4" style={{ color: T.warning }} strokeWidth={2} />
+                </button>
+                {onShowStartseite && (
+                  <button
+                    onClick={onShowStartseite}
+                    title="Alternativansicht öffnen"
+                    className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+                    style={{ width: 32, height: 32, backgroundColor: T.n600, flexShrink: 0 }}
+                  >
+                    <Sun className="w-4 h-4" style={{ color: T.n200 }} strokeWidth={1.5} />
+                  </button>
+                )}
+                {onShowOnboarding && (
+                  <button
+                    onClick={onShowOnboarding}
+                    title="Onboarding starten"
+                    className="flex items-center justify-center rounded-full transition-opacity hover:opacity-70 active:opacity-50"
+                    style={{ width: 32, height: 32, backgroundColor: T.n600, flexShrink: 0 }}
+                  >
+                    <User className="w-4 h-4" style={{ color: T.n200 }} strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
           </div>
         )}
       </div>
@@ -1601,7 +1638,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
         {/* Main card */}
         <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden">
+          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden" style={{ border: '1px solid #C8CDD4' }}>
             <CardHeader compact tiny={isTinyScreen} />
             <div className="w-full">
               {mobileView === 'clock' && (
@@ -1612,7 +1649,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               {mobileView === 'list' && <ListBlocks compact />}
             </div>
             <DaySummary />
-            {mobileView === 'clock' && <AlertBanner mobile />}
+            {mobileView === 'clock' && (
+              <div className="-mx-4 -mb-3 min-[390px]:-mb-4">
+                <AlertBanner mobile />
+              </div>
+            )}
           </div>
         </div>
 
