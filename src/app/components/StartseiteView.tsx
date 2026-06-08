@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import { CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
 import {
   AlertTriangle, AlertCircle, CheckCircle,
-  Thermometer, Droplet, Wind, Sun,
+  Thermometer, Droplet, Wind, Sun, Clock,
   ChevronDown, ChevronRight,
   Wrench, ClipboardList, User,
 } from 'lucide-react';
@@ -203,13 +203,14 @@ interface WeekDay {
   label: string;
   status: DayStatus;
   temp: { min: number; max: number };
+  criticalWindow?: string;
   actions: string[];
 }
 
 const WEEK_DAYS: WeekDay[] = [
-  { label: 'Heute',       status: 'umplanung',      temp: { min: 18, max: 36 }, actions: ['Außenarbeiten möglichst vermeiden', 'Verlängerte Pausen einhalten', 'Ausreichend Trinkwasser', 'Schattenplätze nutzen'] },
-  { label: 'Di, 6. Mai',  status: 'eingeschraenkt', temp: { min: 22, max: 34 }, actions: ['Schwere Arbeiten bis 12 Uhr abschließen', 'Leichte Tätigkeiten am Nachmittag', 'Regelmäßige Pausen empfohlen'] },
-  { label: 'Mi, 7. Mai',  status: 'umplanung',      temp: { min: 24, max: 36 }, actions: ['Außenarbeiten möglichst vermeiden', 'Schattenplätze nutzen', 'Verlängerte Pausen einhalten', 'Ausreichend Trinkwasser'] },
+  { label: 'Heute',       status: 'umplanung',      temp: { min: 18, max: 36 }, criticalWindow: '12:00 – 17:00 Uhr', actions: ['Außenarbeiten möglichst vermeiden', 'Verlängerte Pausen einhalten', 'Ausreichend Trinkwasser', 'Schattenplätze nutzen'] },
+  { label: 'Di, 6. Mai',  status: 'eingeschraenkt', temp: { min: 22, max: 34 }, criticalWindow: '12:00 – 16:00 Uhr', actions: ['Schwere Arbeiten bis 12 Uhr abschließen', 'Leichte Tätigkeiten am Nachmittag', 'Regelmäßige Pausen empfohlen'] },
+  { label: 'Mi, 7. Mai',  status: 'umplanung',      temp: { min: 24, max: 36 }, criticalWindow: '10:00 – 17:00 Uhr', actions: ['Außenarbeiten möglichst vermeiden', 'Schattenplätze nutzen', 'Verlängerte Pausen einhalten', 'Ausreichend Trinkwasser'] },
   { label: 'Fr, 9. Mai',  status: 'gut',            temp: { min: 20, max: 28 }, actions: ['Normale Außenarbeiten möglich', 'Regelmäßige Pausen empfohlen'] },
   { label: 'Sa, 10. Mai', status: 'gut',            temp: { min: 18, max: 26 }, actions: ['Normale Außenarbeiten möglich', 'Ausreichend Trinkwasser empfohlen'] },
 ];
@@ -690,6 +691,26 @@ export default function StartseiteView({
 
                 {isDayOpen && (
                   <div className="mx-3 mb-3 rounded-xl overflow-hidden bg-white">
+                    {day.criticalWindow && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-neutral-100">
+                        <Clock
+                          className="w-3 h-3 flex-shrink-0 text-black"
+                          strokeWidth={2}
+                        />
+                        <p
+                          className="text-xs font-semibold text-black"
+                          style={{ fontFamily: 'var(--font-family)' }}
+                        >
+                          {day.criticalWindow}
+                        </p>
+                        <p
+                          className="text-xs text-black/50"
+                          style={{ fontFamily: 'var(--font-family)' }}
+                        >
+                          {day.status === 'umplanung' ? 'Kritisch' : 'Eingeschränkt'}
+                        </p>
+                      </div>
+                    )}
                     {day.actions.map((action, ai) => (
                       <div
                         key={ai}

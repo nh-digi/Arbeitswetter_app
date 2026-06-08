@@ -48,15 +48,15 @@ const SCHICHT_PRESETS: Record<Schicht, { start: string; end: string }> = {
 };
 
 const SCHWERE_OPTIONS: { id: Schwere; label: string; sub: string; Icon: React.ElementType }[] = [
-  { id: 'leicht', label: 'Leichte Arbeit',  sub: 'Für leichte Tätigkeiten, z. B. Inspektionen',        Icon: Eye        },
-  { id: 'mittel', label: 'Mittlere Arbeit', sub: 'Mittel für typische körperliche Arbeit',              Icon: HardHat    },
-  { id: 'schwer', label: 'Schwere Arbeit',  sub: 'Für schwere körperliche Arbeit, z. B. Bauarbeiten',  Icon: ShieldCheck },
+  { id: 'leicht', label: 'Leichte Arbeit',  sub: 'Stehen, Gehen, Kontrolle, leichte Montagearbeiten',  Icon: Eye        },
+  { id: 'mittel', label: 'Mittlere Arbeit', sub: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten', Icon: HardHat    },
+  { id: 'schwer', label: 'Schwere Arbeit',  sub: 'Schaufeln, Graben, schwere Hebe- und Tragearbeiten', Icon: ShieldCheck },
 ];
 
 const BEKLEIDUNG_OPTIONS: { id: Bekleidung; label: string; sub: string; Icon: React.ElementType }[] = [
-  { id: 'leicht', label: 'Leichte Kleidung', sub: 'T-Shirt, dünne Hose',                      Icon: Shirt      },
-  { id: 'mittel', label: 'Arbeitskleidung',  sub: 'Arbeitshose, Hemd',                          Icon: HardHat    },
-  { id: 'schwer', label: 'Schutzausrüstung', sub: 'Warnweste, Helm, Sicherheitsschuhe',         Icon: ShieldCheck },
+  { id: 'leicht', label: 'Leichte Kleidung',      sub: 'Atmungsaktiv, z. B. T-Shirt, Baumwoll-Arbeitshose',         Icon: Shirt      },
+  { id: 'mittel', label: 'Arbeitskleidung',        sub: 'Typische Arbeitskleidung, z. B. Hemd, Arbeitshose',          Icon: HardHat    },
+  { id: 'schwer', label: 'Schwere Schutzkleidung', sub: 'Warnschutzoverall, Wetterschutzanzug, Schutzausrüstung',     Icon: ShieldCheck },
 ];
 
 const SCHWERE_LABEL: Record<Schwere, string> = {
@@ -364,7 +364,7 @@ export default function OnboardingFlow({
             Willkommen bei<br />Arbeitswetter
           </h1>
           <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
-            Hitze- und UV-Schutz für Ihre Arbeit im Freien. Richten Sie Ihr Arbeitsprofil in wenigen Schritten ein.
+            Schutz vor Hitze und UV für die Arbeit draußen. Profil in wenigen Schritten einrichten.
           </p>
         </div>
       </div>
@@ -377,14 +377,14 @@ export default function OnboardingFlow({
           <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Standort</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wo arbeiten Sie?</h2>
-        <p className="text-sm text-muted-foreground mt-1">Für genaue lokale Vorhersagen und Warnungen.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wo wird gearbeitet?</h2>
+        <p className="text-sm text-muted-foreground mt-1">Für lokale Wettervorhersagen und Unwetterwarnungen.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-black/[0.06]">
         <div className="relative p-4">
           <label className="block text-sm font-semibold text-black mb-3" htmlFor="ob-ort-suche">
-            Arbeitsort suchen
+            Einsatzort suchen
           </label>
           <div className={`bg-neutral-100 border rounded-xl transition-all ${
             suchFokus ? 'border-[#325cda] bg-white shadow-[0_0_0_3px_rgba(50,92,218,0.12)]' : 'border-transparent'
@@ -474,8 +474,8 @@ export default function OnboardingFlow({
           <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wie schwer ist Ihre Arbeit?</h2>
-        <p className="text-sm text-muted-foreground mt-1">Beeinflusst die Beurteilungstemperatur.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wie schwer ist die Arbeit?</h2>
+        <p className="text-sm text-muted-foreground mt-1">Bestimmt die Hitzebelastung Ihrer Mitarbeiter.</p>
       </div>
       <div className="space-y-2.5">
         {SCHWERE_OPTIONS.map(opt => (
@@ -499,8 +499,8 @@ export default function OnboardingFlow({
           <Shirt className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Welche Kleidung tragen Sie?</h2>
-        <p className="text-sm text-muted-foreground mt-1">Schwere Kleidung erhöht die Wärmebelastung.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Welche Kleidung wird getragen?</h2>
+        <p className="text-sm text-muted-foreground mt-1">Schwere Kleidung erhöht die Hitzebelastung.</p>
       </div>
       <div className="space-y-2.5">
         {BEKLEIDUNG_OPTIONS.map(opt => (
@@ -524,8 +524,8 @@ export default function OnboardingFlow({
           <Clock className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitszeiten</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wann arbeiten Sie?</h2>
-        <p className="text-sm text-muted-foreground mt-1">Frühschichten reduzieren die Hitzebelastung.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wann wird gearbeitet?</h2>
+        <p className="text-sm text-muted-foreground mt-1">Frühschichten sind besser bei Hitze.</p>
       </div>
       <div className="bg-white rounded-2xl border border-black/[0.06] p-4 space-y-4">
         {/* Shift chips */}
@@ -595,15 +595,15 @@ export default function OnboardingFlow({
             />
           </label>
         </div>
-        <p className="text-xs text-muted-foreground">Frühere Arbeitszeiten werden bei Hitze empfohlen</p>
+        <p className="text-xs text-muted-foreground">Frühere Schichten schützen Ihre Mitarbeiter bei Hitze</p>
       </div>
     </div>,
 
     // 5 — Zusammenfassung
     <div key="summary" className="flex-1 flex flex-col justify-center space-y-4 py-4">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-black">Ihre Einstellungen</h2>
-        <p className="text-sm text-muted-foreground mt-1">Alles korrekt? Sie können jederzeit in den Einstellungen anpassen.</p>
+        <h2 className="text-xl font-semibold tracking-tight text-black">Ihr Arbeitsprofil</h2>
+        <p className="text-sm text-muted-foreground mt-1">Stimmt alles? Sie können die Einstellungen jederzeit ändern.</p>
       </div>
       <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-black/[0.05]">
         {/* Location */}
@@ -632,13 +632,13 @@ export default function OnboardingFlow({
         </div>
       </div>
       <p className="text-xs text-center text-muted-foreground px-4">
-        Alle Werte sind bereits aktiv. Sie können alles jederzeit unter <span className="font-medium text-black/60">Einstellungen</span> ändern.
+        Alle Werte sind aktiv. Änderungen jederzeit unter <span className="font-medium text-black/60">Einstellungen</span>.
       </p>
     </div>,
   ];
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const ctaLabel   = step === 0 ? 'Einrichtung starten' : isLastStep ? 'App starten' : 'Weiter';
+  const ctaLabel   = step === 0 ? 'Profil einrichten' : isLastStep ? 'App starten' : 'Weiter';
   const showSkip   = step === 1; // location step only
 
   // ── Layout ──────────────────────────────────────────────────────────────────

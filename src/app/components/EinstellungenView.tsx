@@ -43,15 +43,15 @@ const SCHICHT_PRESETS: Record<Schicht, { start: string; end: string }> = {
 };
 
 const SCHWERE_LABEL: Record<Schwere, string> = {
-  leicht: 'Für leichte Tätigkeiten, z. B. Inspektionen',
-  mittel: 'Mittel für typische körperliche Arbeit',
-  schwer: 'Für schwere körperliche Arbeit, z. B. Bauarbeiten',
+  leicht: 'Stehen, Gehen, Kontrolle, leichte Montagearbeiten',
+  mittel: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten',
+  schwer: 'Schaufeln, Graben, schwere Hebe- und Tragearbeiten',
 };
 
 const BEKLEIDUNG_LABEL: Record<Bekleidung, string> = {
-  leicht: 'Leichte Arbeitskleidung, z. B. T-Shirt und dünne Hose',
-  mittel: 'Typische Arbeitskleidung, z. B. Arbeitshose und Hemd',
-  schwer: 'Schwere Schutzkleidung, z. B. Warnweste, Helm, Sicherheitsschuhe',
+  leicht: 'Atmungsaktive Bekleidung, z. B. T-Shirt, Baumwoll-Arbeitshose',
+  mittel: 'Typische Arbeitskleidung, z. B. Hemd, Arbeitshose (Baumwoll-Mix)',
+  schwer: 'Schwere Schutzkleidung, z. B. Warnschutzoverall, Wetterschutzanzug',
 };
 
 const UMGEBUNG_OPTIONS: { id: Umgebung; label: string; sub: string; Icon: React.ElementType }[] = [
@@ -375,7 +375,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
             {/* Search field + dropdown */}
             <div className="relative p-4 md:p-6" ref={dropdownRef}>
               <label className="block text-sm font-semibold text-black mb-3" htmlFor="ort-suche">
-                Arbeitsort suchen
+                Einsatzort suchen
               </label>
               <div className={`bg-neutral-100 border rounded-xl transition-all ${
                 suchFokus ? 'border-[#325cda] bg-white shadow-[0_0_0_3px_rgba(50,92,218,0.12)]' : 'border-transparent'
@@ -680,7 +680,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
               </div>
 
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Frühere Arbeitszeiten werden bei Hitze empfohlen
+                Frühere Schichten schützen Ihre Mitarbeiter bei Hitze
               </p>
             </div>
 
