@@ -769,7 +769,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           : 'Gut planbar heute';
 
     return (
-      <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: tiny ? 2 : compact ? 3 : 5 }}>
+      <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: tiny ? 2 : compact ? 2 : 5 }}>
 
         {/* Row 0: weather icon + date · time (left) · ViewToggle on right when compact */}
         {(() => {
@@ -1616,7 +1616,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
         {/* Main card */}
         <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-3 overflow-hidden">
+          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden min-h-[calc(100dvh-5rem)]">
             <CardHeader compact tiny={isTinyScreen} />
             <div className="w-full">
               {mobileView === 'clock' && (
