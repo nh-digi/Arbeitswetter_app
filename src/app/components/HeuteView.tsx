@@ -336,7 +336,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   useEffect(() => {
     if (trayOpen) {
       requestAnimationFrame(() => {
-        trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
   }, [trayOpen]);
@@ -741,7 +741,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               </div>
             </button>
             {trayOpen && (
-              <div ref={trayRef} className="px-2 pb-2">
+              <div ref={trayRef} className="px-2 pb-2 animate-slide-up">
                 <ActionsCard />
               </div>
             )}
