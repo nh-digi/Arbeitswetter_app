@@ -35,7 +35,7 @@ export default function PageHeader({
   const LocationButton = () => (
     <button
       onClick={handleOpenSettings}
-      className="inline-flex items-center gap-2 rounded-2xl px-3 md:px-5 py-2 md:py-3.5 h-9 md:h-[52px] border transition-all duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 md:flex-initial overflow-hidden"
+      className="inline-flex items-center gap-2 rounded-2xl px-3 md:px-4 py-2 md:py-2 h-9 md:h-10 border transition-all duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 md:flex-initial overflow-hidden"
       style={{
         backgroundColor: isDark ? 'var(--neutral-800)' : 'var(--muted)',
         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'transparent',
@@ -47,7 +47,7 @@ export default function PageHeader({
         style={{ color: isDark ? '#E2E8F0' : 'var(--muted-foreground)' }}
       />
       <span
-        className="text-xs md:text-sm truncate"
+        className="text-xs md:text-[15px] truncate"
         style={{
           color: isDark ? '#E2E8F0' : 'var(--muted-foreground)',
           fontFamily: 'var(--font-family)'
@@ -60,7 +60,7 @@ export default function PageHeader({
 
   return (
     <div
-      className="px-4 md:px-8 py-4 md:py-8"
+      className="px-4 md:px-8 py-3 md:py-5"
       style={{ backgroundColor: isDark ? 'var(--neutral-black)' : 'transparent' }}
     >
       <div className="max-w-5xl mx-auto">

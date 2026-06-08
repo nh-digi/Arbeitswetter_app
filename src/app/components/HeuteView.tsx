@@ -747,11 +747,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             )}
           </>
         )}
-        {mobile && status.level === 1 && (
-          <p style={{ fontSize: 13, color: T.n300, fontFamily: 'var(--font-family)', padding: '2px 12px 10px', lineHeight: 1.4 }}>
-            Heute keine besonderen Schutzmaßnahmen erforderlich.
-          </p>
-        )}
       </div>
     );
   };
@@ -769,7 +764,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           : 'Gut planbar heute';
 
     return (
-      <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: tiny ? 2 : compact ? 2 : 5 }}>
+      <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: tiny ? 2 : compact ? 5 : 7 }}>
 
         {/* Row 0: weather icon + date · time (left) · ViewToggle on right when compact */}
         {(() => {
@@ -791,8 +786,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           );
         })()}
 
-        {/* Row 1: day-level headline + Außer Dienst badge inline */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Row 1: day-level headline */}
+        <div className="flex items-center gap-2">
           {compact ? (
             <h1 style={{
               fontSize: tiny ? 16 : 18,
@@ -819,6 +814,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               {dayLabel}
             </h1>
           )}
+        </div>
+
+        {/* Row 2: peak temp badge + Außer Dienst badge */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+            style={{ backgroundColor: dayPeakStatus.badgeBg }}>
+            <span style={{ fontSize: compact ? 12 : 13, fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
+              {dayPeakStatus.beurteilungstemperatur}°C max.
+            </span>
+          </div>
           {isOutsideWork && (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0"
               style={{ backgroundColor: 'var(--brand-tint)' }}>
@@ -834,32 +839,18 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           )}
         </div>
 
-        {/* Row 2: peak temp badge (left) · settings button (right, aligned) */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: dayPeakStatus.badgeBg }}>
-
-            <span style={{ fontSize: compact ? 12 : 13, fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
-              {dayPeakStatus.beurteilungstemperatur}°C max.
-            </span>
-          </div>
-          <button
-            onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
-            className="relative z-10 inline-flex items-center gap-1.5 rounded-lg transition-all cursor-pointer min-w-0 max-w-[55%]
-              hover:bg-neutral-100 hover:border-neutral-400
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
-            style={{
-              padding: compact ? '5px 8px' : '4px 10px',
-              backgroundColor: 'transparent',
-              border: `1px solid ${T.n300}`,
-            }}
-          >
-            <Edit3 size={compact ? 11 : 12} style={{ color: T.mutedFg, flexShrink: 0 }} strokeWidth={1.5} />
-            <span style={{ fontSize: compact ? 10 : 11, color: T.mutedFg, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-              {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
-            </span>
-          </button>
-        </div>
+        {/* Row 3: settings — plain text link, full width, no button chrome */}
+        <button
+          onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
+          className="inline-flex items-center gap-1.5 w-full transition-opacity hover:opacity-60 cursor-pointer
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
+          style={{ padding: 0, background: 'none', border: 'none' }}
+        >
+          <Edit3 size={compact ? 12 : 14} style={{ color: T.n600, flexShrink: 0 }} strokeWidth={1.5} />
+          <span style={{ fontSize: compact ? 12 : 14, color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
+          </span>
+        </button>
       </div>
     );
   };
@@ -970,10 +961,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           </div>
         )}
 
-        {timeBlocks.map((block, i) => {
-          const isActive   = i === activeBlockIdx;
-          const isNow      = i === nowIdx;
-          const isExpanded = compact && listExpandedIdx === i;
+        {timeBlocks.filter(b => b.level >= 2).map((block, i) => {
+          const origIdx    = timeBlocks.indexOf(block);
+          const isActive   = origIdx === activeBlockIdx;
+          const isNow      = origIdx === nowIdx;
+          const isExpanded = compact && listExpandedIdx === origIdx;
 
           const getActionsForLevel = (level: number) => {
             if (level >= 4) return ACTIONS_L4;
@@ -983,16 +975,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           };
 
           return (
-            <div key={i}>
+            <div key={origIdx}>
               <button
                 onClick={() => {
                   if (returnTimer.current) clearTimeout(returnTimer.current);
                   setScrubbingHour(block.startH);
                   if (compact) {
-                    if (listExpandedIdx === i) {
+                    if (listExpandedIdx === origIdx) {
                       setListExpandedIdx(null);
                     } else {
-                      setListExpandedIdx(i);
+                      setListExpandedIdx(origIdx);
                       setListOpenActionIdx(null);
                     }
                   } else {
@@ -1018,16 +1010,20 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                       </span>
                     )}
                   </div>
-                  <p className="leading-tight"
-                    style={{
-                      fontSize: 'var(--type-size-body)',
-                      fontWeight: isActive ? 600 : block.level >= 3 ? 600 : 500,
-                      color: T.n950,
-                      fontFamily: 'var(--font-family)',
-                    }}>
-                    {block.label}
-                  </p>
-                  <p className="mt-0.5" style={{ fontSize: 'var(--type-size-body-sm)', color: T.n500, fontFamily: 'var(--font-family)' }}>{block.sublabel}</p>
+                  {block.level >= 2 && (
+                    <p className="leading-tight"
+                      style={{
+                        fontSize: 'var(--type-size-body)',
+                        fontWeight: isActive ? 600 : block.level >= 3 ? 600 : 500,
+                        color: T.n950,
+                        fontFamily: 'var(--font-family)',
+                      }}>
+                      {block.label}
+                    </p>
+                  )}
+                  {block.level >= 2 && (
+                    <p className="mt-0.5" style={{ fontSize: 'var(--type-size-body-sm)', color: T.n500, fontFamily: 'var(--font-family)' }}>{block.sublabel}</p>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-center flex-shrink-0 rounded-full"
@@ -1577,11 +1573,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       )}
 
       {/* ── DESKTOP ──────────────────────────────────────────────────────── */}
-      <div className="hidden lg:block p-8 pt-12 max-w-7xl mx-auto">
+      <div className="hidden lg:block p-6 pt-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-12 gap-6">
 
           {/* Clock card */}
-          <div className="col-span-7 self-start bg-card rounded-[24px] shadow-lg p-8 flex flex-col gap-3.5">
+          <div className="col-span-7 self-start bg-card rounded-[24px] shadow-lg p-6 flex flex-col gap-3">
             <CardHeader />
             <div className="w-full">
               {mobileView === 'clock' && (
