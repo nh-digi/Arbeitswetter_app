@@ -4,10 +4,11 @@ import {
   Search, LocateFixed, Shirt, ShieldCheck, Eye,
   Sunrise, Sun, Moon,
 } from 'lucide-react';
-
-type Schwere    = 'leicht' | 'mittel' | 'schwer';
-type Bekleidung = 'leicht' | 'mittel' | 'schwer';
-type Schicht    = 'früh' | 'tag' | 'nacht';
+import {
+  type Schwere, type Bekleidung, type Schicht,
+  SCHICHT_PRESETS, SCHICHT_LABEL, SCHWERE_LABEL, BEKLEIDUNG_LABEL,
+  SCHWERE_SHORT, BEKLEIDUNG_SHORT,
+} from '../constants/workProfile';
 
 interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 interface OrtVorschlag { id: string; name: string; region: string; lat: number; lng: number; }
@@ -41,12 +42,6 @@ const MOCK_VORSCHLÄGE: OrtVorschlag[] = [
   { id: 'flensburg',      name: 'Flensburg',      region: 'S-H',     lat: 54.7833, lng: 9.4333  },
 ];
 
-const SCHICHT_PRESETS: Record<Schicht, { start: string; end: string }> = {
-  früh:  { start: '05:00', end: '13:00' },
-  tag:   { start: '06:00', end: '14:00' },
-  nacht: { start: '22:00', end: '06:00' },
-};
-
 const SCHWERE_OPTIONS: { id: Schwere; label: string; sub: string; Icon: React.ElementType }[] = [
   { id: 'leicht', label: 'Leichte Arbeit',  sub: 'Stehen, Gehen, Kontrolle, leichte Montagearbeiten',  Icon: Eye        },
   { id: 'mittel', label: 'Mittlere Arbeit', sub: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten', Icon: HardHat    },
@@ -59,23 +54,7 @@ const BEKLEIDUNG_OPTIONS: { id: Bekleidung; label: string; sub: string; Icon: Re
   { id: 'schwer', label: 'Schwere Schutzkleidung', sub: 'Warnschutzoverall, Wetterschutzanzug, Schutzausrüstung',     Icon: ShieldCheck },
 ];
 
-const SCHWERE_LABEL: Record<Schwere, string> = {
-  leicht: 'Leichte Arbeit',
-  mittel: 'Mittlere Arbeit',
-  schwer: 'Schwere Arbeit',
-};
 
-const BEKLEIDUNG_LABEL: Record<Bekleidung, string> = {
-  leicht: 'Leichte Kleidung',
-  mittel: 'Arbeitskleidung',
-  schwer: 'Schutzausrüstung',
-};
-
-const SCHICHT_LABEL: Record<Schicht, string> = {
-  früh:  'Frühschicht',
-  tag:   'Tagschicht',
-  nacht: 'Nachtschicht',
-};
 
 // ── Shared UI classes (same as EinstellungenView) ─────────────────────────────
 const SEL   = 'bg-[#eef2fd] text-[#1d3fa3] border-[#325cda]/40';
@@ -364,7 +343,7 @@ export default function OnboardingFlow({
             Willkommen bei<br />Arbeitswetter
           </h1>
           <p className="text-[15px] text-muted-foreground leading-relaxed max-w-xs mx-auto">
-            Schutz vor Hitze und UV für die Arbeit draußen. Profil in wenigen Schritten einrichten.
+            Wetterschutz für die Arbeit draußen – Hitze, Kälte, UV und mehr. Profil in wenigen Schritten einrichten.
           </p>
         </div>
       </div>
@@ -418,7 +397,7 @@ export default function OnboardingFlow({
 
           {/* Dropdown */}
           {showDropdown && (
-            <div className="absolute left-4 right-4 bg-white border border-[#325cda] border-t-black/[0.06] rounded-b-xl shadow-lg divide-y divide-black/[0.05] overflow-hidden z-10">
+            <div className="absolute left-4 right-4 bg-white border border-[#325cda] border-t-black/[0.06] rounded-b-xl shadow-lg divide-y divide-black/[0.05] overflow-y-auto max-h-[260px] z-10">
               <button
                 onMouseDown={e => e.preventDefault()}
                 onClick={handleGPS}
@@ -616,19 +595,24 @@ export default function OnboardingFlow({
         <div className="flex items-center gap-3 px-4 py-3.5">
           <HardHat className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
           <span className="text-sm text-black flex-1">Arbeitsschwere</span>
-          <ValueChip label={SCHWERE_LABEL[schwere]} />
+          <ValueChip label={SCHWERE_SHORT[schwere]} />
         </div>
         {/* Bekleidung */}
         <div className="flex items-center gap-3 px-4 py-3.5">
           <Shirt className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
           <span className="text-sm text-black flex-1">Kleidung</span>
-          <ValueChip label={BEKLEIDUNG_LABEL[bekleidung]} />
+          <ValueChip label={BEKLEIDUNG_SHORT[bekleidung]} />
         </div>
         {/* Arbeitszeiten */}
         <div className="flex items-center gap-3 px-4 py-3.5">
           <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
           <span className="text-sm text-black flex-1">Arbeitszeiten</span>
-          <ValueChip label={`${SCHICHT_LABEL[schicht]} · ${startZeit}–${endZeit}`} />
+          <span className="hidden sm:block flex-shrink-0">
+            <ValueChip label={`${SCHICHT_LABEL[schicht]} · ${startZeit}–${endZeit}`} />
+          </span>
+          <span className="sm:hidden flex-shrink-0">
+            <ValueChip label={`${startZeit}–${endZeit}`} />
+          </span>
         </div>
       </div>
       <p className="text-xs text-center text-muted-foreground px-4">
@@ -638,8 +622,8 @@ export default function OnboardingFlow({
   ];
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const ctaLabel   = step === 0 ? 'Profil einrichten' : isLastStep ? 'App starten' : 'Weiter';
-  const showSkip   = step === 1; // location step only
+  const ctaLabel   = step === 0 ? 'Los geht\'s' : isLastStep ? 'App starten' : 'Weiter';
+  const showSkip   = false;
 
   // ── Layout ──────────────────────────────────────────────────────────────────
   return (
@@ -681,25 +665,8 @@ export default function OnboardingFlow({
             ))}
           </div>
 
-          {/* Close / Skip — no close on step 0 (welcome), only from step 1+ */}
-          {showSkip ? (
-            <button
-              onClick={() => go(step + 1)}
-              className="text-xs font-medium text-muted-foreground hover:text-black transition-colors px-1"
-            >
-              Überspringen
-            </button>
-          ) : step === 0 ? (
-            <div className="w-8" />
-          ) : (
-            <button
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/[0.06] transition-colors"
-              aria-label="Schließen"
-            >
-              <X className="w-4 h-4 text-black/40" strokeWidth={2} />
-            </button>
-          )}
+          {/* No close button — all steps are mandatory */}
+          <div className="w-8" />
         </div>
 
         {/* ── Screen content (animated) ── */}

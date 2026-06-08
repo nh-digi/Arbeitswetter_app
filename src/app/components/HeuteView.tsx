@@ -1,4 +1,4 @@
-import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X } from 'lucide-react';
+import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X, Moon } from 'lucide-react';
 import { CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
 import { useState, useRef, useEffect, type RefObject } from 'react';
 import DWDWarningBanner from './DWDWarningBanner';
@@ -75,15 +75,34 @@ const T = {
 // Simplified calculation: Lufttemperatur + corrections for work/sun/humidity - wind/shade
 
 function getBeurteilungstemperatur(hour: number, wStart: number, wEnd: number): number {
+  const isOvernight = wEnd <= wStart;
+  const normH = hour % 24;
+  const isWorkHour = isOvernight
+    ? (normH >= wStart || normH < wEnd)
+    : (hour >= wStart && hour < wEnd);
+
   // Outside work hours: return ambient air temperature only (no work corrections)
-  if (hour < wStart) {
-    const morning = hour >= 6 ? 22 + (hour - 6) * 1.2 : 22;
-    return Math.round(morning);
-  }
-  if (hour >= wEnd) {
+  if (!isWorkHour) {
+    if (isOvernight) {
+      // Off hours are daytime for overnight workers — use daytime ambient profile
+      const dh = normH;
+      if (dh >= 13 && dh < 17) return 37;
+      if (dh >= 11 && dh < 13) return 34;
+      if (dh >= 9  && dh < 11) return 31;
+      if (dh >= 8  && dh < 9)  return 27;
+      if (dh >= 17 && dh < 18) return 33;
+      return Math.round(dh >= 6 ? 22 + (dh - 6) * 1.2 : 22);
+    }
+    if (hour < wStart) {
+      const morning = hour >= 6 ? 22 + (hour - 6) * 1.2 : 22;
+      return Math.round(morning);
+    }
     const evening = Math.max(28, 37 - (hour - wEnd) * 2);
     return Math.round(evening);
   }
+
+  // Night shift work hours — temperatures are low, no heat stress
+  if (isOvernight) return 22;
 
   const h = hour;
 
@@ -112,7 +131,11 @@ function getBeurteilungstemperatur(hour: number, wStart: number, wEnd: number): 
 // ── Status config (4 states) ──────────────────────────────────────────────────
 
 function getStatus(hour: number, wStart: number, wEnd: number) {
-  const isWorkHour = hour >= wStart && hour < wEnd;
+  const isOvernight = wEnd <= wStart;
+  const normH = hour % 24;
+  const isWorkHour = isOvernight
+    ? (normH >= wStart || normH < wEnd)
+    : (hour >= wStart && hour < wEnd);
   const beurteilungsTemp = getBeurteilungstemperatur(hour, wStart, wEnd);
 
   // Outside work hours: classify by ambient air temperature
@@ -125,7 +148,7 @@ function getStatus(hour: number, wStart: number, wEnd: number) {
 
     if (level === 4) return {
       level: 4, label: 'Kritisch',
-      badgeBg: T.criticalBg, badgeDot: T.critical, badgeText: T.critical, ringColor: T.n100,
+      badgeBg: T.criticalBg, badgeDot: T.critical, badgeText: T.critical, ringColor: T.critical,
       badgeLabel: `${beurteilungsTemp}°C`,
       beurteilungstemperatur: beurteilungsTemp,
       alertBg: T.black,
@@ -136,7 +159,7 @@ function getStatus(hour: number, wStart: number, wEnd: number) {
     };
     if (level === 3) return {
       level: 3, label: 'Stark',
-      badgeBg: T.strongBg, badgeDot: T.strong, badgeText: T.n950, ringColor: T.n100,
+      badgeBg: T.strongBg, badgeDot: T.strong, badgeText: T.n950, ringColor: T.strong,
       badgeLabel: `${beurteilungsTemp}°C`,
       beurteilungstemperatur: beurteilungsTemp,
       alertBg: T.black,
@@ -147,7 +170,7 @@ function getStatus(hour: number, wStart: number, wEnd: number) {
     };
     if (level === 2) return {
       level: 2, label: 'Mäßig',
-      badgeBg: T.warningBg, badgeDot: T.warning, badgeText: T.n950, ringColor: T.n100,
+      badgeBg: T.warningBg, badgeDot: T.warning, badgeText: T.n950, ringColor: T.warning,
       badgeLabel: `${beurteilungsTemp}°C`,
       beurteilungstemperatur: beurteilungsTemp,
       alertBg: T.black,
@@ -231,9 +254,11 @@ function getStatusDescription(label: string): string {
 // ── Day peak helper ─────────────────────────────────────────────────────────────
 // Samples every workday hour and returns the hour with the highest stress level.
 function getDayPeakHour(wStart: number, wEnd: number): number {
+  const isOvernight = wEnd <= wStart;
+  const endH = isOvernight ? wEnd + 24 : wEnd;
   let peakLevel = 0;
   let peakHour  = wStart;
-  for (let h = Math.floor(wStart); h < wEnd; h++) {
+  for (let h = Math.floor(wStart); h < endH; h++) {
     const lvl = getStatus(h + 0.5, wStart, wEnd).level;
     if (lvl > peakLevel) { peakLevel = lvl; peakHour = h; }
   }
@@ -254,9 +279,20 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   onOpenSettings?: () => void;
 }) {
   const [realtimeHour, setRealtimeHour]   = useState(getRealHour);
-  const [scrubbingHour, setScrubbingHour] = useState<number | null>(null);
+  const [scrubbingHour, setScrubbingHour] = useState<number | null>(() => {
+    // Auto-anchor to shift start when the user opens the app before their shift.
+    // The view serves the context that matters, not just the clock on the wall.
+    const ws  = parseHour(workStart ?? '09:00');
+    const we  = parseHour(workEnd   ?? '18:00');
+    const now = getRealHour();
+    const isOvernightInit = we <= ws;
+    const isPreShiftInit  = isOvernightInit
+      ? (now >= we && now < ws)   // daytime gap between end and start
+      : now < ws;
+    return isPreShiftInit ? ws : null;
+  });
   const [mobileView, setMobileView]       = useState<'clock' | 'list'>('clock');
-  const [dwdWarningVisible, setDwdWarningVisible] = useState(true);
+  const [dwdWarningVisible, setDwdWarningVisible] = useState(false);
   const [showUndoToast, setShowUndoToast] = useState(false);
   const [trayOpen, setTrayOpen]           = useState(false);
   const [uvDetailOpen, setUvDetailOpen] = useState(false);
@@ -277,6 +313,17 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const handleFinalizeToast = () => {
     setShowUndoToast(false);
   };
+
+  // Press 'b' to toggle the DWD banner (dev/demo shortcut)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement &&
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (e.key === 'b' || e.key === 'B') setDwdWarningVisible(v => !v);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const clockRefDesktop = useRef<SVGSVGElement>(null);
   const clockRefMobile  = useRef<SVGSVGElement>(null);
@@ -346,13 +393,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     const dy     = svgY - C;
     let deg      = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
     if (deg < 0) deg += 360;
-    // Main arc: 8:00@240° → 12:00@0°(top) → 18:00@180° (300° clockwise)
-    if (deg >= 240 || deg <= 180) {
-      const h = deg >= 240 ? deg / 30 : deg / 30 + 12;
-      return h;
-    }
-    // Evening gap (180°–240°): maps to 18:00–20:00 (post-work hours)
-    return 18 + (deg - 180) / 30;
+    // Generic mapping: measure clockwise offset from the shift-start angle,
+    // then add to wStartH. Works for any shift including overnight.
+    const startAngle = (wStartH % 12) * 30;
+    const offset     = ((deg - startAngle) + 360) % 360;
+    return wStartH + offset / 30;
   };
 
   // ── Real-time tick ─────────────────────────────────────────────────────────
@@ -420,9 +465,27 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileView]);
 
-  const dayPeakHour   = getDayPeakHour(wStart, wEnd);
-  const dayPeakStatus = getStatus(dayPeakHour, wStart, wEnd);
-  const isOutsideWork = realtimeHour < wStart || realtimeHour >= wEnd;
+  // Reset handle position whenever the shift changes (e.g. switching from Nacht → Früh in onboarding).
+  useEffect(() => {
+    const isOvernightNew  = wEnd <= wStart;
+    const isPreShiftNew   = isOvernightNew
+      ? (realtimeHour >= wEnd && realtimeHour < wStart)
+      : realtimeHour < wStart;
+    setScrubbingHour(isPreShiftNew ? wStart : null);
+  // workStart / workEnd prop strings are the stable dependency; wStart/wEnd are derived floats
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workStart, workEnd]);
+
+  const dayPeakHour     = getDayPeakHour(wStart, wEnd);
+  const dayPeakStatus   = getStatus(dayPeakHour, wStart, wEnd);
+  const isOvernightShift = wEnd <= wStart;
+  const isOutsideWork   = isOvernightShift
+    ? !(realtimeHour >= wStart || realtimeHour < wEnd)
+    : (realtimeHour < wStart || realtimeHour >= wEnd);
+  // Before shift starts today: the user is a planner previewing upcoming conditions.
+  const isPreShift = isOvernightShift
+    ? (realtimeHour >= wEnd && realtimeHour < wStart)
+    : realtimeHour < wStart;
   // Show actual real-time position even outside work hours; scrubbing always takes priority.
   const currentHour   = scrubbingHour !== null ? scrubbingHour : realtimeHour;
   const status        = getStatus(currentHour, wStart, wEnd);
@@ -437,7 +500,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       const greyStartAngle = hourToAngle(wEndH);             // angle at Feierabend
       const greyEndAngle   = hourToAngle(wStartH);           // angle at Start (= 12h later)
       const greySpan       = ((greyEndAngle - greyStartAngle) + 360) % 360 || 360;
-      const greyHours      = wStartH + 12 - wEndH;           // hours in grey arc
+      const greyHours      = isOvernightShift ? (wStartH - wEndH) : (wStartH + 12 - wEndH);   // hours in grey arc
       const progress       = Math.min((realtimeHour - wEnd) / greyHours, 0.98);
       return greyStartAngle + progress * greySpan;
     }
@@ -512,7 +575,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       {/* All 12 clock positions (9→8 in 12h format) */}
       {Array.from({ length: 12 }, (_, i) => wStartH + i).map(h => {
         const angle   = hourToAngle(h);
-        const display = h === 12 ? 12 : h > 12 ? h - 12 : h;
+        const display = h % 24;  // 24h format — unambiguous for all shifts
 
         if (h === wStartH) {
           const dotPos      = polar(R, angle);
@@ -535,7 +598,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           );
         }
 
-        if (h === wEndH) {
+        if (h % 24 === wEndH) {
           const dotPos      = polar(R, angle);
           const numPos      = polar(LABEL_R, angle);
           const sublabelPos = polar(R + SW / 2 + 26, angle);
@@ -571,7 +634,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       <text x={C} y={C - 23} textAnchor="middle" dominantBaseline="middle"
         fill={T.n950}
         style={{ fontSize: '32px', fontWeight: 600, pointerEvents: 'none', fontFamily: 'var(--font-family)', fontVariantNumeric: 'tabular-nums' }}>
-        {formatHH(currentHour)}
+        {formatHH(currentHour % 24)}
       </text>
 
       {/* Center: status label — 18 px semi-bold, always dark */}
@@ -621,7 +684,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           <div className="flex-1 min-w-0">
             <p className="leading-snug mb-0.5 lg:mb-1"
               style={{ fontSize: mobile ? 14 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
-              {scrubbingHour !== null ? status.alertTitle : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
+              {isPreShift && scrubbingHour !== null
+                ? `Schichtbeginn, ${formatHH(wStart)} Uhr`
+                : scrubbingHour !== null
+                  ? status.alertTitle
+                  : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
             </p>
             <p className="leading-snug"
               style={{ fontSize: mobile ? 13 : 'var(--type-size-body)', lineHeight: mobile ? 1.3 : 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
@@ -671,6 +738,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             )}
           </>
         )}
+        {mobile && status.level === 1 && (
+          <p style={{ fontSize: 13, color: T.n400, fontFamily: 'var(--font-family)', padding: '2px 12px 10px', lineHeight: 1.4 }}>
+            Heute keine besonderen Schutzmaßnahmen erforderlich.
+          </p>
+        )}
       </div>
     );
   };
@@ -700,7 +772,9 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               <div className="flex items-center gap-1.5">
                 <WeatherIcon size={compact ? 13 : 14} weight="regular" color={T.mutedFg} />
                 <span style={{ fontSize: compact ? 10 : 11, color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
-                  {formatGermanDate(now)} · {formatHH(h)} Uhr
+                  {isPreShift
+                    ? `${formatGermanDate(now)} · ${formatHH(h)} · Schicht ${formatHH(wStart)}`
+                    : `${formatGermanDate(now)} · ${formatHH(h)} Uhr`}
                 </span>
               </div>
               <ViewToggle compact={compact} />
@@ -708,33 +782,48 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           );
         })()}
 
-        {/* Row 1: day-level headline — full width on compact, shares row with toggle on desktop */}
-        {compact ? (
-          <h1 style={{
-            fontSize: tiny ? 16 : 18,
-            fontWeight: 700,
-            lineHeight: 1.15,
-            letterSpacing: '-0.3px',
-            color: T.n950,
-            fontFamily: 'var(--font-family)',
-            margin: 0,
-          }}>
-            {dayLabel}
-          </h1>
-        ) : (
-          <h1 style={{
-            fontSize: 20,
-            fontWeight: 700,
-            lineHeight: 1.1,
-            letterSpacing: '-0.3px',
-            color: T.n950,
-            fontFamily: 'var(--font-family)',
-            margin: 0,
-            whiteSpace: 'nowrap',
-          }}>
-            {dayLabel}
-          </h1>
-        )}
+        {/* Row 1: day-level headline + Außer Dienst badge inline */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {compact ? (
+            <h1 style={{
+              fontSize: tiny ? 16 : 18,
+              fontWeight: 700,
+              lineHeight: 1.15,
+              letterSpacing: '-0.3px',
+              color: T.n950,
+              fontFamily: 'var(--font-family)',
+              margin: 0,
+            }}>
+              {dayLabel}
+            </h1>
+          ) : (
+            <h1 style={{
+              fontSize: 20,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: '-0.3px',
+              color: T.n950,
+              fontFamily: 'var(--font-family)',
+              margin: 0,
+              whiteSpace: 'nowrap',
+            }}>
+              {dayLabel}
+            </h1>
+          )}
+          {isOutsideWork && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0"
+              style={{ backgroundColor: 'var(--brand-tint)' }}>
+              <Moon
+                style={{ color: T.brand, flexShrink: 0 }}
+                className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'}
+                strokeWidth={1.75}
+              />
+              <span style={{ fontSize: compact ? 11 : 12, fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
+                Außer Dienst
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Row 2: peak temp badge (left) · settings button (right, aligned) */}
         <div className="flex items-center justify-between">
@@ -786,25 +875,57 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
   // ── Time-block list ───────────────────────────────────────────────────────
 
-  const timeBlocks = [
-    { start: '08:00', end: '09:00', startH: 8,  label: 'Gering',   sublabel: 'Geringe Belastung',  level: 1 },
-    { start: '09:00', end: '11:00', startH: 9,  label: 'Mäßig',    sublabel: 'Mittlere Belastung', level: 2 },
-    { start: '11:00', end: '13:00', startH: 11, label: 'Stark',     sublabel: 'Hohe Belastung',     level: 3 },
-    { start: '13:00', end: '17:00', startH: 13, label: 'Kritisch',  sublabel: 'Sehr hohe Belastung', level: 4 },
-    { start: '17:00', end: '18:00', startH: 17, label: 'Stark',     sublabel: 'Hohe Belastung',     level: 3 },
-  ];
+  // Dynamic timeBlocks — derived from actual work hours so overnight shifts work correctly.
+  // Post-midnight hours in overnight shifts are stored as h+24 (e.g. 1am = 25) so that
+  // numeric comparisons remain monotonically increasing within the shift window.
+  const timeBlocks = (() => {
+    const fmtH   = (h: number) => `${String(h % 24).padStart(2, '0')}:00`;
+    const lvlLbl = (l: number) => l >= 4 ? 'Kritisch' : l >= 3 ? 'Stark' : l >= 2 ? 'Mäßig' : 'Gering';
+    const lvlSub = (l: number) => l >= 4 ? 'Sehr hohe Belastung' : l >= 3 ? 'Hohe Belastung' : l >= 2 ? 'Mittlere Belastung' : 'Geringe Belastung';
+    const hours: number[] = [];
+    if (isOvernightShift) {
+      for (let h = wStartH; h < 24; h++) hours.push(h);
+      for (let h = 0; h < wEndH; h++) hours.push(h + 24); // post-midnight as h+24
+    } else {
+      for (let h = wStartH; h < wEndH; h++) hours.push(h);
+    }
+    const blocks: { start: string; end: string; startH: number; label: string; sublabel: string; level: number }[] = [];
+    if (!hours.length) return blocks;
+    let segH   = hours[0];
+    let segLvl = getStatus(segH + 0.5, wStart, wEnd).level;
+    for (let i = 1; i <= hours.length; i++) {
+      const isLast  = i === hours.length;
+      const endH    = isLast ? (isOvernightShift ? wEndH + 24 : wEndH) : hours[i];
+      const nextLvl = isLast ? -1 : getStatus(hours[i] + 0.5, wStart, wEnd).level;
+      if (nextLvl !== segLvl || isLast) {
+        blocks.push({ start: fmtH(segH), end: fmtH(endH), startH: segH, label: lvlLbl(segLvl), sublabel: lvlSub(segLvl), level: segLvl });
+        segH   = isLast ? endH : hours[i];
+        segLvl = nextLvl;
+      }
+    }
+    return blocks;
+  })();
+
+  // Normalize a clock hour into shift-relative space for block boundary comparisons.
+  // Post-midnight hours are represented as h+24 so comparisons stay monotonic.
+  const normForBlocks = (h: number): number =>
+    isOvernightShift && h < wStart ? h + 24 : h;
 
   // Block index that matches realtime (the "Jetzt" row) — independent of selection.
   const nowIdx = isOutsideWork
     ? -1
-    : timeBlocks.findIndex((b, i) =>
-        realtimeHour >= b.startH && realtimeHour < (timeBlocks[i + 1]?.startH ?? wEnd)
-      );
+    : timeBlocks.findIndex((b, i) => {
+        const nh    = normForBlocks(realtimeHour);
+        const nextH = timeBlocks[i + 1]?.startH ?? (isOvernightShift ? wEndH + 24 : wEndH);
+        return nh >= b.startH && nh < nextH;
+      });
 
   // Block index that matches the currently selected hour (drives the recommendations).
-  const activeBlockIdx = timeBlocks.findIndex((b, i) =>
-    currentHour >= b.startH && currentHour < (timeBlocks[i + 1]?.startH ?? wEnd)
-  );
+  const activeBlockIdx = timeBlocks.findIndex((b, i) => {
+    const nh    = normForBlocks(currentHour);
+    const nextH = timeBlocks[i + 1]?.startH ?? (isOvernightShift ? wEndH + 24 : wEndH);
+    return nh >= b.startH && nh < nextH;
+  });
   const activeBlock = activeBlockIdx >= 0 ? timeBlocks[activeBlockIdx] : null;
 
   const ListBlocks = ({ compact = false }: { compact?: boolean }) => {
@@ -1271,7 +1392,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const WeatherSection = () => (
     <div className="rounded-[16px] p-3 lg:p-4 flex flex-col gap-2.5 lg:gap-3" style={{ backgroundColor: T.n800 }}>
       <p className="lg:text-base" style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
-        Heute um {Math.floor(currentHour)}:00 Uhr
+        Heute um {Math.floor(currentHour % 24)}:00 Uhr
       </p>
 
       {/* Mobile: flex-wrap layout */}

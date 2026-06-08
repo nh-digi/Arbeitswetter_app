@@ -6,11 +6,10 @@ import {
 } from 'lucide-react';
 import PageHeader from './PageHeader';
 import { Switch } from './ui/switch';
-
-type Schwere    = 'leicht' | 'mittel' | 'schwer';
-type Bekleidung = 'leicht' | 'mittel' | 'schwer';
-type Umgebung   = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
-type Schicht    = 'früh' | 'tag' | 'nacht';
+import {
+  type Schwere, type Bekleidung, type Schicht,
+  SCHICHT_PRESETS, SCHWERE_LABEL, BEKLEIDUNG_LABEL,
+} from '../constants/workProfile';
 
 interface Ort { id: number; name: string; city: string; lat?: number; lng?: number; }
 interface OrtVorschlag { id: string; name: string; region: string; lat: number; lng: number; }
@@ -36,23 +35,7 @@ const MOCK_VORSCHLÄGE: OrtVorschlag[] = [
   { id: 'flensburg',      name: 'Flensburg',      region: 'S-H',     lat: 54.7833, lng: 9.4333  },
 ];
 
-const SCHICHT_PRESETS: Record<Schicht, { start: string; end: string }> = {
-  früh:  { start: '05:00', end: '13:00' },
-  tag:   { start: '06:00', end: '14:00' },
-  nacht: { start: '22:00', end: '06:00' },
-};
-
-const SCHWERE_LABEL: Record<Schwere, string> = {
-  leicht: 'Stehen, Gehen, Kontrolle, leichte Montagearbeiten',
-  mittel: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten',
-  schwer: 'Schaufeln, Graben, schwere Hebe- und Tragearbeiten',
-};
-
-const BEKLEIDUNG_LABEL: Record<Bekleidung, string> = {
-  leicht: 'Atmungsaktive Bekleidung, z. B. T-Shirt, Baumwoll-Arbeitshose',
-  mittel: 'Typische Arbeitskleidung, z. B. Hemd, Arbeitshose (Baumwoll-Mix)',
-  schwer: 'Schwere Schutzkleidung, z. B. Warnschutzoverall, Wetterschutzanzug',
-};
+type Umgebung = 'sonne' | 'teilschatten' | 'schatten' | 'innen';
 
 const UMGEBUNG_OPTIONS: { id: Umgebung; label: string; sub: string; Icon: React.ElementType }[] = [
   { id: 'sonne',        label: 'Direkte Sonne',       sub: 'Meist ohne Schatten',     Icon: Sun       },
@@ -358,7 +341,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
             <p className="text-xs text-muted-foreground ml-1">· Verbessert lokale Vorhersagen</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden divide-y divide-black/[0.05]">
+          <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-black/[0.05]">
 
             {/* Success banner */}
             <div
@@ -412,7 +395,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
               {/* Dropdown */}
               {showDropdown && (
                 <div className="absolute left-4 right-4 md:left-6 md:right-6 bg-white border border-[#325cda] border-t-black/[0.06] rounded-b-xl shadow-lg
-                  divide-y divide-black/[0.05] overflow-hidden z-10">
+                  divide-y divide-black/[0.05] overflow-y-auto max-h-[280px] z-10">
                   {/* GPS option */}
                   <button
                     onMouseDown={e => e.preventDefault()}
