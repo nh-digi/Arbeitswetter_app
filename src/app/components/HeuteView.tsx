@@ -931,12 +931,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const ListBlocks = ({ compact = false }: { compact?: boolean }) => {
     return (
       <div className={compact ? 'mb-3' : 'mb-6'}>
-        {/* Intent header — mirrors the clock view's "Griff ziehen…" hint */}
-        <div className="flex items-center justify-between gap-2 px-1 mb-1.5">
-          <p style={{ fontSize: 'var(--type-size-body-sm)', color: T.n500, fontFamily: 'var(--font-family)' }}>
-            Zeitraum tippen, um Empfehlungen anzupassen
-          </p>
-          {scrubbingHour !== null && (
+        {scrubbingHour !== null && (
+          <div className="flex items-center justify-end gap-2 px-1 mb-1.5">
             <button
               onClick={() => { if (returnTimer.current) clearTimeout(returnTimer.current); setScrubbingHour(null); }}
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded transition-opacity hover:opacity-70"
@@ -945,19 +941,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               <RotateCcw className="w-3 h-3" strokeWidth={1.75} />
               Zurück zu jetzt
             </button>
-          )}
-        </div>
-
-        {/* Outside work hours — Jetzt anchor */}
-        {isOutsideWork && (
-          <div className="flex items-center gap-2.5 px-2 py-2 mb-1 rounded-xl"
-            style={{ backgroundColor: T.n50 }}>
-            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: T.n400 }} />
-            <div className="flex-1 min-w-0">
-              <p className="tabular-nums" style={{ fontSize: 'var(--type-size-body-sm)', color: T.n500, fontFamily: 'var(--font-family)' }}>
-                Jetzt, {formatHH(realtimeHour)} Uhr · Außerhalb Arbeitszeit
-              </p>
-            </div>
           </div>
         )}
 
@@ -1531,7 +1514,13 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const ViewToggle = ({ compact = false }: { compact?: boolean }) => (
     <div className="flex items-center rounded-lg p-0.5" style={{ backgroundColor: T.n100 }}>
       {(['clock', 'list'] as const).map(v => (
-        <button key={v} onClick={() => setMobileView(v)}
+        <button key={v} onClick={() => {
+          setMobileView(v);
+          // When switching to the list, auto-expand the block that matches the
+          // currently selected clock position so the list visibly reacts to
+          // any clock interaction the user performed before switching.
+          if (v === 'list' && activeBlockIdx >= 0) setListExpandedIdx(activeBlockIdx);
+        }}
           className="rounded-md transition-all"
           style={{
             padding: compact ? '6px 12px' : '6px 12px',
@@ -1590,7 +1579,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               {mobileView === 'list' && <ListBlocks />}
             </div>
             <DaySummary />
-            <AlertBanner />
+            {mobileView === 'clock' && <AlertBanner />}
           </div>
 
           {/* Right column */}
@@ -1623,7 +1612,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               {mobileView === 'list' && <ListBlocks compact />}
             </div>
             <DaySummary />
-            <AlertBanner mobile />
+            {mobileView === 'clock' && <AlertBanner mobile />}
           </div>
         </div>
 
