@@ -748,7 +748,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           </>
         )}
         {mobile && status.level === 1 && (
-          <p style={{ fontSize: 13, color: T.n400, fontFamily: 'var(--font-family)', padding: '2px 12px 10px', lineHeight: 1.4 }}>
+          <p style={{ fontSize: 13, color: T.n300, fontFamily: 'var(--font-family)', padding: '2px 12px 10px', lineHeight: 1.4 }}>
             Heute keine besonderen Schutzmaßnahmen erforderlich.
           </p>
         )}
@@ -1565,7 +1565,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: T.black }}>
+    <div className="pb-20" style={{ backgroundColor: T.black }}>
 
       {/* ── DWD WARNING BANNER ─────────────────────────────────────────── */}
       {dwdWarningVisible && (
@@ -1616,7 +1616,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
         {/* Main card */}
         <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden min-h-[calc(100dvh-5rem)]">
+          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden">
             <CardHeader compact tiny={isTinyScreen} />
             <div className="w-full">
               {mobileView === 'clock' && (
