@@ -299,7 +299,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
     <div className="min-h-screen bg-neutral-100 pb-28">
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-neutral-100/95 backdrop-blur-sm border-b border-black/[0.06]">
+      <div className="sticky top-0 z-10 bg-neutral-100/95 backdrop-blur-sm border-b border-black/[0.06] px-2" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="relative">
           <PageHeader
             title="Einstellungen"
@@ -318,7 +318,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
       </div>
 
       {/* Autosave feedback - now outside header */}
-      <div className="max-w-4xl mx-auto px-4 md:px-8 pt-2">
+      <div className="max-w-4xl mx-auto px-6 md:px-8 pt-2">
         <div className="flex justify-end">
           <span
             className="text-xs text-muted-foreground flex items-center gap-1.5 pb-0.5 transition-opacity duration-300"
@@ -331,7 +331,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
         </div>
       </div>
 
-      <div className="px-4 md:px-8 pt-6 space-y-8 max-w-4xl mx-auto">
+      <div className="px-6 md:px-8 pt-6 space-y-8 max-w-4xl mx-auto">
 
         {/* ── SECTION 1: Standort ─────────────────────────────────── */}
         <section>

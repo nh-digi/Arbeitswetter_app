@@ -330,6 +330,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const isDragging      = useRef(false);
   const returnTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const actionsCardRef  = useRef<HTMLDivElement>(null);
+  const trayRef         = useRef<HTMLDivElement>(null);
+
+  // When the mobile tray opens, scroll it into view so the list is visible.
+  useEffect(() => {
+    if (trayOpen) {
+      requestAnimationFrame(() => {
+        trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+  }, [trayOpen]);
 
   // Smooth-scroll the recommendations card into view on mobile after a list selection,
   // so the cause (tapped row) and effect (updated card) are visible together.
@@ -355,14 +365,12 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const PILL_R  = R + SW / 2 + 38;
 
   // Viewport-aware sizing — read once at render time (CSR-only app)
-  // Fluid clamp: visualization is supporting content, never dominate.
-  // Width budget = viewport − page padding (16×2) − card padding (16×2) − handle/pill safety (~20 each side)
+  // Fill the full card inner width (viewport − outer px-4 × 2 − card px-4 × 2 = 64px),
+  // capped at SIZE (340) so the SVG never renders smaller than its design geometry.
   const VIEWPORT_W      = typeof window !== 'undefined' ? window.innerWidth  : 390;
   const VIEWPORT_H      = typeof window !== 'undefined' ? window.innerHeight : 844;
   const isTinyScreen    = VIEWPORT_H < 700; // iPhone SE (667px) and shorter phones
-  const widthBudget     = Math.max(200, Math.min(VIEWPORT_W, 480) - 32 - 32 - 40);
-  const heightBudget    = Math.round(VIEWPORT_H * 0.33);
-  const mobileClockSize = Math.max(200, Math.min(260, widthBudget, heightBudget));
+  const mobileClockSize = Math.max(240, Math.min(VIEWPORT_W - 64, SIZE));
 
   // True clock-face mapping: (h % 12) * 30°  →  8→240°, 12→0°(top), 15→90°(right), 18→180°(bottom)
   const hourToAngle = (h: number) => (h % 12) * 30;
@@ -428,7 +436,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       const svgY   = (e.clientY - rect.top)  * scaleY;
       const { x: hx, y: hy } = handlePosRef.current;
       const dist = Math.hypot(svgX - hx, svgY - hy);
-      if (dist > 50) return; // Not near handle – let browser scroll
+      const hitRadius = e.pointerType === 'touch' ? 70 : 50;
+      if (dist > hitRadius) return; // Not near handle – let browser scroll
       e.preventDefault();
       svg.setPointerCapture(e.pointerId);
       if (returnTimer.current) clearTimeout(returnTimer.current);
@@ -535,7 +544,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       width="100%" height="100%"
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       className="select-none overflow-visible"
-      style={{ display: 'block' }}
+      style={{ display: 'block', touchAction: 'none' }}
     >
       {/* Full 360° background ring */}
       <circle cx={C} cy={C} r={R} fill="none" stroke={T.n100} strokeWidth={SW} />
@@ -732,7 +741,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               </div>
             </button>
             {trayOpen && (
-              <div className="px-2 pb-2">
+              <div ref={trayRef} className="px-2 pb-2">
                 <ActionsCard />
               </div>
             )}
@@ -1607,7 +1616,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
         {/* Main card */}
         <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-3">
+          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-3 overflow-hidden">
             <CardHeader compact tiny={isTinyScreen} />
             <div className="w-full">
               {mobileView === 'clock' && (

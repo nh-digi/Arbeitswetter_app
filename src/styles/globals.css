@@ -1,0 +1,4 @@
+/* Prevent browser pull-to-refresh from firing during clock handle drags */
+body {
+  overscroll-behavior-y: none;
+}
