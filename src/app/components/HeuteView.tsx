@@ -335,9 +335,9 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // When the mobile tray opens, scroll it into view so the list is visible.
   useEffect(() => {
     if (trayOpen) {
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      }, 50);
     }
   }, [trayOpen]);
 
