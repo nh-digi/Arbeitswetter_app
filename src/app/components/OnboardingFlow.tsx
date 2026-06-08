@@ -334,7 +334,7 @@ export default function OnboardingFlow({
   const screens = [
     // 0 — Willkommen
     <div key="welcome" className="flex-1 flex flex-col">
-      <div className="my-auto pt-14 flex flex-col items-center text-center gap-6">
+      <div className="my-auto flex flex-col items-center text-center gap-6">
         <div className="w-24 h-24 rounded-3xl bg-[#eef2fd] flex items-center justify-center">
           <HardHat className="w-12 h-12 text-[#325cda]" strokeWidth={1.5} />
         </div>
@@ -627,7 +627,7 @@ export default function OnboardingFlow({
 
   // ── Layout ──────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 bg-white md:bg-[#f0f4fe] flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-white md:bg-[#f0f4fe] flex items-center justify-center" style={{ height: '100dvh' }}>
 
       {/* Card */}
       <div className={[
@@ -683,7 +683,7 @@ export default function OnboardingFlow({
         </div>
 
         {/* ── CTA ── */}
-        <div className="flex-shrink-0 px-5 md:px-7 pb-7 pt-3 bg-white">
+        <div className="flex-shrink-0 px-5 md:px-7 pt-3 bg-white" style={{ paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom))' }}>
           <button
             onClick={() => {
               if (isLastStep) { onClose(); }
