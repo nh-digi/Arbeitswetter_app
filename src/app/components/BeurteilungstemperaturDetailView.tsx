@@ -219,18 +219,6 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                       </div>
                     )}
                   </div>
-                  {/* Temperature label */}
-                  <p style={{
-                    fontSize: 8,
-                    fontWeight: isNow ? 700 : 400,
-                    color: isNow ? 'var(--foreground)' : 'var(--muted-foreground)',
-                    fontFamily: 'var(--font-family)',
-                    lineHeight: 1,
-                    marginBottom: 2,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {temp}°
-                  </p>
                   {/* Bar */}
                   <div
                     className="w-full rounded-sm"
@@ -255,7 +243,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                       }}
                     >
                       <p style={{
-                        fontSize: 8,
+                        fontSize: 10,
                         fontWeight: 700,
                         color: '#fff',
                         fontFamily: 'var(--font-family)',
@@ -264,9 +252,9 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                         Jetzt
                       </p>
                     </div>
-                  ) : (
+                  ) : hourNum % 3 === 0 ? (
                     <p style={{
-                      fontSize: 8,
+                      fontSize: 12,
                       fontWeight: 400,
                       color: 'var(--muted-foreground)',
                       fontFamily: 'var(--font-family)',
@@ -275,7 +263,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                     }}>
                       {hour}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               );
             })}

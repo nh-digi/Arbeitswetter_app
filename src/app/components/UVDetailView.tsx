@@ -160,7 +160,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                            <p style={{ fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
+                            <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
                               {payload[0].payload.time}
                             </p>
                             <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
@@ -184,7 +184,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                           <g>
                             <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="#2563EB" strokeWidth={2} />
                             <rect x={viewBox.x - 20} y={18} width={40} height={16} rx={3} fill="#000000" stroke="#BFDBFE" strokeWidth={1} />
-                            <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={9} fontWeight={600} fontFamily="var(--font-family)">
+                            <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={11} fontWeight={600} fontFamily="var(--font-family)">
                               Jetzt
                             </text>
                           </g>
@@ -231,7 +231,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                            <p style={{ fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
+                            <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
                               {payload[0].payload.time}
                             </p>
                             <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
@@ -255,7 +255,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                           <g>
                             <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="#2563EB" strokeWidth={2} />
                             <rect x={viewBox.x - 20} y={18} width={40} height={16} rx={3} fill="#000000" stroke="#BFDBFE" strokeWidth={1} />
-                            <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={9} fontWeight={600} fontFamily="var(--font-family)">
+                            <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={11} fontWeight={600} fontFamily="var(--font-family)">
                               Jetzt
                             </text>
                           </g>
@@ -270,7 +270,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           </div>
 
           {/* X-axis labels */}
-          <div className="flex justify-between mt-2 pl-[52px] lg:pl-20" style={{ fontSize: 11, fontFamily: 'var(--font-family)' }}>
+          <div className="flex justify-between mt-2 pl-[52px] lg:pl-20" style={{ fontSize: 12, fontFamily: 'var(--font-family)' }}>
             <p style={{ color: '#6B7280', fontWeight: 500 }}>12AM</p>
             <p style={{ color: '#6B7280', fontWeight: 500 }}>6AM</p>
             <p style={{ color: '#111827', fontWeight: 700 }} className="lg:text-[13px]">12PM</p>
@@ -298,7 +298,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
         {/* Sun Exposure Recommendations */}
         <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
           <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
-            <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
+            <p className="pb-1 lg:pb-2" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
               Sonnenschutz-Empfehlungen bei hohem UV-Index
             </p>
             <DetailRowList items={uvSunRecommendations} />

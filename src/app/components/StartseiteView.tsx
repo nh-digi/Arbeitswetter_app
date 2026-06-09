@@ -524,8 +524,8 @@ export default function StartseiteView({
 
                     {/* Time label */}
                     <p
-                      className="text-base md:text-lg font-semibold flex-1"
-                      style={{ color: T.white, fontFamily: 'var(--font-family)' }}
+                      className="font-semibold flex-1"
+                      style={{ color: T.white, fontFamily: 'var(--font-family)', fontSize: 'var(--type-size-h3)' }}
                     >
                       {block.timeLabel}
                     </p>

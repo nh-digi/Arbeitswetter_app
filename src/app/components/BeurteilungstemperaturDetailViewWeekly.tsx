@@ -159,21 +159,21 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                   stroke="var(--status-warning)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '25°', position: 'right', fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '25°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <ReferenceLine
                   y={28}
                   stroke="var(--status-strong)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '28°', position: 'right', fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '28°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <ReferenceLine
                   y={32}
                   stroke="var(--status-critical-tint)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '32°', position: 'right', fontSize: 10, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '32°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <Tooltip
                   content={({ active, payload }) => {
@@ -182,7 +182,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                       const lvl = getLevelInfo(d.temp);
                       return (
                         <div className="bg-white border rounded-lg px-3 py-2 shadow-lg" style={{ borderColor: 'var(--border)' }}>
-                          <p style={{ fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
+                          <p style={{ fontSize: 12, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
                           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                             {d.temp}°C · {lvl.label}
                           </p>
@@ -242,7 +242,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                       {temp}°C
                     </p>
                     <span
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                       style={{ backgroundColor: lvl.solidColor, color: '#000' }}
                     >
                       {lvl.label}

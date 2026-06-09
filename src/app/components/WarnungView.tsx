@@ -152,7 +152,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
               </div>
 
               {/* Location & Time */}
-              <div className="flex items-center gap-1.5 flex-wrap text-sm lg:text-base leading-[1.6]">
+              <div className="flex items-center gap-1.5 flex-wrap text-sm md:text-base leading-[1.6]">
                 <MapPin className="w-3.5 h-3.5 text-[var(--neutral-600)]" strokeWidth={2} />
                 <span className="text-[var(--neutral-950)]" style={{ fontWeight: 600 }}>Ort:</span>
                 <span className="text-[var(--neutral-950)]">{warning.location}</span>
@@ -166,7 +166,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
               <div className="h-px bg-[var(--neutral-100)]" />
 
               {/* Description */}
-              <p className="text-sm lg:text-base leading-[1.5] text-[var(--neutral-950)]">
+              <p className="text-sm md:text-base leading-[1.5] text-[var(--neutral-950)]">
                 {warning.description}
               </p>
 
@@ -176,7 +176,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
                   <div className="h-px bg-[var(--neutral-100)]" />
                   <details className="group">
                     <summary className="cursor-pointer list-none flex items-center justify-between py-2 text-[var(--neutral-950)] hover:opacity-70 transition-opacity">
-                      <span className="text-sm lg:text-base" style={{ fontWeight: 600 }}>
+                      <span className="text-sm md:text-base" style={{ fontWeight: 600 }}>
                         Empfohlene Maßnahmen
                       </span>
                       <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" strokeWidth={2} />
@@ -184,7 +184,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
                     <div className="pt-2">
                       <ul className="space-y-1.5">
                         {warning.recommendations.map((rec, index) => (
-                          <li key={index} className="text-sm lg:text-base leading-[1.5] text-[var(--neutral-950)] pl-4 relative">
+                          <li key={index} className="text-sm md:text-base leading-[1.5] text-[var(--neutral-950)] pl-4 relative">
                             <span className="absolute left-0">•</span>
                             {rec}
                           </li>
@@ -202,7 +202,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
         <div className="bg-[var(--neutral-50)] rounded-2xl px-6 py-4 border border-[var(--neutral-100)]">
           <div className="flex items-start gap-3">
             <div className="flex-1">
-              <p className="text-sm lg:text-base text-[var(--neutral-950)]" style={{ fontWeight: 600 }}>
+              <p className="text-sm md:text-base text-[var(--neutral-950)]" style={{ fontWeight: 600 }}>
                 Quelle: Deutscher Wetterdienst (DWD)
               </p>
               <p className="text-sm leading-[1.5] text-[var(--neutral-600)] mt-1">

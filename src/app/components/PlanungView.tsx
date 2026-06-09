@@ -370,7 +370,7 @@ function MetricTile({
     <>
       <div className="flex items-center gap-1 md:gap-1.5 mb-1 md:mb-1.5">
         <Icon className="w-3 md:w-3.5 h-3 md:h-3.5 text-[#E2E8F0]" strokeWidth={1.5} />
-        <p className="text-[10px] md:text-xs leading-tight text-[#E2E8F0]">{label}</p>
+        <p className="text-xs leading-tight text-[#E2E8F0]">{label}</p>
       </div>
       <p className="text-sm md:text-base font-semibold text-white">{value}</p>
       {alert && (
@@ -475,7 +475,7 @@ export default function PlanungView({ onNavigate, onOpenSettings, activeLocation
               {/* Date heading */}
               <div className="space-y-0.5 md:space-y-1">
                 <p className="text-xs text-[var(--neutral-500)]">Hinweise zur Arbeitsplanung:</p>
-                <h2 className="text-[var(--neutral-950)] text-lg md:text-2xl">
+                <h2 className="text-[var(--neutral-950)]" style={{ fontSize: 'var(--type-size-h2)' }}>
                   {d.date}
                 </h2>
               </div>
@@ -494,9 +494,8 @@ export default function PlanungView({ onNavigate, onOpenSettings, activeLocation
                         >
                           <div className="flex flex-col gap-1 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className={`text-base md:text-xl ${
-                                block.status === 'kritisch' ? 'text-[var(--status-critical)]' : 'text-[var(--neutral-950)]'
-                              }`}>
+                              <h3 className={block.status === 'kritisch' ? 'text-[var(--status-critical)]' : 'text-[var(--neutral-950)]'}
+                                style={{ fontSize: 'var(--type-size-h3)' }}>
                                 {block.timeLabel}
                               </h3>
                               <StatusBadge status={block.status} />
@@ -582,9 +581,9 @@ export default function PlanungView({ onNavigate, onOpenSettings, activeLocation
               >
                 <div className="flex items-center gap-1 md:gap-1.5 mb-0.5 md:mb-1">
                   <Wind className="w-3 md:w-3.5 h-3 md:h-3.5 text-white/80" strokeWidth={1.5} />
-                  <p className="text-[10px] md:text-xs text-white/80">Beurteilungstemperatur</p>
+                  <p className="text-xs text-white/80">Beurteilungstemperatur</p>
                 </div>
-                <p className="text-2xl md:text-[32px] font-semibold leading-tight text-white">
+                <p className="font-semibold leading-tight text-white" style={{ fontSize: 'var(--type-size-display)' }}>
                   {d.conditions.beurteilungsTemp}
                 </p>
                 {d.conditions.assessmentAlert && (

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Settings, Edit3 } from 'lucide-react';
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
@@ -75,14 +76,15 @@ export default function PageHeader({
               />
             )}
             <h1
-              className="text-xl"
               style={{
+                fontSize: 'var(--type-size-h1)',
                 color: isDark ? 'white' : 'var(--neutral-950)',
                 fontFamily: 'var(--font-family)',
                 fontWeight: 600,
                 lineHeight: 1.2,
-                letterSpacing: '-0.5px'
-              }}
+                letterSpacing: '-0.5px',
+                textWrap: 'balance',
+              } as React.CSSProperties}
             >
               {title}
             </h1>
@@ -134,14 +136,15 @@ export default function PageHeader({
               />
             )}
             <h1
-              className="text-2xl"
               style={{
+                fontSize: 'var(--type-size-h1)',
                 color: isDark ? 'white' : 'var(--neutral-950)',
                 fontFamily: 'var(--font-family)',
                 fontWeight: 600,
                 lineHeight: 1.2,
-                letterSpacing: '-0.5px'
-              }}
+                letterSpacing: '-0.5px',
+                textWrap: 'balance',
+              } as React.CSSProperties}
             >
               {title}
             </h1>

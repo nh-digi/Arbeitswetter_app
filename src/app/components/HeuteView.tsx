@@ -363,7 +363,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const VIEWPORT_W      = typeof window !== 'undefined' ? window.innerWidth  : 390;
   const VIEWPORT_H      = typeof window !== 'undefined' ? window.innerHeight : 844;
   const isTinyScreen    = VIEWPORT_H < 700; // iPhone SE (667px) and shorter phones
-  const mobileClockSize = Math.max(240, Math.min(VIEWPORT_W - 64, SIZE));
+  const mobileClockSize = Math.max(280, Math.min(VIEWPORT_W - 64, SIZE));
 
   // True clock-face mapping: (h % 12) * 30°  →  8→240°, 12→0°(top), 15→90°(right), 18→180°(bottom)
   const hourToAngle = (h: number) => (h % 12) * 30;
@@ -589,7 +589,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <g key={h} style={{ pointerEvents: 'none' }}>
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
-                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
               <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
@@ -597,7 +597,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 fill={T.n800} />
               <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.white}
-                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Start
               </text>
             </g>
@@ -614,7 +614,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <g key={h} style={{ pointerEvents: 'none' }}>
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
-                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
               <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
@@ -622,7 +622,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 fill={T.n800} />
               <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.white}
-                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Feierabend
               </text>
             </g>
@@ -634,7 +634,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           <text key={h} x={pos.x} y={pos.y}
             textAnchor="middle" dominantBaseline="middle"
             fill={T.n500}
-            style={{ fontSize: '12px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
+            style={{ fontSize: '14px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
             {display}
           </text>
         );
@@ -715,7 +715,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               onClick={() => setTrayOpen(true)}
               className="flex items-center justify-between w-full px-3 py-2.5 transition-opacity active:opacity-60"
             >
-              <span style={{ fontSize: 15, fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
+              <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
                 Empfehlungen
               </span>
               <div className="flex items-center gap-1.5">
@@ -861,7 +861,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       }}
     >
       <Edit3 className="w-3 lg:w-4 h-3 lg:h-4 flex-shrink-0 transition-colors" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
-      <span className="truncate" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+      <span className="truncate" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', fontSize: 'var(--type-size-body-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
         {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
       </span>
     </button>
@@ -1664,14 +1664,17 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="md:px-4 md:max-w-xl md:mx-auto h-[calc(100svh-5rem)] md:h-[100svh] flex flex-col">
           <div className="bg-card md:rounded-[24px] md:shadow-lg px-4 pt-3 min-[390px]:pt-4 flex flex-col flex-1 overflow-hidden" style={{ border: '1px solid #3a3a4a' }}>
             <CardHeader compact tiny={isTinyScreen} />
-            <div className="flex-1 flex items-center justify-center w-full min-h-0">
-              {mobileView === 'clock' && (
+            {mobileView === 'clock' ? (
+              <div className="flex-1 flex items-center justify-center w-full min-h-0">
                 <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', maxHeight: '100%' }}>
                   {makeClockSVG(clockRefMobile)}
                 </div>
-              )}
-              {mobileView === 'list' && <ListBlocks compact />}
-            </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto w-full min-h-0 pt-1">
+                <ListBlocks compact />
+              </div>
+            )}
             <DaySummary />
             {mobileView === 'clock' && (
               <div className="-mx-4">

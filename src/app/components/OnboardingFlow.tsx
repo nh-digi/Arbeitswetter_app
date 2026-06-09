@@ -356,7 +356,7 @@ export default function OnboardingFlow({
           <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Standort</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wo wird gearbeitet?</h2>
+        <h2 className="font-semibold tracking-tight text-black mt-2" style={{ fontSize: 'var(--type-size-h2)' }}>Wo wird gearbeitet?</h2>
         <p className="text-sm text-muted-foreground mt-1">Für lokale Wettervorhersagen und Unwetterwarnungen.</p>
       </div>
 
@@ -453,7 +453,7 @@ export default function OnboardingFlow({
           <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wie schwer ist die Arbeit?</h2>
+        <h2 className="font-semibold tracking-tight text-black mt-2" style={{ fontSize: 'var(--type-size-h2)' }}>Wie schwer ist die Arbeit?</h2>
         <p className="text-sm text-muted-foreground mt-1">Bestimmt die Hitzebelastung Ihrer Mitarbeiter.</p>
       </div>
       <div className="space-y-2.5">
@@ -478,7 +478,7 @@ export default function OnboardingFlow({
           <Shirt className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Welche Kleidung wird getragen?</h2>
+        <h2 className="font-semibold tracking-tight text-black mt-2" style={{ fontSize: 'var(--type-size-h2)' }}>Welche Kleidung wird getragen?</h2>
         <p className="text-sm text-muted-foreground mt-1">Schwere Kleidung erhöht die Hitzebelastung.</p>
       </div>
       <div className="space-y-2.5">
@@ -503,7 +503,7 @@ export default function OnboardingFlow({
           <Clock className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitszeiten</p>
         </div>
-        <h2 className="text-xl font-semibold tracking-tight text-black mt-2">Wann wird gearbeitet?</h2>
+        <h2 className="font-semibold tracking-tight text-black mt-2" style={{ fontSize: 'var(--type-size-h2)' }}>Wann wird gearbeitet?</h2>
         <p className="text-sm text-muted-foreground mt-1">Frühschichten sind besser bei Hitze.</p>
       </div>
       <div className="bg-white rounded-2xl border border-black/[0.06] p-4 space-y-4">
@@ -581,7 +581,7 @@ export default function OnboardingFlow({
     // 5 — Zusammenfassung
     <div key="summary" className="flex-1 flex flex-col justify-center space-y-4 py-4">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-black">Ihr Arbeitsprofil</h2>
+        <h2 className="font-semibold tracking-tight text-black" style={{ fontSize: 'var(--type-size-h2)' }}>Ihr Arbeitsprofil</h2>
         <p className="text-sm text-muted-foreground mt-1">Stimmt alles? Sie können die Einstellungen jederzeit ändern.</p>
       </div>
       <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-black/[0.05]">

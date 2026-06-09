@@ -45,7 +45,7 @@ export default function UndoToast({ message, onUndo, onDismiss, duration = 5000 
             backgroundColor: 'var(--brand-primary)',
             color: 'white',
             fontFamily: 'var(--font-family)',
-            fontSize: 13,
+            fontSize: 'var(--type-size-body-sm)',
             fontWeight: 600,
             lineHeight: 1.4,
           }}

@@ -145,7 +145,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                       const lvl = getUVLevel(d.uv);
                       return (
                         <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                          <p style={{ fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
+                          <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
                           <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
                             UV-Index: {d.uv} · {lvl.label}
                           </p>
@@ -202,7 +202,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                     </p>
                     <p className="text-sm mr-3" style={{ fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>{uv}</p>
                     <span
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                       style={{ backgroundColor: lvl.solidColor, color: '#000' }}
                     >
                       {lvl.label}
@@ -218,7 +218,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
           {/* Sun recommendations */}
           <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
             <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
-              <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
+              <p className="pb-1 lg:pb-2" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                 Sonnenschutz-Empfehlungen bei hohem UV-Index
               </p>
               <DetailRowList items={uvSunRecommendations} />
