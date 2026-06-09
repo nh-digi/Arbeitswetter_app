@@ -1,6 +1,6 @@
-import { ChevronDown, Sun, ClipboardList, User, X } from 'lucide-react';
+import { Sun, ClipboardList, User, X } from 'lucide-react';
+import DetailRowList from './DetailRowList';
 import { BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
-import { useState } from 'react';
 import type { Day } from './PlanungView';
 
 interface UVDetailViewWeeklyProps {
@@ -47,8 +47,6 @@ const uvSunRecommendations = [
 ];
 
 export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0 }: UVDetailViewWeeklyProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
   const chartData = days.map(d => ({
     name: d.shortDate,
     date: d.date,
@@ -218,44 +216,12 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
           <div className="h-px bg-[#E5E7EB] my-6 lg:my-8" />
 
           {/* Sun recommendations */}
-          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: '#F9FAFB' }}>
+          <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
             <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
-              <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: '#111827', fontFamily: 'var(--font-family)' }}>
+              <p className="pb-1 lg:pb-2 lg:text-base" style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                 Sonnenschutz-Empfehlungen bei hohem UV-Index
               </p>
-              {uvSunRecommendations.map(({ Icon, label, detail }, i) => (
-                <div key={label}>
-                  <button
-                    onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                    className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-3 rounded-lg cursor-pointer lg:min-h-[44px] text-left"
-                    style={{ minHeight: 40, background: 'none', border: 'none' }}
-                  >
-                    <div
-                      className="flex items-center justify-center rounded-lg flex-shrink-0 lg:w-[28px] lg:h-[28px]"
-                      style={{ width: 24, height: 24, backgroundColor: '#F3F4F6' }}
-                    >
-                      <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: '#6B7280' }} strokeWidth={1.5} />
-                    </div>
-                    <p className="flex-1 text-xs lg:text-sm" style={{ color: '#111827', fontFamily: 'var(--font-family)' }}>{label}</p>
-                    <ChevronDown
-                      className="w-3.5 lg:w-4 h-3.5 lg:h-4 flex-shrink-0 transition-transform"
-                      style={{ color: '#6B7280', transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                      strokeWidth={1.5}
-                    />
-                  </button>
-                  {openIndex === i && (
-                    <p
-                      className="pb-2 text-xs lg:text-sm"
-                      style={{ color: '#6B7280', fontFamily: 'var(--font-family)', lineHeight: 1.6, paddingLeft: 36 }}
-                    >
-                      {detail}
-                    </p>
-                  )}
-                  {i < uvSunRecommendations.length - 1 && (
-                    <div className="w-full h-px" style={{ backgroundColor: '#F3F4F6' }} />
-                  )}
-                </div>
-              ))}
+              <DetailRowList items={uvSunRecommendations} />
             </div>
           </div>
 

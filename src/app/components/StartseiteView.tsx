@@ -20,7 +20,7 @@ import {
 import PageHeader from './PageHeader';
 import DWDWarningBanner from './DWDWarningBanner';
 import UndoToast from './UndoToast';
-import { CATEGORY_ICON, type ActionItem } from './ActionList';
+import ActionList, { CATEGORY_ICON, type ActionItem } from './ActionList';
 import { StatusIconCircle } from './StatusBadge';
 import UVDetailView from './UVDetailView';
 import BeurteilungstemperaturDetailView from './BeurteilungstemperaturDetailView';
@@ -250,52 +250,6 @@ const BLOCK_ICON_COLOR: Record<BlockStatus, string> = {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'startseite';
-
-// ── DarkActionItems ───────────────────────────────────────────────────────────
-// Dark-themed inline accordion matching HeuteView's HazardCard style.
-// Replaces ActionList (which is hardcoded light) inside dark time-block cards.
-function DarkActionItems({ items }: { items: ActionItem[] }) {
-  const single = items.length === 1;
-  const [openIdx, setOpenIdx] = useState<number | null>(single ? 0 : null);
-  return (
-    <div>
-      {items.map((item, i) => {
-        const Icon = CATEGORY_ICON[item.cat];
-        const isOpen = openIdx === i;
-        return (
-          <div key={i} className={i > 0 ? 'border-t' : ''} style={{ borderColor: T.n700 }}>
-            <button
-              onClick={() => !single && setOpenIdx(isOpen ? null : i)}
-              className="w-full flex items-center gap-2.5 md:gap-3 py-2 md:py-2.5 text-left min-h-[44px] transition-opacity hover:opacity-75"
-            >
-              <div
-                className="flex items-center justify-center rounded-lg flex-shrink-0"
-                style={{ width: 28, height: 28, backgroundColor: T.n700 }}
-              >
-                <Icon className="w-4 h-4" style={{ color: T.n300 }} strokeWidth={1.5} />
-              </div>
-              <p className="flex-1 leading-snug" style={{ fontSize: 'var(--type-size-body)', fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
-                {item.short}
-              </p>
-              {!single && (
-                <ChevronDown
-                  className="w-4 h-4 flex-shrink-0 transition-transform"
-                  style={{ color: T.n500, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  strokeWidth={1.5}
-                />
-              )}
-            </button>
-            {isOpen && (
-              <p className="leading-relaxed pb-2 md:pb-3" style={{ fontSize: 'var(--type-size-body)', color: T.n300, fontFamily: 'var(--font-family)' }}>
-                {item.long}
-              </p>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function StartseiteView({
@@ -602,7 +556,7 @@ export default function StartseiteView({
                   {/* Inline dark recommendations — matches HeuteView dark accordion */}
                   {isOpen && (
                     <div className="px-4 pb-3">
-                      <DarkActionItems items={block.actions} />
+                      <ActionList items={block.actions} dark />
                     </div>
                   )}
                 </div>
@@ -700,13 +654,13 @@ export default function StartseiteView({
                           strokeWidth={2}
                         />
                         <p
-                          className="text-xs font-semibold text-black"
+                          className="text-sm font-semibold text-black"
                           style={{ fontFamily: 'var(--font-family)' }}
                         >
                           {day.criticalWindow}
                         </p>
                         <p
-                          className="text-xs text-black/50"
+                          className="text-sm text-black/50"
                           style={{ fontFamily: 'var(--font-family)' }}
                         >
                           {day.status === 'umplanung' ? 'Kritisch' : 'Eingeschränkt'}

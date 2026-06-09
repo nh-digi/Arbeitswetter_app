@@ -1,7 +1,7 @@
 import React from 'react';
-import { ChevronDown, Shield, Clock, Droplet, AlertCircle, AlertTriangle, Info, CheckCircle, X, Thermometer, Wind, Sun, HardHat, Shirt } from 'lucide-react';
+import { Shield, Clock, Droplet, AlertCircle, AlertTriangle, Info, CheckCircle, X, Thermometer, Wind, Sun, HardHat, Shirt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip } from 'recharts';
-import { useState } from 'react';
+import DetailRowList from './DetailRowList';
 import type { Day } from './PlanungView';
 
 interface BeurteilungstemperaturDetailViewWeeklyProps {
@@ -53,9 +53,6 @@ export default function BeurteilungstemperaturDetailViewWeekly({
   days,
   selectedDayIndex = 0,
 }: BeurteilungstemperaturDetailViewWeeklyProps) {
-  const [openMassnahme, setOpenMassnahme] = useState<number | null>(null);
-  const [openEinflussIndex, setOpenEinflussIndex] = useState<number | null>(null);
-
   const selDay = days[selectedDayIndex];
   const einflussfaktoren = selDay ? [
     { Icon: Thermometer, label: 'Temperatur',            value: selDay.conditions.lufttemp,      description: 'Die Lufttemperatur ist der wichtigste Faktor. Hohe Temperaturen erhöhen die Wärmebelastung des Körpers direkt.' },
@@ -297,41 +294,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
             </p>
             <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
               <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
-                {massnahmen.map(({ Icon, label, detail }, i) => (
-                  <div key={label}>
-                    <button
-                      onClick={() => setOpenMassnahme(openMassnahme === i ? null : i)}
-                      className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-3 rounded-lg cursor-pointer lg:min-h-[44px] text-left"
-                      style={{ minHeight: 40, background: 'none', border: 'none' }}
-                    >
-                      <div
-                        className="flex items-center justify-center rounded-lg flex-shrink-0 lg:w-[28px] lg:h-[28px]"
-                        style={{ width: 24, height: 24, backgroundColor: 'var(--accent)' }}
-                      >
-                        <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
-                      </div>
-                      <p className="flex-1 text-xs lg:text-sm" style={{ color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
-                        {label}
-                      </p>
-                      <ChevronDown
-                        className="w-3.5 lg:w-4 h-3.5 lg:h-4 flex-shrink-0 transition-transform"
-                        style={{ color: 'var(--muted-foreground)', transform: openMassnahme === i ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                        strokeWidth={1.5}
-                      />
-                    </button>
-                    {openMassnahme === i && (
-                      <p
-                        className="pb-2 text-xs lg:text-sm"
-                        style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', lineHeight: 1.6, paddingLeft: 36 }}
-                      >
-                        {detail}
-                      </p>
-                    )}
-                    {i < massnahmen.length - 1 && (
-                      <div className="w-full h-px" style={{ backgroundColor: 'var(--border)' }} />
-                    )}
-                  </div>
-                ))}
+                <DetailRowList items={massnahmen} />
               </div>
             </div>
           </div>
@@ -349,42 +312,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
               </p>
               <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
                 <div className="px-3 lg:px-4 pt-4 lg:pt-5 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
-                  {einflussfaktoren.map(({ Icon, label, value, description }, i) => (
-                    <div key={label}>
-                      <button
-                        onClick={() => setOpenEinflussIndex(openEinflussIndex === i ? null : i)}
-                        className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-3 rounded-lg cursor-pointer lg:min-h-[44px] text-left"
-                        style={{ minHeight: 40, background: 'none', border: 'none' }}
-                      >
-                        <div
-                          className="flex items-center justify-center rounded-lg flex-shrink-0 lg:w-[28px] lg:h-[28px]"
-                          style={{ width: 24, height: 24, backgroundColor: 'var(--accent)' }}
-                        >
-                          <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
-                        </div>
-                        <p className="flex-1 text-xs lg:text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
-                          {label}
-                        </p>
-                        <p className="text-xs lg:text-sm mr-2" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>{value}</p>
-                        <ChevronDown
-                          className="w-3.5 lg:w-4 h-3.5 lg:h-4 flex-shrink-0 transition-transform"
-                          style={{ color: 'var(--muted-foreground)', transform: openEinflussIndex === i ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                          strokeWidth={1.5}
-                        />
-                      </button>
-                      {openEinflussIndex === i && (
-                        <p
-                          className="pb-2 text-xs lg:text-sm"
-                          style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', lineHeight: 1.6, paddingLeft: 36 }}
-                        >
-                          {description}
-                        </p>
-                      )}
-                      {i < einflussfaktoren.length - 1 && (
-                        <div className="w-full h-px" style={{ backgroundColor: 'var(--border)' }} />
-                      )}
-                    </div>
-                  ))}
+                  <DetailRowList items={einflussfaktoren.map(e => ({ ...e, detail: e.description }))} />
                 </div>
               </div>
             </div>

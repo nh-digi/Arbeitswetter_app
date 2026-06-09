@@ -2,3 +2,31 @@
 @source '../**/*.{js,ts,jsx,tsx}';
 
 @import 'tw-animate-css';
+
+/* ── Apple HIG type scale ─────────────────────────────────────────────────
+   Overrides Tailwind's default font-size utilities globally.
+   Mapped to Apple iOS/iPadOS Dynamic Type roles (1pt = 1px at 1×):
+
+   Role           Size    Tailwind class
+   ─────────────────────────────────────
+   Caption 1      12 px   text-xs    (unchanged – decorative captions only)
+   Subhead        15 px   text-sm    (was 14 px)
+   Callout        16 px   text-base  (unchanged – stable layout base)
+   Title 3        20 px   text-lg    (was 18 px)
+   Title 2        22 px   text-xl    (was 20 px)
+   Title 1        28 px   text-2xl   (was 24 px)
+   Large Title    34 px   text-3xl   (was 30 px)
+
+   EXCEPTIONS – these bypass Tailwind and are intentionally unchanged:
+   • Inline style={{ fontSize }} on Figma-imported detail views
+   • Hardcoded text-[10px] / text-[11px] chart annotations
+   • text-[28px] / text-[32px] page-title and temperature displays
+   • Clock / timeline axis numbers (text-xs / tabular-nums)
+──────────────────────────────────────────────────────────────────────── */
+@theme {
+  --text-sm:   0.9375rem;  /* 15 px – Subhead   */
+  --text-lg:   1.25rem;    /* 20 px – Title 3   */
+  --text-xl:   1.375rem;   /* 22 px – Title 2   */
+  --text-2xl:  1.75rem;    /* 28 px – Title 1   */
+  --text-3xl:  2.125rem;   /* 34 px – Large Title */
+}

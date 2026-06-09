@@ -1,6 +1,7 @@
 import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X, Moon } from 'lucide-react';
 import { CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
 import { useState, useRef, useEffect, type RefObject } from 'react';
+import ActionList from './ActionList';
 import DWDWarningBanner from './DWDWarningBanner';
 import UndoToast from './UndoToast';
 import UVDetailView from './UVDetailView';
@@ -332,16 +333,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const isDragging      = useRef(false);
   const returnTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const actionsCardRef  = useRef<HTMLDivElement>(null);
-  const trayRef         = useRef<HTMLDivElement>(null);
-
-  // When the mobile tray opens, scroll it into view so the list is visible.
-  useEffect(() => {
-    if (trayOpen) {
-      setTimeout(() => {
-        trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
-    }
-  }, [trayOpen]);
 
   // Smooth-scroll the recommendations card into view on mobile after a list selection,
   // so the cause (tapped row) and effect (updated card) are visible together.
@@ -589,20 +580,24 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         const display = h % 24;  // 24h format — unambiguous for all shifts
 
         if (h === wStartH) {
-          const dotPos      = polar(R, angle);
-          const numPos      = polar(LABEL_R, angle);
-          const sublabelPos = polar(R + SW / 2 + 16, angle);
+          const dotPos    = polar(R, angle);
+          const numPos    = polar(LABEL_R, angle);
+          const pillDist  = R + SW / 2 + 14;
+          const pillC     = polar(pillDist, angle);
+          const pillW = 54, pillH = 20;
           return (
             <g key={h} style={{ pointerEvents: 'none' }}>
-              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
                 style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
-              <text x={sublabelPos.x} y={sublabelPos.y} textAnchor="middle" dominantBaseline="middle"
-                fill={T.n800}
-                style={{ fontSize: '9px', fontWeight: 400, fontFamily: 'var(--font-family)' }}>
+              <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
+                width={pillW} height={pillH} rx={pillH / 2}
+                fill={T.n800} />
+              <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.white}
+                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Start
               </text>
             </g>
@@ -610,20 +605,24 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         }
 
         if (h % 24 === wEndH) {
-          const dotPos      = polar(R, angle);
-          const numPos      = polar(LABEL_R, angle);
-          const sublabelPos = polar(R + SW / 2 + 26, angle);
+          const dotPos    = polar(R, angle);
+          const numPos    = polar(LABEL_R, angle);
+          const pillDist  = R + SW / 2 + 14;
+          const pillC     = polar(pillDist, angle);
+          const pillW = 82, pillH = 20;
           return (
             <g key={h} style={{ pointerEvents: 'none' }}>
-              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
                 style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
-              <text x={sublabelPos.x} y={sublabelPos.y} textAnchor="middle" dominantBaseline="middle"
-                fill={T.n800}
-                style={{ fontSize: '9px', fontWeight: 400, fontFamily: 'var(--font-family)' }}>
+              <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
+                width={pillW} height={pillH} rx={pillH / 2}
+                fill={T.n800} />
+              <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
+                fill={T.white}
+                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Feierabend
               </text>
             </g>
@@ -655,10 +654,10 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         {status.label}
       </text>
 
-      {/* Center: description — 12 px regular */}
-      <text x={C} y={C + 26} textAnchor="middle" dominantBaseline="middle"
+      {/* Center: description — 14 px regular */}
+      <text x={C} y={C + 28} textAnchor="middle" dominantBaseline="middle"
         fill={T.mutedFg}
-        style={{ fontSize: '12px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
+        style={{ fontSize: '14px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
         {getStatusDescription(status.label)}
       </text>
 
@@ -694,7 +693,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           </div>
           <div className="flex-1 min-w-0">
             <p className="leading-snug mb-0.5 lg:mb-1"
-              style={{ fontSize: mobile ? 14 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
+              style={{ fontSize: 'var(--type-size-body)', lineHeight: 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
               {isPreShift && scrubbingHour !== null && Math.abs(scrubbingHour - wStart) < 0.25
                 ? `Schichtbeginn, ${formatHH(wStart)} Uhr`
                 : scrubbingHour !== null
@@ -702,51 +701,46 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                   : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
             </p>
             <p className="leading-snug"
-              style={{ fontSize: mobile ? 14 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
+              style={{ fontSize: 'var(--type-size-body-sm)', lineHeight: 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
               {status.alertBody}
             </p>
           </div>
         </div>
 
-        {/* Mobile: accordion row embedded inside banner */}
+        {/* Mobile: bottom sheet trigger row */}
         {mobile && status.level >= 2 && (
           <>
             <div style={{ height: 1, margin: '0 12px', backgroundColor: 'rgba(255,255,255,0.12)' }} />
             <button
-              onClick={() => setTrayOpen(o => !o)}
+              onClick={() => setTrayOpen(true)}
               className="flex items-center justify-between w-full px-3 py-2.5 transition-opacity active:opacity-60"
             >
-              <span style={{ fontSize: 13, fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
-                Empfehlungen · {status.label}
+              <span style={{ fontSize: 15, fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
+                Empfehlungen
               </span>
               <div className="flex items-center gap-1.5">
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: 20, height: 20, borderRadius: '50%',
+                  width: 22, height: 22, borderRadius: '50%',
                   backgroundColor:
                     status.level >= 4 ? T.criticalTint
                     : status.level >= 3 ? T.strong
                     : status.level >= 2 ? T.warning
                     : T.success,
-                  fontSize: 11, fontWeight: 700,
+                  fontSize: 12, fontWeight: 700,
                   color: status.level === 1 ? T.white : T.black,
                   fontFamily: 'var(--font-family)',
                   flexShrink: 0,
                 }}>
                   {items.length}
                 </span>
-                <ChevronDown
+                <ChevronRight
                   size={14}
                   strokeWidth={2}
-                  style={{ color: T.n300, flexShrink: 0, transition: 'transform 0.2s', transform: trayOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  style={{ color: T.n300, flexShrink: 0 }}
                 />
               </div>
             </button>
-            {trayOpen && (
-              <div ref={trayRef} className="pb-3 animate-slide-up">
-                <ActionsCard dark />
-              </div>
-            )}
           </>
         )}
       </div>
@@ -777,7 +771,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5">
                 <WeatherIcon size={compact ? 13 : 14} weight="regular" color={T.mutedFg} />
-                <span style={{ fontSize: compact ? 12 : 12, color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
+                <span style={{ fontSize: 'var(--type-size-body-sm)', color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
                   {`${formatGermanDate(now)} · ${formatHH(h)} Uhr`}
                 </span>
               </div>
@@ -790,7 +784,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="flex items-center gap-2">
           {compact ? (
             <h1 style={{
-              fontSize: tiny ? 16 : 18,
+              fontSize: tiny ? 'var(--type-size-body)' : 'var(--type-size-h3)',
               fontWeight: 700,
               lineHeight: 1.15,
               letterSpacing: '-0.3px',
@@ -802,7 +796,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </h1>
           ) : (
             <h1 style={{
-              fontSize: 20,
+              fontSize: 'var(--type-size-h3)',
               fontWeight: 700,
               lineHeight: 1.1,
               letterSpacing: '-0.3px',
@@ -820,7 +814,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
             style={{ backgroundColor: dayPeakStatus.badgeBg }}>
-            <span style={{ fontSize: compact ? 12 : 13, fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
+            <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
               {dayPeakStatus.beurteilungstemperatur}°C max.
             </span>
           </div>
@@ -832,7 +826,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'}
                 strokeWidth={1.75}
               />
-              <span style={{ fontSize: compact ? 11 : 12, fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
+              <span style={{ fontSize: 'var(--type-size-caption)', fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
                 Außer Dienst
               </span>
             </div>
@@ -847,7 +841,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           style={{ padding: 0, background: 'none', border: 'none' }}
         >
           <Edit3 size={14} style={{ color: T.n600, flexShrink: 0 }} strokeWidth={1.5} />
-          <span style={{ fontSize: 14, color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 'var(--type-size-body-sm)', color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
           </span>
         </button>
@@ -1167,14 +1161,13 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   // ── Actions card (light) ──────────────────────────────────────────────────
 
   const ActionsCard = ({ dark = false }: { dark?: boolean }) => {
-    const [openIdx, setOpenIdx] = useState<number | null>(null);
     const items = getActionItems();
     const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
     return (
       <div ref={actionsCardRef} className={dark ? 'scroll-mt-4' : 'rounded-[16px] overflow-hidden scroll-mt-4'} style={dark ? undefined : { backgroundColor: T.n50 }}>
         <div className={dark ? 'px-3 pt-2 pb-2' : 'px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4'}>
           {/* Period chip */}
-          {rangeLabel && (
+          {rangeLabel && !dark && (
             <div className="inline-flex items-center px-2.5 py-1 rounded-full mb-2"
               style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: dark ? T.n100 : T.n800, fontFamily: 'var(--font-family)' }}>
@@ -1184,7 +1177,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           )}
           {/* Headline — hidden in dark/mobile tray (redundant with banner) */}
           {!dark && (
-            <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
+            <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
               Handlungsempfehlungen für diesen Zeitraum
             </p>
           )}
@@ -1196,34 +1189,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               ))}
             </div>
           )}
-          {items.map((item, i) => {
-            const Icon = CATEGORY_ICON[item.cat];
-            const isOpen = openIdx === i;
-            return (
-              <div key={i} className={i > 0 ? 'border-t' : ''} style={{ borderColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
-                <button
-                  onClick={() => setOpenIdx(isOpen ? null : i)}
-                  className="w-full flex items-center gap-2.5 lg:gap-3 py-2 lg:py-2.5 text-left min-h-[44px] transition-opacity hover:opacity-75"
-                >
-                  <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-                    style={{ width: 24, height: 24, backgroundColor: dark ? 'rgba(255,255,255,0.12)' : T.n100 }}>
-                    <Icon className="w-3 h-3" style={{ color: dark ? T.n300 : T.n600 }} strokeWidth={1.5} />
-                  </div>
-                  <p className="flex-1 text-sm lg:text-base leading-snug" style={{ color: dark ? T.white : T.n950, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{item.short}</p>
-                  <ChevronDown
-                    className="w-3.5 h-3.5 flex-shrink-0 transition-transform"
-                    style={{ color: dark ? T.n300 : T.n400, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    strokeWidth={1.5}
-                  />
-                </button>
-                {isOpen && (
-                  <p className="text-sm lg:text-base leading-relaxed pb-2 lg:pb-3" style={{ color: dark ? T.n200 : T.n600, fontFamily: 'var(--font-family)' }}>
-                    {item.long}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+          <ActionList items={items} dark={dark} />
         </div>
       </div>
     );
@@ -1303,8 +1269,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const HazardCard = () => {
     const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
     return (
-    <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
-      <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
+    <div className="md:rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
+      <div className="px-4 lg:px-4 pt-4 lg:pt-6 pb-4 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
         {rangeLabel && (
           <div className="inline-flex self-start items-center px-2.5 py-1 rounded-full mb-1"
             style={{ backgroundColor: T.n600 }}>
@@ -1313,7 +1279,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </span>
           </div>
         )}
-        <p className="pb-1 lg:pb-2 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
+        <p className="pb-1 lg:pb-2 lg:text-lg" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
           Belastungsfaktoren in diesem Zeitraum
         </p>
         {hazardRows.map(({ Icon, label }, i) => (
@@ -1323,7 +1289,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 style={{ width: 24, height: 24, backgroundColor: T.n600 }}>
                 <Icon className="w-3 lg:w-3.5 h-3 lg:h-3.5" style={{ color: T.white }} strokeWidth={1.5} />
               </div>
-              <p className="flex-1 text-sm lg:text-base" style={{ color: T.white, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{label}</p>
+              <p className="flex-1" style={{ fontSize: 'var(--type-size-body)', color: T.white, fontFamily: 'var(--font-family)', fontWeight: 400 }}>{label}</p>
               <ChevronDown className="w-3.5 lg:w-4 h-3.5 lg:h-4 flex-shrink-0" style={{ color: T.n300 }} strokeWidth={1.5} />
             </div>
             {i < hazardRows.length - 1 && (
@@ -1385,8 +1351,8 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const weatherStats = getWeatherStats();
 
   const WeatherSection = () => (
-    <div className="rounded-[16px] p-3 lg:p-4 flex flex-col gap-2.5 lg:gap-3" style={{ backgroundColor: T.n800 }}>
-      <p className="lg:text-base" style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
+    <div className="md:rounded-[16px] p-4 lg:p-4 flex flex-col gap-2.5 lg:gap-3" style={{ backgroundColor: T.n800 }}>
+      <p className="lg:text-base" style={{ fontWeight: 700, fontSize: 'var(--type-size-body-sm)', lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
         Heute um {Math.floor(currentHour % 24)}:00 Uhr
       </p>
 
@@ -1488,7 +1454,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-      <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
+      <div className="md:rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-full flex items-center justify-between px-3 lg:px-4 py-3 lg:py-4 hover:opacity-90 transition-opacity"
@@ -1636,13 +1602,71 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       {/* ── MOBILE ───────────────────────────────────────────────────────── */}
       <div className="lg:hidden">
 
+        {/* Recommendations bottom sheet */}
+        {trayOpen && (
+          <>
+            {/* Scrim */}
+            <div
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+              onClick={() => setTrayOpen(false)}
+            />
+            {/* Sheet */}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
+              style={{
+                height: 'calc(100svh - 3rem)',
+                backgroundColor: T.n800,
+                borderRadius: '20px 20px 0 0',
+                animation: 'slideUpSheet 0.28s cubic-bezier(0.32,0.72,0,1)',
+              }}
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.25)' }} />
+              </div>
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 pb-3 flex-shrink-0">
+                <div>
+                  <p style={{ fontSize: 17, fontWeight: 700, color: T.white, fontFamily: 'var(--font-family)' }}>
+                    Empfehlungen
+                  </p>
+                  {activeBlock && (
+                    <p style={{ fontSize: 13, color: T.n300, fontFamily: 'var(--font-family)', marginTop: 2 }}>
+                      {activeBlock.start} – {activeBlock.end} · {status.label}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setTrayOpen(false)}
+                  className="flex items-center justify-center transition-opacity active:opacity-60"
+                  style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}
+                >
+                  <X size={16} strokeWidth={2} style={{ color: T.white }} />
+                </button>
+              </div>
+              <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto px-4 py-4">
+                <ActionsCard dark />
+              </div>
+            </div>
+            <style>{`
+              @keyframes slideUpSheet {
+                from { transform: translateY(100%); }
+                to   { transform: translateY(0); }
+              }
+            `}</style>
+          </>
+        )}
+
         {/* Main card */}
-        <div className="px-4 pt-3 pb-3 max-w-xl mx-auto">
-          <div className="bg-card rounded-[24px] shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden" style={{ border: '1px solid #C8CDD4' }}>
+        <div className="md:px-4 md:max-w-xl md:mx-auto h-[calc(100svh-5rem)] md:h-[100svh] flex flex-col">
+          <div className="bg-card md:rounded-[24px] md:shadow-lg px-4 pt-3 min-[390px]:pt-4 flex flex-col flex-1 overflow-hidden" style={{ border: '1px solid #3a3a4a' }}>
             <CardHeader compact tiny={isTinyScreen} />
-            <div className="w-full">
+            <div className="flex-1 flex items-center justify-center w-full min-h-0">
               {mobileView === 'clock' && (
-                <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', margin: '0 auto' }}>
+                <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', maxHeight: '100%' }}>
                   {makeClockSVG(clockRefMobile)}
                 </div>
               )}
@@ -1650,7 +1674,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </div>
             <DaySummary />
             {mobileView === 'clock' && (
-              <div className="-mx-4 -mb-3 min-[390px]:-mb-4">
+              <div className="-mx-4">
                 <AlertBanner mobile />
               </div>
             )}
@@ -1658,7 +1682,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         </div>
 
         {/* Weather + cards */}
-        <div className="px-4 mb-3 max-w-xl mx-auto flex flex-col gap-3">
+        <div className="mt-4 mb-4 md:px-4 md:max-w-xl md:mx-auto flex flex-col gap-4">
           <HazardCard />
           <WeatherSection />
           <InfoAccordion />

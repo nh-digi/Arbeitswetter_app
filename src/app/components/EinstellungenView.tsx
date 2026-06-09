@@ -196,12 +196,12 @@ function ShiftTimeline({
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-muted-foreground">{durationH} Stunden</span>
         {schicht === 'früh' && (
-          <span className="text-xs text-[#166534] font-medium">
+          <span className="text-sm text-[#166534] font-medium">
             Empfohlen bei Hitze
           </span>
         )}
         {schicht === 'nacht' && (
-          <span className="text-xs text-muted-foreground">Nachtschicht</span>
+          <span className="text-sm text-muted-foreground">Nachtschicht</span>
         )}
       </div>
     </div>
@@ -321,7 +321,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
       <div className="max-w-4xl mx-auto px-6 md:px-8 pt-2">
         <div className="flex justify-end">
           <span
-            className="text-xs text-muted-foreground flex items-center gap-1.5 pb-0.5 transition-opacity duration-300"
+            className="text-sm text-muted-foreground flex items-center gap-1.5 pb-0.5 transition-opacity duration-300"
             style={{ opacity: showSaved ? 1 : 0 }}
             aria-live="polite"
           >
@@ -338,7 +338,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
           <div className="flex items-center gap-2 mb-3 px-1">
             <MapPin className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
             <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Standort</p>
-            <p className="text-xs text-muted-foreground ml-1">· Verbessert lokale Vorhersagen</p>
+            <p className="text-sm text-muted-foreground ml-1">· Verbessert lokale Vorhersagen</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-black/[0.05]">
@@ -482,7 +482,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                               Gerade gespeichert
                             </span>
                           ) : (
-                            <p className="text-xs text-muted-foreground mt-0.5">{ort.city}</p>
+                            <p className="text-sm text-muted-foreground mt-0.5">{ort.city}</p>
                           )}
                         </div>
                         {isActive && (
@@ -512,7 +512,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
           <div className="flex items-center gap-2 mb-3 px-1">
             <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
             <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
-            <p className="text-xs text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
+            <p className="text-sm text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
           </div>
 
           <div className="bg-white rounded-2xl overflow-hidden border border-black/[0.06] divide-y divide-black/[0.05]">
@@ -530,7 +530,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 <Chip label="Mittel" selected={schwere === 'mittel'} onClick={() => change(setSchwere)('mittel')} />
                 <Chip label="Schwer" selected={schwere === 'schwer'} onClick={() => change(setSchwere)('schwer')} />
               </div>
-              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
+              <p className="text-sm text-muted-foreground mt-2.5 leading-relaxed">{SCHWERE_LABEL[schwere]}</p>
             </div>
 
             {/* Arbeitskleidung */}
@@ -546,7 +546,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 <Chip label="Mittel" selected={bekleidung === 'mittel'} onClick={() => change(setBekleidung)('mittel')} />
                 <Chip label="Schwer" selected={bekleidung === 'schwer'} onClick={() => change(setBekleidung)('schwer')} />
               </div>
-              <p className="text-xs text-muted-foreground mt-2.5 leading-relaxed">{BEKLEIDUNG_LABEL[bekleidung]}</p>
+              <p className="text-sm text-muted-foreground mt-2.5 leading-relaxed">{BEKLEIDUNG_LABEL[bekleidung]}</p>
             </div>
 
             {/* Arbeitsumgebung */}
@@ -574,10 +574,10 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                         className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}
                         strokeWidth={1.5}
                       />
-                      <p className={`text-xs font-semibold leading-tight break-words ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
+                      <p className={`text-sm font-semibold leading-tight break-words ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
                         {label}
                       </p>
-                      <p className={`text-xs mt-1 leading-tight break-words ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
+                      <p className={`text-sm mt-1 leading-tight break-words ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
                         {sub}
                       </p>
                     </button>
@@ -662,7 +662,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 </label>
               </div>
 
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Frühere Schichten schützen Ihre Mitarbeiter bei Hitze
               </p>
             </div>
@@ -681,7 +681,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
             <div className="flex items-center justify-between p-4 md:p-6">
               <div className="flex-1 min-w-0 pr-4">
                 <p className="text-sm font-semibold text-black">Push-Benachrichtigungen</p>
-                <p className="text-xs mt-1 leading-relaxed">
+                <p className="text-sm mt-1 leading-relaxed">
                   {benachrichtigungen ? (
                     <><span className="font-semibold text-[#166534]">An</span><span className="text-muted-foreground"> · Hinweise bei Hitze, Unwetter und Arbeitsschutzempfehlungen</span></>
                   ) : (

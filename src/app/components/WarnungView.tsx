@@ -205,7 +205,7 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
               <p className="text-sm lg:text-base text-[var(--neutral-950)]" style={{ fontWeight: 600 }}>
                 Quelle: Deutscher Wetterdienst (DWD)
               </p>
-              <p className="text-xs leading-[1.5] text-[var(--neutral-600)] mt-1">
+              <p className="text-sm leading-[1.5] text-[var(--neutral-600)] mt-1">
                 Offizielle Wetterwarnungen werden vom Deutschen Wetterdienst bereitgestellt und automatisch aktualisiert.
               </p>
             </div>

@@ -90,7 +90,7 @@ export default function PageHeader({
 
           {subtitle && (
             <p
-              className="text-xs leading-[1.3]"
+              className="text-sm leading-[1.3]"
               style={{
                 color: isDark ? '#E2E8F0' : 'var(--neutral-600)',
                 fontFamily: 'var(--font-family)'
@@ -134,7 +134,7 @@ export default function PageHeader({
               />
             )}
             <h1
-              className="text-[28px]"
+              className="text-2xl"
               style={{
                 color: isDark ? 'white' : 'var(--neutral-950)',
                 fontFamily: 'var(--font-family)',
@@ -149,7 +149,7 @@ export default function PageHeader({
 
           {subtitle && (
             <p
-              className="text-xs leading-[1.3] mb-4"
+              className="text-sm leading-[1.3] mb-4"
               style={{
                 color: isDark ? '#E2E8F0' : 'var(--neutral-600)',
                 fontFamily: 'var(--font-family)'

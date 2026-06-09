@@ -97,7 +97,7 @@ function SelectionCard<T extends string>({
       </div>
       <div className="min-w-0">
         <p className={`text-sm font-semibold leading-tight ${selected ? 'text-[#1d3fa3]' : 'text-black/80'}`}>{label}</p>
-        <p className={`text-xs mt-0.5 leading-tight ${selected ? 'text-[#325cda]' : 'text-muted-foreground'}`}>{sub}</p>
+        <p className={`text-sm mt-0.5 leading-tight ${selected ? 'text-[#325cda]' : 'text-muted-foreground'}`}>{sub}</p>
       </div>
     </button>
   );
@@ -241,8 +241,8 @@ function ShiftTimeline({
       </div>
       <div className="flex items-center justify-between mt-1.5">
         <span className="text-xs text-muted-foreground">{durationH} Stunden</span>
-        {schicht === 'früh' && <span className="text-xs text-[#166534] font-medium">Empfohlen bei Hitze</span>}
-        {schicht === 'nacht' && <span className="text-xs text-muted-foreground">Nachtschicht</span>}
+        {schicht === 'früh' && <span className="text-sm text-[#166534] font-medium">Empfohlen bei Hitze</span>}
+        {schicht === 'nacht' && <span className="text-sm text-muted-foreground">Nachtschicht</span>}
       </div>
     </div>
   );
@@ -433,7 +433,7 @@ export default function OnboardingFlow({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#1d3fa3]">{auswahl.name}</p>
-                <p className="text-xs text-[#325cda]/70">{auswahl.region}</p>
+                <p className="text-sm text-[#325cda]/70">{auswahl.region}</p>
               </div>
               <button onClick={clearCity} className="text-[#325cda]/50 hover:text-[#325cda] transition-colors">
                 <X className="w-4 h-4" strokeWidth={2} />
@@ -574,7 +574,7 @@ export default function OnboardingFlow({
             />
           </label>
         </div>
-        <p className="text-xs text-muted-foreground">Frühere Schichten schützen Ihre Mitarbeiter bei Hitze</p>
+        <p className="text-sm text-muted-foreground">Frühere Schichten schützen Ihre Mitarbeiter bei Hitze</p>
       </div>
     </div>,
 
@@ -615,7 +615,7 @@ export default function OnboardingFlow({
           </span>
         </div>
       </div>
-      <p className="text-xs text-center text-muted-foreground px-4">
+      <p className="text-sm text-center text-muted-foreground px-4">
         Alle Werte sind aktiv. Änderungen jederzeit unter <span className="font-medium text-black/60">Einstellungen</span>.
       </p>
     </div>,
