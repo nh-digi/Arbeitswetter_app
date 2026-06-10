@@ -68,19 +68,19 @@ export default function WarnungView({ onNavigate, onOpenSettings, activeLocation
 
   const severityConfig = {
     extreme: {
-      iconBg: 'bg-[#fb88ff]',
-      tagBg: 'bg-[#fb88ff]',
+      iconBg: 'bg-[var(--status-dwd-extreme)]',
+      tagBg: 'bg-[var(--status-dwd-extreme)]',
       tagBorder: 'border-[var(--status-critical)]',
     },
     unwetter: {
-      iconBg: 'bg-[#ff878a]',
-      tagBg: 'bg-[#ff878a]',
+      iconBg: 'bg-[var(--status-critical-tint)]',
+      tagBg: 'bg-[var(--status-critical-tint)]',
       tagBorder: 'border-[var(--status-critical)]',
     },
     markant: {
       iconBg: 'bg-[var(--status-warning)]',
       tagBg: 'bg-[var(--status-warning)]',
-      tagBorder: 'border-[#ff878a]',
+      tagBorder: 'border-[var(--status-critical-tint)]',
     },
     wetter: {
       iconBg: 'bg-[var(--status-caution)]',

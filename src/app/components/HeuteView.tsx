@@ -970,7 +970,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                     </p>
                     {isNow && (
                       <span className="inline-flex items-center px-1.5 py-px rounded-full"
-                        style={{ backgroundColor: T.n100, color: T.n800, fontSize: 10, fontWeight: 600, fontFamily: 'var(--font-family)', lineHeight: 1.4 }}>
+                        style={{ backgroundColor: T.n100, color: T.n800, fontSize: 'var(--type-size-caption)', fontWeight: 600, fontFamily: 'var(--font-family)', lineHeight: 1.4 }}>
                         Jetzt
                       </span>
                     )}

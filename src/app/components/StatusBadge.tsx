@@ -13,25 +13,25 @@ interface StatusBadgeProps {
 const statusConfig = {
   normal: {
     bg: 'bg-[#E8F5E9]',
-    text: 'text-[#2E7D32]',
+    text: 'text-[var(--foreground)]',
     border: 'border-[#2E7D32]/30',
     icon: Circle,
   },
   vorsorge: {
     bg: 'bg-[#FFF3E0]',
-    text: 'text-[#E65100]',
+    text: 'text-[var(--foreground)]',
     border: 'border-[#E65100]/30',
     icon: AlertCircle,
   },
   pflicht: {
     bg: 'bg-[#FFE0B2]',
-    text: 'text-[#E65100]',
+    text: 'text-[var(--foreground)]',
     border: 'border-[#E65100]/40',
     icon: AlertTriangle,
   },
   kritisch: {
     bg: 'bg-[#FFCDD2]',
-    text: 'text-[#C62828]',
+    text: 'text-[var(--foreground)]',
     border: 'border-[#C62828]/40',
     icon: XCircle,
   },

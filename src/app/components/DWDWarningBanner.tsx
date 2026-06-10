@@ -12,44 +12,44 @@ interface DWDWarningBannerProps {
 
 const warningConfig = {
   wetter: {
-    bg: '#f8d74a',
-    border: '#f8d74a',
+    bg: 'var(--status-warning)',
+    border: 'var(--status-warning)',
     title: 'DWD-Wetterwarnung für Ihren Standort',
     description: 'Es liegt eine amtliche Warnung des DWD der Stufe Wetterwarnung vor.',
-    textColor: '#111827',
-    iconColor: '#111827',
+    textColor: 'var(--foreground)',
+    iconColor: 'var(--foreground)',
   },
   markant: {
-    bg: '#febb6a',
-    border: '#e8193c',
+    bg: 'var(--status-strong)',
+    border: 'var(--status-critical)',
     title: 'DWD-Wetterwarnung für Ihren Standort',
     description: 'Es liegt eine amtliche Warnung des DWD der Stufe markante vor.',
-    textColor: '#111827',
-    iconColor: '#111827',
+    textColor: 'var(--foreground)',
+    iconColor: 'var(--foreground)',
   },
   unwetter: {
-    bg: '#ff878a',
-    border: '#e8193c',
+    bg: 'var(--status-critical-tint)',
+    border: 'var(--status-critical)',
     title: 'DWD-Wetterwarnung für Ihren Standort',
     description: 'Es liegt eine amtliche Warnung des DWD der Stufe Unwetterwarnung vor.',
-    textColor: '#111827',
-    iconColor: '#111827',
+    textColor: 'var(--foreground)',
+    iconColor: 'var(--foreground)',
   },
   extreme: {
-    bg: '#fb88ff',
-    border: '#e8193c',
+    bg: 'var(--status-dwd-extreme)',
+    border: 'var(--status-critical)',
     title: 'DWD-Wetterwarnung für Ihren Standort',
     description: 'Es liegt eine amtliche Warnung des DWD der Stufe Extreme Unwetterwarnung vor.',
-    textColor: '#111827',
-    iconColor: '#111827',
+    textColor: 'var(--foreground)',
+    iconColor: 'var(--foreground)',
   },
   multiple: {
     bg: '#111118',
     border: '#111118',
     title: 'DWD-Wetterwarnung für Ihren Standort',
     description: 'Es liegen mehrere aktive amtliche Warnungen des DWD vor.',
-    textColor: 'white',
-    iconColor: 'white',
+    textColor: 'var(--text-inverse)',
+    iconColor: 'var(--text-inverse)',
   },
 };
 
@@ -67,7 +67,7 @@ export default function DWDWarningBanner({ level, onNavigate, onDismiss }: DWDWa
     >
       <X
         className="w-4 h-4"
-        style={{ color: level === 'multiple' ? 'white' : '#222' }}
+        style={{ color: level === 'multiple' ? 'var(--text-inverse)' : 'var(--foreground)' }}
         strokeWidth={1.5}
       />
     </button>

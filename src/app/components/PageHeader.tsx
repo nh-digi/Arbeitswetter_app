@@ -45,12 +45,12 @@ export default function PageHeader({
       <Edit3
         className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0"
         strokeWidth={1.5}
-        style={{ color: isDark ? '#E2E8F0' : 'var(--muted-foreground)' }}
+        style={{ color: isDark ? 'var(--text-inverse-secondary)' : 'var(--muted-foreground)' }}
       />
       <span
         className="text-xs md:text-[15px] truncate"
         style={{
-          color: isDark ? '#E2E8F0' : 'var(--muted-foreground)',
+          color: isDark ? 'var(--text-inverse-secondary)' : 'var(--muted-foreground)',
           fontFamily: 'var(--font-family)'
         }}
       >
@@ -94,7 +94,7 @@ export default function PageHeader({
             <p
               className="text-sm leading-[1.3]"
               style={{
-                color: isDark ? '#E2E8F0' : 'var(--neutral-600)',
+                color: isDark ? 'var(--text-inverse-secondary)' : 'var(--neutral-600)',
                 fontFamily: 'var(--font-family)'
               }}
             >
@@ -117,7 +117,7 @@ export default function PageHeader({
                   <Settings
                     className="w-4 h-4"
                     strokeWidth={1.5}
-                    style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'var(--neutral-600)' }}
+                    style={{ color: isDark ? 'var(--text-inverse-secondary)' : 'var(--neutral-600)' }}
                   />
                 </button>
               )}
@@ -154,7 +154,7 @@ export default function PageHeader({
             <p
               className="text-sm leading-[1.3] mb-4"
               style={{
-                color: isDark ? '#E2E8F0' : 'var(--neutral-600)',
+                color: isDark ? 'var(--text-inverse-secondary)' : 'var(--neutral-600)',
                 fontFamily: 'var(--font-family)'
               }}
             >
@@ -181,7 +181,7 @@ export default function PageHeader({
                       <Settings
                         className="w-5 h-5"
                         strokeWidth={1.5}
-                        style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'var(--neutral-600)' }}
+                        style={{ color: isDark ? 'var(--text-inverse-secondary)' : 'var(--neutral-600)' }}
                       />
                     </button>
                   )}
@@ -199,7 +199,7 @@ export default function PageHeader({
                     <Settings
                       className="w-5 h-5"
                       strokeWidth={1.5}
-                      style={{ color: isDark ? 'rgba(255,255,255,0.5)' : 'var(--neutral-600)' }}
+                      style={{ color: isDark ? 'var(--text-inverse-secondary)' : 'var(--neutral-600)' }}
                     />
                   </button>
                 </div>

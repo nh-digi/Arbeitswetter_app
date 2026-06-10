@@ -319,7 +319,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
           )}
 
           {/* Footer note */}
-          <p style={{ fontSize: 11, lineHeight: 1.5, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
+          <p style={{ fontSize: 'var(--type-size-caption)', lineHeight: 1.5, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
             Alle Werte beziehen sich auf Tagesspitzenwerte bei mittlerer körperlicher Arbeit und direkter Sonneneinstrahlung.
           </p>
 

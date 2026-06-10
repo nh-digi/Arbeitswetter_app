@@ -80,10 +80,10 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
         <div className="flex items-center gap-2 px-4 py-3">
           <button onClick={onClose} className="w-6 h-6" aria-label="Zurück">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24">
-              <path d={svgPaths.p177d0d00} stroke="#111827" strokeLinecap="round" strokeWidth="2" />
+              <path d={svgPaths.p177d0d00} stroke="var(--foreground)" strokeLinecap="round" strokeWidth="2" />
             </svg>
           </button>
-          <p style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: '#111827', fontFamily: 'var(--font-family)' }}>
+          <p style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
             UV-Index
           </p>
         </div>
@@ -92,9 +92,9 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
       {/* Desktop Header */}
       <div
         className="hidden lg:flex items-center justify-between px-6 py-4 sticky top-0 z-10 bg-white border-b"
-        style={{ borderColor: '#E5E7EB' }}
+        style={{ borderColor: 'var(--border)' }}
       >
-        <p style={{ fontWeight: 600, fontSize: 16, color: '#111827', fontFamily: 'var(--font-family)' }}>
+        <p style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
           UV-Index
         </p>
         <button
@@ -102,7 +102,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/[0.06] transition-colors"
           aria-label="Schließen"
         >
-          <X className="w-4 h-4" style={{ color: '#6B7280' }} strokeWidth={2} />
+          <X className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} strokeWidth={2} />
         </button>
       </div>
 
@@ -111,14 +111,14 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
         {/* Large Number Display */}
         <div className="mb-6 lg:mb-8">
           <div className="flex items-baseline gap-3 lg:gap-4">
-            <p style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, color: '#111827', fontFamily: 'var(--font-family)' }} className="lg:text-[80px]">
+            <p style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }} className="lg:text-[80px]">
               9
             </p>
             <div>
-              <p style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.2, letterSpacing: '-0.14px', color: '#111827', fontFamily: 'var(--font-family)' }} className="lg:text-[44px] lg:tracking-[-0.22px]">
+              <p style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.2, letterSpacing: '-0.14px', color: 'var(--foreground)', fontFamily: 'var(--font-family)' }} className="lg:text-[44px] lg:tracking-[-0.22px]">
                 Sehr hoch
               </p>
-              <p style={{ fontSize: 12, lineHeight: 1.3, color: '#6B7280', fontFamily: 'var(--font-family)' }}>
+              <p style={{ fontSize: 'var(--type-size-caption)', lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
                 Deutscher Wetterdienst UVI
               </p>
             </div>
@@ -130,7 +130,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           {/* Mobile Chart */}
           <div className="lg:hidden flex items-start">
             {/* Y-axis labels */}
-            <div className="flex flex-col justify-between pr-2 w-[52px]" style={{ height: 200, fontSize: 12, lineHeight: 1.3, color: '#3F3F3F', fontFamily: 'var(--font-family)', textAlign: 'right' }}>
+            <div className="flex flex-col justify-between pr-2 w-[52px]" style={{ height: 200, fontSize: 12, lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', textAlign: 'right' }}>
               <p key="mobile-extrem">Extrem</p>
               <p key="mobile-sehr-hoch">Sehr hoch</p>
               <p key="mobile-hoch">Hoch</p>
@@ -152,18 +152,18 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       <stop offset="100%" stopColor="#1AA626" stopOpacity={0.3} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="#E5E7EB" vertical={false} />
+                  <CartesianGrid strokeDasharray="0" stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="hour" hide />
                   <YAxis domain={[0, 11]} hide />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                            <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
+                          <div className="bg-white border border-[var(--border)] rounded-lg px-3 py-2 shadow-lg">
+                            <p style={{ fontSize: 12, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
                               {payload[0].payload.time}
                             </p>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                               UV-Index: {payload[0].value}
                             </p>
                           </div>
@@ -174,7 +174,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                   />
                   <ReferenceLine
                     x={13}
-                    stroke="#2563EB"
+                    stroke="var(--brand-primary)"
                     strokeWidth={2}
                     label={{
                       content: (props) => {
@@ -182,7 +182,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                         if (!viewBox || typeof viewBox.x !== 'number') return null;
                         return (
                           <g>
-                            <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="#2563EB" strokeWidth={2} />
+                            <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="var(--brand-primary)" strokeWidth={2} />
                             <rect x={viewBox.x - 20} y={18} width={40} height={16} rx={3} fill="#000000" stroke="#BFDBFE" strokeWidth={1} />
                             <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={11} fontWeight={600} fontFamily="var(--font-family)">
                               Jetzt
@@ -192,7 +192,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       }
                     }}
                   />
-                  <Area type="monotone" dataKey="uv" stroke="#111827" strokeWidth={1.5} fill="url(#uvGradient)" />
+                  <Area type="monotone" dataKey="uv" stroke="var(--foreground)" strokeWidth={1.5} fill="url(#uvGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -201,7 +201,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           {/* Desktop Chart */}
           <div className="hidden lg:flex items-start">
             {/* Y-axis labels */}
-            <div className="flex flex-col justify-between pr-3 w-20" style={{ height: 280, fontSize: 12, lineHeight: 1.3, color: '#3F3F3F', fontFamily: 'var(--font-family)', textAlign: 'right' }}>
+            <div className="flex flex-col justify-between pr-3 w-20" style={{ height: 280, fontSize: 12, lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', textAlign: 'right' }}>
               <p key="desktop-extrem">Extrem</p>
               <p key="desktop-sehr-hoch">Sehr hoch</p>
               <p key="desktop-hoch">Hoch</p>
@@ -223,18 +223,18 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       <stop offset="100%" stopColor="#1AA626" stopOpacity={0.3} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="#E5E7EB" vertical={false} />
+                  <CartesianGrid strokeDasharray="0" stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="hour" hide />
                   <YAxis domain={[0, 11]} hide />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                            <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
+                          <div className="bg-white border border-[var(--border)] rounded-lg px-3 py-2 shadow-lg">
+                            <p style={{ fontSize: 12, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 2 }}>
                               {payload[0].payload.time}
                             </p>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                               UV-Index: {payload[0].value}
                             </p>
                           </div>
@@ -245,7 +245,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                   />
                   <ReferenceLine
                     x={13}
-                    stroke="#2563EB"
+                    stroke="var(--brand-primary)"
                     strokeWidth={2}
                     label={{
                       content: (props) => {
@@ -253,7 +253,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                         if (!viewBox || typeof viewBox.x !== 'number') return null;
                         return (
                           <g>
-                            <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="#2563EB" strokeWidth={2} />
+                            <circle cx={viewBox.x} cy={10} r={5} fill="#FFFFFF" stroke="var(--brand-primary)" strokeWidth={2} />
                             <rect x={viewBox.x - 20} y={18} width={40} height={16} rx={3} fill="#000000" stroke="#BFDBFE" strokeWidth={1} />
                             <text x={viewBox.x} y={29} textAnchor="middle" fill="#FFFFFF" fontSize={11} fontWeight={600} fontFamily="var(--font-family)">
                               Jetzt
@@ -263,7 +263,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
                       }
                     }}
                   />
-                  <Area type="monotone" dataKey="uv" stroke="#111827" strokeWidth={1.5} fill="url(#uvGradientDesktop)" />
+                  <Area type="monotone" dataKey="uv" stroke="var(--foreground)" strokeWidth={1.5} fill="url(#uvGradientDesktop)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -271,29 +271,29 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
 
           {/* X-axis labels */}
           <div className="flex justify-between mt-2 pl-[52px] lg:pl-20" style={{ fontSize: 12, fontFamily: 'var(--font-family)' }}>
-            <p style={{ color: '#6B7280', fontWeight: 500 }}>12AM</p>
-            <p style={{ color: '#6B7280', fontWeight: 500 }}>6AM</p>
-            <p style={{ color: '#111827', fontWeight: 700 }} className="lg:text-[13px]">12PM</p>
-            <p style={{ color: '#6B7280', fontWeight: 500 }}>6PM</p>
+            <p style={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>12AM</p>
+            <p style={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>6AM</p>
+            <p style={{ color: 'var(--foreground)', fontWeight: 700 }} className="lg:text-[13px]">12PM</p>
+            <p style={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>6PM</p>
           </div>
         </div>
 
-        <div className="h-px bg-[#E5E7EB] my-8" />
+        <div className="h-px bg-[var(--border)] my-8" />
 
         {/* Current Info */}
         <div className="mb-8">
-          <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
+          <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Jetzt, 13:06 Uhr
           </p>
-          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
+          <p className="max-w-prose" style={{ fontSize: 'var(--type-size-body-sm)', lineHeight: 1.6, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Sonnenschutz wird dringend empfohlen. UV-Werte von Mäßig oder höher werden von 10:00 bis 18:00 Uhr erreicht.
           </p>
-          <p style={{ fontSize: 12, lineHeight: 1.3, color: '#3F3F3F', fontFamily: 'var(--font-family)' }}>
+          <p style={{ fontSize: 'var(--type-size-caption)', lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
             Quelle: <a href="https://www.dwd.de" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>DWD</a>
           </p>
         </div>
 
-        <div className="h-px bg-[#E5E7EB] my-8" />
+        <div className="h-px bg-[var(--border)] my-8" />
 
         {/* Sun Exposure Recommendations */}
         <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
@@ -305,59 +305,59 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
           </div>
         </div>
 
-        <div className="h-px bg-[#E5E7EB] my-8" />
+        <div className="h-px bg-[var(--border)] my-8" />
 
-        {/* Day Comparison */}
+        {/* Day Comparison */}}
         <div className="mb-8">
-          <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
+          <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Tagesvergleich
           </p>
-          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)', marginBottom: 16 }}>
+          <p className="max-w-prose" style={{ fontSize: 'var(--type-size-body-sm)', lineHeight: 1.6, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 16 }}>
             Der UV-Index-Höchstwert heute ist ähnlich wie gestern.
           </p>
 
           {/* Comparison Cards */}
           <div className="space-y-3">
             {/* Today */}
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-3 flex items-center gap-3">
+            <div className="bg-white border border-[var(--border)] rounded-xl p-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(to right, #4ADE80, #F59E0B)', opacity: 0.12 }}>
                 <div className="w-5 h-5 rounded-full" style={{ background: 'linear-gradient(to right, #4ADE80, #F59E0B)' }} />
               </div>
               <div className="flex-1">
-                <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>Heute</p>
-                <p style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', fontFamily: 'var(--font-family)' }}>UV-Index</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>Heute</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', fontWeight: 500, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>UV-Index</p>
               </div>
               <div className="bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.2)] rounded-full px-3 py-1.5 flex items-center gap-1">
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#222', fontFamily: 'var(--font-family)' }}>UV</p>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#222', fontFamily: 'var(--font-family)' }}>9</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>UV</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>9</p>
               </div>
             </div>
 
             {/* Yesterday */}
-            <div className="bg-white border border-[#E5E7EB] rounded-xl p-3 flex items-center gap-3">
+            <div className="bg-white border border-[var(--border)] rounded-xl p-3 flex items-center gap-3">
               <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(to right, #4ADE80, #F59E0B)', opacity: 0.12 }}>
                 <div className="w-5 h-5 rounded-full" style={{ background: 'linear-gradient(to right, #4ADE80, #F59E0B)' }} />
               </div>
               <div className="flex-1">
-                <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>Gestern</p>
-                <p style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', fontFamily: 'var(--font-family)' }}>UV-Index</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>Gestern</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', fontWeight: 500, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>UV-Index</p>
               </div>
               <div className="bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.2)] rounded-full px-3 py-1.5 flex items-center gap-1">
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#222', fontFamily: 'var(--font-family)' }}>UV</p>
-                <p style={{ fontSize: 15, fontWeight: 700, color: '#222', fontFamily: 'var(--font-family)' }}>8</p>
+                <p style={{ fontSize: 'var(--type-size-caption)', fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>UV</p>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>8</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="h-px bg-[#E5E7EB] my-8" />
+        <div className="h-px bg-[var(--border)] my-8" />
 
         {/* About UV Index */}
         <div>
-          <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#222', fontFamily: 'var(--font-family)', marginBottom: 8 }}>
+          <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 8 }}>
             Über den UV-Index
           </p>
-          <p className="max-w-prose" style={{ fontSize: 14, lineHeight: 1.6, color: '#3F3F3F', fontFamily: 'var(--font-family)' }}>
+          <p className="max-w-prose" style={{ fontSize: 'var(--type-size-body-sm)', lineHeight: 1.6, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
             Der UV-Index (UVI) der Weltgesundheitsorganisation misst ultraviolette Strahlung. Je höher der UVI, desto größer ist das Schadenspotenzial und desto schneller können Schäden entstehen. Der UVI hilft Ihnen zu entscheiden, wie und wann Sie das Aufhalten im Freien einschränken sollten. Die WHO empfiehlt bei Werten ab 3 (Mäßig) Schatten, Sonnencreme, Hüte und Schutzkleidung zu verwenden.
           </p>
         </div>

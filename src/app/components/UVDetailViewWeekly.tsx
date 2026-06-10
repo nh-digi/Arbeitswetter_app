@@ -70,14 +70,14 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
       <div className="absolute inset-0 bg-white overflow-y-auto lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[560px] lg:shadow-2xl">
 
         {/* Mobile Header */}
-        <div className="lg:hidden bg-white border-b" style={{ borderColor: '#E5E7EB' }}>
+        <div className="lg:hidden bg-white border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 px-4 py-3">
             <button onClick={onClose} className="w-6 h-6" aria-label="Zurück">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24">
-                <path d={backArrow} stroke="#111827" strokeLinecap="round" strokeWidth="2" />
+                <path d={backArrow} stroke="var(--foreground)" strokeLinecap="round" strokeWidth="2" />
               </svg>
             </button>
-            <p style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: '#111827', fontFamily: 'var(--font-family)' }}>
+            <p style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
               UV-Index – Wochenübersicht
             </p>
           </div>
@@ -86,9 +86,9 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
         {/* Desktop Header */}
         <div
           className="hidden lg:flex items-center justify-between px-6 py-4 sticky top-0 z-10 bg-white border-b"
-          style={{ borderColor: '#E5E7EB' }}
+          style={{ borderColor: 'var(--border)' }}
         >
-          <p style={{ fontWeight: 600, fontSize: 16, color: '#111827', fontFamily: 'var(--font-family)' }}>
+          <p style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
             UV-Index – Wochenübersicht
           </p>
           <button
@@ -96,7 +96,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/[0.06] transition-colors"
             aria-label="Schließen"
           >
-            <X className="w-4 h-4" style={{ color: '#6B7280' }} strokeWidth={2} />
+            <X className="w-4 h-4" style={{ color: 'var(--muted-foreground)' }} strokeWidth={2} />
           </button>
         </div>
 
@@ -107,19 +107,19 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
           <div className="mb-6 lg:mb-8">
             <div className="flex items-baseline gap-3 lg:gap-4">
               <p
-                style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, color: '#111827', fontFamily: 'var(--font-family)' }}
+                style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}
                 className="lg:text-[80px]"
               >
                 {peakUV}
               </p>
               <div>
                 <p
-                  style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.2, color: '#111827', fontFamily: 'var(--font-family)' }}
+                  style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.2, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}
                   className="lg:text-[44px]"
                 >
                   {peakLevel.label}
                 </p>
-                <p style={{ fontSize: 12, lineHeight: 1.3, color: '#6B7280', fontFamily: 'var(--font-family)' }}>
+                <p style={{ fontSize: 'var(--type-size-caption)', lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
                   Höchstwert diese Woche · Deutscher Wetterdienst UVI
                 </p>
               </div>
@@ -130,10 +130,10 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
           <div className="mb-8 lg:mb-10">
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={chartData} margin={{ top: 16, right: 8, left: 0, bottom: 0 }} barCategoryGap="28%">
-                <CartesianGrid strokeDasharray="0" stroke="#E5E7EB" vertical={false} />
+                <CartesianGrid strokeDasharray="0" stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="name"
-                  tick={{ fontSize: 12, fill: '#6B7280', fontFamily: 'var(--font-family)' }}
+                  tick={{ fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -144,9 +144,9 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                       const d = payload[0].payload;
                       const lvl = getUVLevel(d.uv);
                       return (
-                        <div className="bg-white border border-[#E5E7EB] rounded-lg px-3 py-2 shadow-lg">
-                          <p style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>
+                        <div className="bg-white border border-[var(--border)] rounded-lg px-3 py-2 shadow-lg">
+                          <p style={{ fontSize: 12, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', marginBottom: 2 }}>{d.date}</p>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
                             UV-Index: {d.uv} · {lvl.label}
                           </p>
                         </div>
@@ -163,7 +163,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                         key={index}
                         fill={lvl.solidColor}
                         opacity={index === selectedDayIndex ? 1 : 0.55}
-                        stroke={index === selectedDayIndex ? '#111827' : 'none'}
+                        stroke={index === selectedDayIndex ? 'var(--foreground)' : 'none'}
                         strokeWidth={index === selectedDayIndex ? 1.5 : 0}
                       />
                     );
@@ -173,14 +173,14 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
             </ResponsiveContainer>
           </div>
 
-          <div className="h-px bg-[#E5E7EB] my-6 lg:my-8" />
+          <div className="h-px bg-[var(--border)] my-6 lg:my-8" />
 
-          {/* Day list */}
+          {/* Day list */}}
           <div className="mb-6 lg:mb-8">
-            <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, color: '#111827', fontFamily: 'var(--font-family)', marginBottom: 12 }}>
+            <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 12 }}>
               Tagesübersicht
             </p>
-            <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: '#E5E7EB' }}>
+            <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
               {days.map((day, i) => {
                 const uv = parseUV(day.conditions.uv);
                 const lvl = getUVLevel(uv);
@@ -190,17 +190,17 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                     key={i}
                     className="flex items-center px-4 py-3"
                     style={{
-                      backgroundColor: isSelected ? '#F3F4F6' : i % 2 === 0 ? 'white' : 'var(--neutral-50)',
-                      borderBottom: i < days.length - 1 ? '1px solid #E5E7EB' : 'none',
+                      backgroundColor: isSelected ? 'var(--neutral-100)' : i % 2 === 0 ? 'white' : 'var(--neutral-50)',
+                      borderBottom: i < days.length - 1 ? '1px solid var(--border)' : 'none',
                     }}
                   >
                     <p
                       className="flex-1 text-sm"
-                      style={{ fontWeight: isSelected ? 700 : 500, color: '#111827', fontFamily: 'var(--font-family)' }}
+                      style={{ fontWeight: isSelected ? 700 : 500, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}
                     >
                       {day.date}
                     </p>
-                    <p className="text-sm mr-3" style={{ fontWeight: 600, color: '#111827', fontFamily: 'var(--font-family)' }}>{uv}</p>
+                    <p className="text-sm mr-3" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>{uv}</p>
                     <span
                       className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                       style={{ backgroundColor: lvl.solidColor, color: '#000' }}
@@ -213,7 +213,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
             </div>
           </div>
 
-          <div className="h-px bg-[#E5E7EB] my-6 lg:my-8" />
+          <div className="h-px bg-[var(--border)] my-6 lg:my-8" />
 
           {/* Sun recommendations */}
           <div className="rounded-[16px] overflow-hidden" style={{ backgroundColor: 'var(--neutral-50)' }}>
