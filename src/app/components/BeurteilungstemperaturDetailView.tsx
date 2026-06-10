@@ -1,34 +1,53 @@
 import React from 'react';
 import { Thermometer, Droplet, Wind, Sun, Shield, Clock, AlertCircle, AlertTriangle, Info, CheckCircle, HardHat, Shirt, X } from 'lucide-react';
 import DetailRowList from './DetailRowList';
+import { SCHWERE_SHORT, BEKLEIDUNG_SHORT } from '../constants/workProfile';
 
 interface BeurteilungstemperaturDetailViewProps {
   onClose: () => void;
+  activeLocation?: string | null;
+  beurteilungstemperatur?: number;
+  statusLabel?: string;
+  schwere?: string;
+  bekleidung?: string;
 }
 
 const svgPaths = {
   backArrow: "M12 4.9992L4.9992 12L12 19.0008M4.9992 12H19.0008",
 };
 
-const hourlyData = [
-  { hour: '05', temp: 18 },
-  { hour: '06', temp: 20 },
-  { hour: '07', temp: 22 },
-  { hour: '08', temp: 22 },
-  { hour: '09', temp: 25 },
-  { hour: '10', temp: 27 },
-  { hour: '11', temp: 28 },
-  { hour: '12', temp: 31 },
-  { hour: '13', temp: 32 },
-  { hour: '14', temp: 34 },
-  { hour: '15', temp: 34 },
-  { hour: '16', temp: 34 },
-  { hour: '17', temp: 33 },
-  { hour: '18', temp: 30 },
-  { hour: '19', temp: 27 },
-  { hour: '20', temp: 24 },
-  { hour: '21', temp: 22 },
-];
+// Beurteilungstemperatur formula — identical to HeuteView's getBeurteilungstemperatur
+// (default: schwere=heavy, bekleidung=work, feuchtigkeit=low, wind=light, sonne=direct 10–17)
+function calcBT(h: number): number {
+  let lufttemp = 25;
+  if (h >= 8  && h < 9)  lufttemp = 27;
+  if (h >= 9  && h < 11) lufttemp = 31;
+  if (h >= 11 && h < 13) lufttemp = 34;
+  if (h >= 13 && h < 17) lufttemp = 37;
+  if (h >= 17 && h < 18) lufttemp = 33;
+  let corrections = 3; // arbeitsschwere(+3) + bekleidung(+1) + feuchtigkeit(0) + wind(-1)
+  if (h >= 10 && h < 17) corrections += 2; // direct sun
+  return Math.round(lufttemp + corrections);
+}
+
+// Bar chart uses air temperature so the color gradient shows a natural Gering→Kritisch arc.
+// The big display number uses calcBT() (actual Beurteilungstemperatur with corrections).
+function getLufttemp(h: number): number {
+  if (h >= 13 && h < 17) return 37;
+  if (h >= 11 && h < 13) return 34;
+  if (h >= 9  && h < 11) return 31;
+  if (h >= 8  && h < 9)  return 27;
+  if (h >= 17 && h < 18) return 33;
+  if (h >= 18 && h < 20) return 28;
+  if (h >= 20)            return 24;
+  // Early morning (< 8): gradual warm-up from overnight low
+  return Math.round(18 + h * 0.8);
+}
+
+const hourlyData = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map(h => ({
+  hour: String(h).padStart(2, '0'),
+  temp: getLufttemp(h),
+}));
 
 function getLevelInfo(temp: number) {
   if (temp < 25) return { level: 1, label: 'Gering',   barBg: 'var(--status-success-bg)',  solidColor: 'var(--status-icon-ok)',      textColor: 'var(--status-success-text)' };
@@ -40,54 +59,42 @@ function getLevelInfo(temp: number) {
 function getRealHour(): number { return new Date().getHours(); }
 
 function getCurrentTemp(hour: number): number {
-  const found = hourlyData.find(d => parseInt(d.hour) === hour);
-  return found ? found.temp : 20;
+  return calcBT(hour);
 }
 
-const waermestufen: { bg: string; Icon: React.ElementType; label: string; range: string }[] = [
-  { bg: 'var(--status-icon-ok)',       Icon: CheckCircle,   label: 'Gering',   range: 'Unter 25°C' },
-  { bg: 'var(--status-warning)',       Icon: Info,          label: 'Mäßig',    range: '25–28°C'   },
-  { bg: 'var(--status-strong)',        Icon: AlertCircle,   label: 'Stark',    range: '28–32°C'   },
-  { bg: 'var(--status-critical-tint)', Icon: AlertTriangle, label: 'Kritisch', range: 'Über 32°C'  },
-];
+// Weather values matching HeuteView's getWeatherStats() — same data source
+function getWeatherValues(h: number) {
+  let temp = 25;
+  if (h >= 8  && h < 9)  temp = 27;
+  if (h >= 9  && h < 11) temp = 31;
+  if (h >= 11 && h < 13) temp = 34;
+  if (h >= 13 && h < 17) temp = 37;
+  if (h >= 17 && h < 18) temp = 33;
 
-const einflussfaktoren = [
-  {
-    Icon: Thermometer,
-    label: 'Temperatur',
-    value: '34°C',
-    description: 'Die Lufttemperatur ist der wichtigste Faktor. Hohe Temperaturen erhöhen die Wärmebelastung des Körpers direkt.',
-  },
-  {
-    Icon: Droplet,
-    label: 'Feuchtigkeit',
-    value: '45%',
-    description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.',
-  },
-  {
-    Icon: Wind,
-    label: 'Wind',
-    value: '5 km/h, Böen: 25 km/h',
-    description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.',
-  },
-  {
-    Icon: Sun,
-    label: 'UV',
-    value: '8, Sehr hoch',
-    description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.',
-  },
-  {
-    Icon: HardHat,
-    label: 'Arbeitsschwere',
-    value: 'Schwer',
-    description: 'Schwere körperliche Tätigkeiten erhöhen die Körperkerntemperatur erheblich. Eingestellt unter Einstellungen → Arbeitsprofil.',
-  },
-  {
-    Icon: Shirt,
-    label: 'Bekleidung',
-    value: 'Schwere Arbeitskleidung',
-    description: 'Schwere Schutzkleidung reduziert die Schweißverdunstung und erhöht die thermische Belastung. Eingestellt unter Einstellungen → Arbeitsprofil.',
-  },
+  let humidity = 45;
+  if (h >= 9  && h < 11) humidity = 32;
+  if (h >= 11 && h < 13) humidity = 24;
+  if (h >= 13 && h < 17) humidity = 20;
+  if (h >= 17 && h < 18) humidity = 28;
+
+  let wind = '5 km/h, Böen: 12 km/h';
+  if (h >= 10 && h < 17) wind = '10 km/h, Böen: 22 km/h';
+  if (h >= 17) wind = '8 km/h, Böen: 18 km/h';
+
+  let uv = '2 (Niedrig)';
+  if (h >= 9  && h < 11) uv = '7 (Hoch)';
+  if (h >= 11 && h < 13) uv = '9 (Sehr hoch)';
+  if (h >= 13 && h < 17) uv = '10 (Sehr hoch)';
+  if (h >= 17 && h < 18) uv = '6 (Hoch)';
+
+  return { temp, humidity, wind, uv };
+}
+
+const waermestufen: { bg: string; Icon: React.ElementType; stufe: string; label: string; range: string }[] = [
+  { bg: 'var(--status-icon-ok)',       Icon: CheckCircle,   stufe: 'Hitzestufe 1', label: 'Geringe Belastung',  range: 'Bis 26°C'    },
+  { bg: 'var(--status-warning)',       Icon: Info,          stufe: 'Hitzestufe 2', label: 'Mäßige Belastung',   range: 'Über 26 bis 30°C' },
+  { bg: 'var(--status-strong)',        Icon: AlertCircle,   stufe: 'Hitzestufe 3', label: 'Starke Belastung',   range: 'Über 30 bis 35°C' },
+  { bg: 'var(--status-critical-tint)', Icon: AlertTriangle, stufe: 'Hitzestufe 4', label: 'Kritische Belastung', range: 'Über 35°C'  },
 ];
 
 const massnahmen = [
@@ -108,15 +115,41 @@ const massnahmen = [
   },
 ];
 
-export default function BeurteilungstemperaturDetailView({ onClose }: BeurteilungstemperaturDetailViewProps) {
+export default function BeurteilungstemperaturDetailView({ onClose, activeLocation, beurteilungstemperatur: btProp, statusLabel: statusLabelProp, schwere, bekleidung }: BeurteilungstemperaturDetailViewProps) {
   const currentHour = getRealHour();
   const currentTemp = getCurrentTemp(currentHour);
   const currentLevel = getLevelInfo(currentTemp);
+
+  // Use passed-in values from home screen when available, fall back to local calculation
+  const displayTemp  = btProp          ?? currentTemp;
+  const displayLabel = statusLabelProp ?? currentLevel.label;
 
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   const maxBarTemp = 40;
+
+  const w = getWeatherValues(currentHour);
+
+  const SCHWERE_DESC: Record<string, string> = {
+    leicht: 'Leichte körperliche Tätigkeiten erzeugen wenig Körperwärme. Der Einfluss auf die Beurteilungstemperatur ist gering.',
+    mittel: 'Mittelschwere Arbeit erhöht die Körpertemperatur moderat. Bei Hitze regelmäßig Pausen einlegen und ausreichend trinken.',
+    schwer: 'Schwere körperliche Tätigkeiten erhöhen die Körperkerntemperatur erheblich. Regelmäßige Kühlung und Pausen sind bei Hitze besonders wichtig.',
+  };
+  const BEKLEIDUNG_DESC: Record<string, string> = {
+    leicht: 'Atmungsaktive Kleidung fördert die Schweißverdunstung und reduziert die thermische Belastung.',
+    mittel: 'Typische Arbeitskleidung schränkt die Schweißverdunstung leicht ein und erhöht die Wärmebelastung moderat.',
+    schwer: 'Schwere Schutzkleidung reduziert die Schweißverdunstung erheblich und erhöht die thermische Belastung stark.',
+  };
+
+  const einflussfaktoren = [
+    { Icon: Thermometer, label: 'Luft-Temperatur', value: `${w.temp}°C`,   description: 'Die Lufttemperatur ist der wichtigste Faktor. Hohe Temperaturen erhöhen die Wärmebelastung des Körpers direkt.' },
+    { Icon: Droplet,     label: 'Relative Luftfeuchtigkeit', value: `${w.humidity}%`, description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.' },
+    { Icon: Wind,        label: 'Wind',           value: w.wind,           description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.' },
+    { Icon: Sun,         label: 'UV-Index',       value: w.uv,             description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.' },
+    { Icon: HardHat,     label: 'Arbeitsschwere', value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Nicht eingestellt', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Unter Einstellungen → Arbeitsprofil festlegen.' },
+    { Icon: Shirt,       label: 'Bekleidung / PSA', value: bekleidung ? (BEKLEIDUNG_SHORT[bekleidung as keyof typeof BEKLEIDUNG_SHORT] ?? bekleidung) : 'Nicht eingestellt', description: bekleidung ? (BEKLEIDUNG_DESC[bekleidung] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Unter Einstellungen → Arbeitsprofil festlegen.' },
+  ];
 
   return (
     <div className="fixed inset-0 z-50">
@@ -172,17 +205,17 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
               style={{ fontSize: 72, fontWeight: 700, lineHeight: 1, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}
               className="lg:text-[80px]"
             >
-              {currentTemp}°C
+              {displayTemp}°C
             </p>
             <div>
               <p
                 style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.2, letterSpacing: '-0.14px', color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}
                 className="lg:text-[44px] lg:tracking-[-0.22px]"
               >
-                {currentLevel.label}
+                {displayLabel}
               </p>
               <p style={{ fontSize: 12, lineHeight: 1.3, color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>
-                Heute, {timeStr} Uhr · München
+                Heute, {timeStr} Uhr{activeLocation ? ` · ${activeLocation}` : ''}
               </p>
             </div>
           </div>
@@ -209,15 +242,26 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                   key={hour}
                   className="flex flex-col items-center flex-1"
                 >
+                  {/* Temperature label — every bar */}
+                  <p style={{
+                    fontSize: 10,
+                    fontWeight: isNow ? 700 : 500,
+                    color: isNow ? 'var(--foreground)' : 'var(--muted-foreground)',
+                    fontFamily: 'var(--font-family)',
+                    lineHeight: 1,
+                    marginBottom: 2,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {temp}°
+                  </p>
                   {/* Status icon in circle */}
                   <div style={{ height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {level.level >= 2 && (
-                      <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: level.solidColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {level.level === 2 && <Info className="w-2 h-2 text-black" strokeWidth={2.5} />}
-                        {level.level === 3 && <AlertCircle className="w-2 h-2 text-black" strokeWidth={2.5} />}
-                        {level.level === 4 && <AlertTriangle className="w-2 h-2 text-black" strokeWidth={2.5} />}
-                      </div>
-                    )}
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: level.solidColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {level.level === 1 && <CheckCircle className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                      {level.level === 2 && <Info className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                      {level.level === 3 && <AlertCircle className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                      {level.level === 4 && <AlertTriangle className="w-2 h-2 text-black" strokeWidth={2.5} />}
+                    </div>
                   </div>
                   {/* Bar */}
                   <div
@@ -228,7 +272,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                       boxShadow: isNow ? `0 0 0 1.5px var(--foreground)` : 'none',
                     }}
                   />
-                  {/* Hour label */}
+                  {/* Hour label — every bar, "Jetzt" pill for current */}
                   {isNow ? (
                     <div
                       style={{
@@ -252,9 +296,9 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                         Jetzt
                       </p>
                     </div>
-                  ) : hourNum % 3 === 0 ? (
+                  ) : (
                     <p style={{
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: 400,
                       color: 'var(--muted-foreground)',
                       fontFamily: 'var(--font-family)',
@@ -263,7 +307,7 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                     }}>
                       {hour}
                     </p>
-                  ) : null}
+                  )}
                 </div>
               );
             })}
@@ -278,9 +322,9 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
             Wärmestufen
           </p>
           <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
-            {waermestufen.map(({ bg, Icon, label, range }, i) => (
+            {waermestufen.map(({ bg, Icon, stufe, label, range }, i) => (
               <div
-                key={label}
+                key={stufe}
                 className="flex items-center px-4 py-3 lg:py-4"
                 style={{
                   backgroundColor: i % 2 === 0 ? 'var(--neutral-50)' : 'white',
@@ -290,10 +334,11 @@ export default function BeurteilungstemperaturDetailView({ onClose }: Beurteilun
                 <div className="w-7 h-7 mr-3 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: bg }}>
                   <Icon className="w-3.5 h-3.5" style={{ color: 'var(--neutral-black)' }} strokeWidth={2} />
                 </div>
-                <p className="flex-1 text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
-                  {label}
-                </p>
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>{range}</p>
+                <div className="flex-1">
+                  <p className="text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>{stufe}</p>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>{label}</p>
+                </div>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', flexShrink: 0 }}>{range}</p>
               </div>
             ))}
           </div>

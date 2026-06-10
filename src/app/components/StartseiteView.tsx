@@ -739,7 +739,7 @@ export default function StartseiteView({
       )}
 
       {beurtDetailOpen && (
-        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} />
+        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} activeLocation={activeLocation} beurteilungstemperatur={status.beurteilungstemperatur} statusLabel={status.label} schwere={schwere} bekleidung={bekleidung} />
       )}
 
     </div>

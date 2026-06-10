@@ -601,7 +601,7 @@ export default function PlanungView({ onNavigate, onOpenSettings, activeLocation
         <UVDetailViewWeekly onClose={() => setUvDetailOpen(false)} days={DAYS} selectedDayIndex={selectedDay} />
       )}
       {beurtDetailOpen && (
-        <BeurteilungstemperaturDetailViewWeekly onClose={() => setBeurtDetailOpen(false)} days={DAYS} selectedDayIndex={selectedDay} />
+        <BeurteilungstemperaturDetailViewWeekly onClose={() => setBeurtDetailOpen(false)} days={DAYS} selectedDayIndex={selectedDay} schwere={schwere} bekleidung={bekleidung} />
       )}
 
     </div>

@@ -3,11 +3,14 @@ import { Shield, Clock, Droplet, AlertCircle, AlertTriangle, Info, CheckCircle, 
 import { BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip } from 'recharts';
 import DetailRowList from './DetailRowList';
 import type { Day } from './PlanungView';
+import { SCHWERE_SHORT, BEKLEIDUNG_SHORT } from '../constants/workProfile';
 
 interface BeurteilungstemperaturDetailViewWeeklyProps {
   onClose: () => void;
   days: Day[];
   selectedDayIndex?: number;
+  schwere?: string;
+  bekleidung?: string;
 }
 
 const backArrow = 'M12 4.9992L4.9992 12L12 19.0008M4.9992 12H19.0008';
@@ -17,17 +20,17 @@ function parseTemp(s: string): number {
 }
 
 function getLevelInfo(temp: number) {
-  if (temp < 25) return { level: 1, label: 'Gering',   solidColor: 'var(--status-icon-ok)',       textColor: 'var(--status-success-text)' };
-  if (temp < 28) return { level: 2, label: 'Mäßig',    solidColor: 'var(--status-warning)',        textColor: 'var(--neutral-600)' };
-  if (temp < 32) return { level: 3, label: 'Stark',    solidColor: 'var(--status-strong)',         textColor: 'var(--neutral-600)' };
+  if (temp <= 26) return { level: 1, label: 'Gering',   solidColor: 'var(--status-icon-ok)',       textColor: 'var(--status-success-text)' };
+  if (temp <= 30) return { level: 2, label: 'Mäßig',    solidColor: 'var(--status-warning)',        textColor: 'var(--neutral-600)' };
+  if (temp <= 35) return { level: 3, label: 'Stark',    solidColor: 'var(--status-strong)',         textColor: 'var(--neutral-600)' };
   return               { level: 4, label: 'Kritisch',  solidColor: 'var(--status-critical-tint)',  textColor: 'var(--status-critical)' };
 }
 
-const waermestufen: { bg: string; Icon: React.ElementType; label: string; range: string }[] = [
-  { bg: 'var(--status-icon-ok)',        Icon: CheckCircle,   label: 'Gering',   range: 'Unter 25°C' },
-  { bg: 'var(--status-warning)',        Icon: Info,          label: 'Mäßig',    range: '25–28°C'    },
-  { bg: 'var(--status-strong)',         Icon: AlertCircle,   label: 'Stark',    range: '28–32°C'    },
-  { bg: 'var(--status-critical-tint)',  Icon: AlertTriangle, label: 'Kritisch', range: 'Über 32°C'  },
+const waermestufen: { bg: string; Icon: React.ElementType; stufe: string; label: string; range: string }[] = [
+  { bg: 'var(--status-icon-ok)',        Icon: CheckCircle,   stufe: 'Hitzestufe 1', label: 'Geringe Belastung',   range: 'Bis 26°C'           },
+  { bg: 'var(--status-warning)',        Icon: Info,          stufe: 'Hitzestufe 2', label: 'Mäßige Belastung',    range: 'Über 26 bis 30°C'   },
+  { bg: 'var(--status-strong)',         Icon: AlertCircle,   stufe: 'Hitzestufe 3', label: 'Starke Belastung',    range: 'Über 30 bis 35°C'   },
+  { bg: 'var(--status-critical-tint)',  Icon: AlertTriangle, stufe: 'Hitzestufe 4', label: 'Kritische Belastung', range: 'Über 35°C'           },
 ];
 
 const massnahmen = [
@@ -52,15 +55,29 @@ export default function BeurteilungstemperaturDetailViewWeekly({
   onClose,
   days,
   selectedDayIndex = 0,
+  schwere,
+  bekleidung,
 }: BeurteilungstemperaturDetailViewWeeklyProps) {
   const selDay = days[selectedDayIndex];
+
+  const SCHWERE_DESC: Record<string, string> = {
+    leicht: 'Leichte körperliche Tätigkeiten erzeugen wenig Körperwärme. Der Einfluss auf die Beurteilungstemperatur ist gering.',
+    mittel: 'Mittelschwere Arbeit erhöht die Körpertemperatur moderat. Bei Hitze regelmäßig Pausen einlegen und ausreichend trinken.',
+    schwer: 'Schwere körperliche Tätigkeiten erhöhen die Körperkerntemperatur erheblich. Regelmäßige Kühlung und Pausen sind bei Hitze besonders wichtig.',
+  };
+  const BEKLEIDUNG_DESC: Record<string, string> = {
+    leicht: 'Atmungsaktive Kleidung fördert die Schweißverdunstung und reduziert die thermische Belastung.',
+    mittel: 'Typische Arbeitskleidung schränkt die Schweißverdunstung leicht ein und erhöht die Wärmebelastung moderat.',
+    schwer: 'Schwere Schutzkleidung reduziert die Schweißverdunstung erheblich und erhöht die thermische Belastung stark.',
+  };
+
   const einflussfaktoren = selDay ? [
-    { Icon: Thermometer, label: 'Temperatur',            value: selDay.conditions.lufttemp,      description: 'Die Lufttemperatur ist der wichtigste Faktor. Hohe Temperaturen erhöhen die Wärmebelastung des Körpers direkt.' },
-    { Icon: Droplet,     label: 'Feuchtigkeit',          value: selDay.conditions.feuchtigkeit,  description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.' },
-    { Icon: Wind,        label: 'Wind',                  value: selDay.conditions.wind,           description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.' },
-    { Icon: Sun,         label: 'UV',                    value: selDay.conditions.uv,             description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.' },
-    { Icon: HardHat,     label: 'Arbeitsschwere',        value: 'Eingestellt in Arbeitsprofil',   description: 'Schwere körperliche Tätigkeiten erhöhen die Körperkerntemperatur erheblich. Eingestellt unter Einstellungen → Arbeitsprofil.' },
-    { Icon: Shirt,       label: 'Bekleidung',            value: 'Eingestellt in Arbeitsprofil',   description: 'Schwere Schutzkleidung reduziert die Schweißverdunstung und erhöht die thermische Belastung. Eingestellt unter Einstellungen → Arbeitsprofil.' },
+    { Icon: Thermometer, label: 'Luft-Temperatur',           value: selDay.conditions.lufttemp,     description: 'Die Lufttemperatur ist der wichtigste Faktor. Hohe Temperaturen erhöhen die Wärmebelastung des Körpers direkt.' },
+    { Icon: Droplet,     label: 'Relative Luftfeuchtigkeit', value: selDay.conditions.feuchtigkeit, description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.' },
+    { Icon: Wind,        label: 'Wind',                      value: selDay.conditions.wind,         description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.' },
+    { Icon: Sun,         label: 'UV-Index',                  value: selDay.conditions.uv,           description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.' },
+    { Icon: HardHat,     label: 'Arbeitsschwere',            value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Eingestellt in Arbeitsprofil', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Eingestellt unter Einstellungen → Arbeitsprofil.' },
+    { Icon: Shirt,       label: 'Bekleidung / PSA',          value: bekleidung ? (BEKLEIDUNG_SHORT[bekleidung as keyof typeof BEKLEIDUNG_SHORT] ?? bekleidung) : 'Eingestellt in Arbeitsprofil', description: bekleidung ? (BEKLEIDUNG_DESC[bekleidung] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Eingestellt unter Einstellungen → Arbeitsprofil.' },
   ] : [];
 
   const chartData = days.map(d => ({
@@ -155,25 +172,25 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                 />
                 <YAxis domain={[0, 42]} hide />
                 <ReferenceLine
-                  y={25}
+                  y={26}
                   stroke="var(--status-warning)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '25°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '26°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <ReferenceLine
-                  y={28}
+                  y={30}
                   stroke="var(--status-strong)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '28°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '30°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <ReferenceLine
-                  y={32}
+                  y={35}
                   stroke="var(--status-critical-tint)"
                   strokeDasharray="4 4"
                   strokeWidth={1}
-                  label={{ value: '32°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
+                  label={{ value: '35°', position: 'right', fontSize: 12, fill: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}
                 />
                 <Tooltip
                   content={({ active, payload }) => {
@@ -261,9 +278,9 @@ export default function BeurteilungstemperaturDetailViewWeekly({
               Wärmestufen
             </p>
             <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
-              {waermestufen.map(({ bg, Icon, label, range }, i) => (
+            {waermestufen.map(({ bg, Icon, stufe, label, range }, i) => (
                 <div
-                  key={label}
+                  key={stufe}
                   className="flex items-center px-4 py-3 lg:py-4"
                   style={{
                     backgroundColor: i % 2 === 0 ? 'var(--neutral-50)' : 'white',
@@ -276,10 +293,11 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                   >
                     <Icon className="w-3.5 h-3.5" style={{ color: 'var(--neutral-black)' }} strokeWidth={2} />
                   </div>
-                  <p className="flex-1 text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>
-                    {label}
-                  </p>
-                  <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>{range}</p>
+                  <div className="flex-1">
+                    <p className="text-sm" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>{stufe}</p>
+                    <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)' }}>{label}</p>
+                  </div>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', flexShrink: 0 }}>{range}</p>
                 </div>
               ))}
             </div>

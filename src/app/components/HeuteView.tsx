@@ -1344,7 +1344,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       { Icon: Thermometer, label: 'Lufttemperatur',           value: `${temp}°C`, showWarning: tempWarning },
       { Icon: Droplet,     label: 'relative Luftfeuchtigkeit', value: `${humidity}%`, showWarning: humidityWarning },
       { Icon: Wind,        label: 'Wind',                     value: wind, showWarning: false },
-      { Icon: Sun,         label: 'UV',                       value: uv, showWarning: uvWarning },
+      { Icon: Sun,         label: 'UV-Index',                 value: uv, showWarning: uvWarning },
     ];
   };
 
@@ -1708,7 +1708,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
       {/* ── BEURTEILUNGSTEMPERATUR DETAIL VIEW ──────────────────────── */}
       {beurtDetailOpen && (
-        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} />
+        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} activeLocation={activeLocation} beurteilungstemperatur={status.beurteilungstemperatur} statusLabel={status.label} schwere={schwere} bekleidung={bekleidung} />
       )}
     </div>
   );
