@@ -243,7 +243,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
                     </p>
                     <span
                       className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
-                      style={{ backgroundColor: lvl.solidColor, color: '#000' }}
+                      style={{ backgroundColor: lvl.solidColor, color: 'var(--foreground)' }}
                     >
                       {lvl.label}
                     </span>

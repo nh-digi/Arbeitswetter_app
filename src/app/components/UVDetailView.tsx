@@ -307,7 +307,7 @@ export default function UVDetailView({ onClose }: UVDetailViewProps) {
 
         <div className="h-px bg-[var(--border)] my-8" />
 
-        {/* Day Comparison */}}
+        {/* Day Comparison */}
         <div className="mb-8">
           <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 6 }}>
             Tagesvergleich

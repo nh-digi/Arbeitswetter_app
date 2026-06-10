@@ -85,13 +85,13 @@ export default function App() {
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
                 className={`relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
-                  isActive ? 'text-[#1d3fa3]' : 'text-[#64748b] hover:text-black/80'
+                  isActive ? 'text-[var(--brand-dark)]' : 'text-[var(--neutral-500)] hover:text-black/80'
                 }`}
               >
                 <span className="relative">
                   <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2]' : 'stroke-[1.5]'}`} />
                   {item.dot && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#E8193C] border border-white" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--status-critical)] border border-white" />
                   )}
                 </span>
                 <span className="text-xs leading-none hidden min-[400px]:inline">{item.label}</span>
@@ -118,18 +118,18 @@ export default function App() {
                   onClick={() => setActiveView(item.id)}
                   className={`w-full flex items-center gap-2 px-3 py-2 h-10 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-[#e2e8f0] text-[#1d3fa3]'
-                      : 'text-[#64748b] hover:bg-[#f1f5f9] hover:text-black/80'
+                      ? 'bg-[#e2e8f0] text-[var(--brand-dark)]'
+                      : 'text-[var(--neutral-500)] hover:bg-[#f1f5f9] hover:text-black/80'
                   }`}
                 >
                   <span className="relative flex-shrink-0">
                     <Icon
                       className="w-[18px] h-[18px]"
                       strokeWidth={isActive ? 2 : 1.5}
-                      style={{ color: isActive ? '#325cda' : '#64748b' }}
+                      style={{ color: isActive ? 'var(--brand-primary)' : 'var(--neutral-500)' }}
                     />
                     {item.dot && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#E8193C] border border-white" />
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--status-critical)] border border-white" />
                     )}
                   </span>
                   <span className="text-base">{item.label}</span>

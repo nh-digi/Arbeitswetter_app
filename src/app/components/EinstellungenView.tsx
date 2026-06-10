@@ -45,7 +45,7 @@ const UMGEBUNG_OPTIONS: { id: Umgebung; label: string; sub: string; Icon: React.
 ];
 
 // Soft tint selected style (chips + cards)
-const SEL = 'bg-[#eef2fd] text-[#1d3fa3] border-[#325cda]/40';
+const SEL = 'bg-[var(--brand-tint)] text-[var(--brand-dark)] border-[var(--brand-primary)]/40';
 const UNSEL = 'bg-neutral-50 text-muted-foreground border-black/[0.08] hover:border-black/20 hover:text-black/80';
 
 function timeToMinutes(t: string): number {
@@ -151,7 +151,7 @@ function ShiftTimeline({
           style={{ left: `${recL}%`, width: `${recW}%` }} />
         {/* Work segment – draggable */}
         <div
-          className="absolute top-1.5 bottom-1.5 bg-[#325cda] rounded-lg cursor-grab active:cursor-grabbing touch-none select-none"
+          className="absolute top-1.5 bottom-1.5 bg-[var(--brand-primary)] rounded-lg cursor-grab active:cursor-grabbing touch-none select-none"
           style={{ left: `${seg1Left}%`, width: `${seg1Width}%` }}
           onPointerDown={ev => startDrag(ev, 'move')}
         >
@@ -167,7 +167,7 @@ function ShiftTimeline({
           />
         </div>
         {overnight && (
-          <div className="absolute top-1.5 bottom-1.5 bg-[#325cda] rounded-lg"
+          <div className="absolute top-1.5 bottom-1.5 bg-[var(--brand-primary)] rounded-lg"
             style={{ left: '0%', width: `${seg2Width}%` }} />
         )}
       </div>
@@ -196,7 +196,7 @@ function ShiftTimeline({
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-muted-foreground">{durationH} Stunden</span>
         {schicht === 'früh' && (
-          <span className="text-sm text-[#166534] font-medium">
+          <span className="text-sm text-[var(--status-success-text)] font-medium">
             Empfohlen bei Hitze
           </span>
         )}
@@ -325,7 +325,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
             style={{ opacity: showSaved ? 1 : 0 }}
             aria-live="polite"
           >
-            <Check className="w-3 h-3 text-[#166534]" strokeWidth={2.5} />
+            <Check className="w-3 h-3 text-[var(--status-success-text)]" strokeWidth={2.5} />
             Gespeichert
           </span>
         </div>
@@ -361,11 +361,11 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 Einsatzort suchen
               </label>
               <div className={`bg-neutral-100 border rounded-xl transition-all ${
-                suchFokus ? 'border-[#325cda] bg-white shadow-[0_0_0_3px_rgba(50,92,218,0.12)]' : 'border-transparent'
+                suchFokus ? 'border-[var(--brand-primary)] bg-white shadow-[0_0_0_3px_rgba(50,92,218,0.12)]' : 'border-transparent'
               } ${showDropdown ? 'rounded-b-none border-b-0' : ''}`}>
                 <div className="flex items-center gap-3 px-3.5 py-3">
                   <Search className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                    suchFokus ? 'text-[#325cda]' : 'text-black/30'
+                    suchFokus ? 'text-[var(--brand-primary)]' : 'text-black/30'
                   }`} strokeWidth={2} />
                   <input
                     id="ort-suche"
@@ -394,7 +394,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
 
               {/* Dropdown */}
               {showDropdown && (
-                <div className="absolute left-4 right-4 md:left-6 md:right-6 bg-white border border-[#325cda] border-t-black/[0.06] rounded-b-xl shadow-lg
+                <div className="absolute left-4 right-4 md:left-6 md:right-6 bg-white border border-[var(--brand-primary)] border-t-black/[0.06] rounded-b-xl shadow-lg
                   divide-y divide-black/[0.05] overflow-y-auto max-h-[280px] z-10">
                   {/* GPS option */}
                   <button
@@ -402,8 +402,8 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                     onClick={handleGPSWählen}
                     className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-neutral-50 transition-colors text-left"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#eef2fd] flex items-center justify-center flex-shrink-0">
-                      <LocateFixed className="w-3.5 h-3.5 text-[#325cda]" strokeWidth={2} />
+                    <div className="w-7 h-7 rounded-full bg-[var(--brand-tint)] flex items-center justify-center flex-shrink-0">
+                      <LocateFixed className="w-3.5 h-3.5 text-[var(--brand-primary)]" strokeWidth={2} />
                     </div>
                     <span className="text-sm font-semibold text-black">Aktueller Standort</span>
                   </button>
@@ -430,8 +430,8 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 <div className="mt-3 bg-neutral-50 rounded-xl border border-black/[0.06] p-4">
                   {auswahl.id === 'gps' && (
                     <div className="flex items-center gap-1.5 mb-1">
-                      <LocateFixed className="w-3 h-3 text-[#325cda] flex-shrink-0" strokeWidth={2} />
-                      <span className="text-xs font-medium text-[#325cda]">GPS-Standort</span>
+                      <LocateFixed className="w-3 h-3 text-[var(--brand-primary)] flex-shrink-0" strokeWidth={2} />
+                      <span className="text-xs font-medium text-[var(--brand-primary)]">GPS-Standort</span>
                     </div>
                   )}
                   <p className="text-sm font-semibold text-black">{auswahl.name}, {auswahl.region}</p>
@@ -440,7 +440,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                   </p>
                   <button
                     onClick={handleSaveOrt}
-                    className="w-full md:w-auto md:px-8 mt-3 bg-[#325cda] hover:bg-[#1d3fa3] active:scale-[0.99]
+                    className="w-full md:w-auto md:px-8 mt-3 bg-[var(--brand-primary)] hover:bg-[var(--brand-dark)] active:scale-[0.99]
                       text-white text-sm font-semibold rounded-xl py-3 transition-all"
                   >
                     Als Arbeitsort speichern
@@ -463,19 +463,19 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                       <div
                         key={ort.id}
                         className={`flex items-center gap-3 px-4 md:px-6 py-3.5 transition-colors cursor-pointer ${
-                          isActive ? 'bg-[#eef2fd]' : 'hover:bg-neutral-50'
+                          isActive ? 'bg-[var(--brand-tint)]' : 'hover:bg-neutral-50'
                         }`}
                         onClick={() => { setAktiveOrtId(ort.id); markSaved(); }}
                         role="button"
                         aria-pressed={isActive}
                       >
                         <MapPin
-                          className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#325cda]' : 'text-muted-foreground/50'}`}
+                          className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[var(--brand-primary)]' : 'text-muted-foreground/50'}`}
                           strokeWidth={1.5}
                         />
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-semibold leading-tight ${
-                            isActive ? 'text-[#1d3fa3]' : 'text-black/80'
+                            isActive ? 'text-[var(--brand-dark)]' : 'text-black/80'
                           }`}>{ort.name}</p>
                           {isNew ? (
                             <span className="text-xs font-semibold tracking-wide uppercase text-emerald-700">
@@ -486,7 +486,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                           )}
                         </div>
                         {isActive && (
-                          <span className="text-xs font-semibold bg-[#325cda]/10 text-[#1d3fa3] border border-[#325cda]/20 px-2 py-0.5 rounded-full flex-shrink-0">
+                          <span className="text-xs font-semibold bg-[var(--brand-primary)]/10 text-[var(--brand-dark)] border border-[var(--brand-primary)]/20 px-2 py-0.5 rounded-full flex-shrink-0">
                             Aktiv
                           </span>
                         )}
@@ -567,17 +567,17 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                     >
                       {sel && (
                         <div className="absolute top-2.5 right-2.5">
-                          <Check className="w-3.5 h-3.5 text-[#325cda]" strokeWidth={2.5} />
+                          <Check className="w-3.5 h-3.5 text-[var(--brand-primary)]" strokeWidth={2.5} />
                         </div>
                       )}
                       <Icon
-                        className={`w-5 h-5 mb-3 ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}
+                        className={`w-5 h-5 mb-3 ${sel ? 'text-[var(--brand-primary)]' : 'text-muted-foreground'}`}
                         strokeWidth={1.5}
                       />
-                      <p className={`text-sm font-semibold leading-tight break-words ${sel ? 'text-[#1d3fa3]' : 'text-black/80'}`}>
+                      <p className={`text-sm font-semibold leading-tight break-words ${sel ? 'text-[var(--brand-dark)]' : 'text-black/80'}`}>
                         {label}
                       </p>
-                      <p className={`text-sm mt-1 leading-tight break-words ${sel ? 'text-[#325cda]' : 'text-muted-foreground'}`}>
+                      <p className={`text-sm mt-1 leading-tight break-words ${sel ? 'text-[var(--brand-primary)]' : 'text-muted-foreground'}`}>
                         {sub}
                       </p>
                     </button>
@@ -610,8 +610,8 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
               {/* Time inputs */}
               <div className="flex items-center gap-3 mb-3">
                 <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
-                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  hover:border-[var(--brand-primary)]/40 hover:bg-[var(--brand-tint)] transition-colors
+                  focus-within:border-[var(--brand-primary)]/60 focus-within:bg-[var(--brand-tint)] focus-within:ring-2 focus-within:ring-[var(--brand-primary)]/20
                   cursor-text">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
                   <input
@@ -639,8 +639,8 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 </div>
 
                 <label className="flex items-center gap-2 bg-neutral-50 border border-black/10 rounded-xl px-4 py-2.5
-                  hover:border-[#325cda]/40 hover:bg-[#eef2fd] transition-colors
-                  focus-within:border-[#325cda]/60 focus-within:bg-[#eef2fd] focus-within:ring-2 focus-within:ring-[#325cda]/20
+                  hover:border-[var(--brand-primary)]/40 hover:bg-[var(--brand-tint)] transition-colors
+                  focus-within:border-[var(--brand-primary)]/60 focus-within:bg-[var(--brand-tint)] focus-within:ring-2 focus-within:ring-[var(--brand-primary)]/20
                   cursor-text">
                   <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 pointer-events-none" strokeWidth={1.5} />
                   <input
@@ -683,7 +683,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 <p className="text-sm font-semibold text-black">Push-Benachrichtigungen</p>
                 <p className="text-sm mt-1 leading-relaxed">
                   {benachrichtigungen ? (
-                    <><span className="font-semibold text-[#166534]">An</span><span className="text-muted-foreground"> · Hinweise bei Hitze, Unwetter und Arbeitsschutzempfehlungen</span></>
+                    <><span className="font-semibold text-[var(--status-success-text)]">An</span><span className="text-muted-foreground"> · Hinweise bei Hitze, Unwetter und Arbeitsschutzempfehlungen</span></>
                   ) : (
                     <><span className="font-semibold text-muted-foreground">Aus</span><span className="text-muted-foreground"> · Du erhältst keine Hinweise</span></>
                   )}
@@ -693,7 +693,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
                 checked={benachrichtigungen}
                 onCheckedChange={(val) => { setBenachrichtigungen(val); markSaved(); }}
                 aria-label="Push-Benachrichtigungen aktivieren"
-                className="data-[state=checked]:bg-[#325cda] flex-shrink-0 h-6 w-11"
+                className="data-[state=checked]:bg-[var(--brand-primary)] flex-shrink-0 h-6 w-11"
               />
             </div>
           </div>

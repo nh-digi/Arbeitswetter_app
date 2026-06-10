@@ -175,7 +175,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
 
           <div className="h-px bg-[var(--border)] my-6 lg:my-8" />
 
-          {/* Day list */}}
+          {/* Day list */}
           <div className="mb-6 lg:mb-8">
             <p style={{ fontSize: 'var(--type-size-body)', fontWeight: 700, lineHeight: 1.35, color: 'var(--foreground)', fontFamily: 'var(--font-family)', marginBottom: 12 }}>
               Tagesübersicht
@@ -203,7 +203,7 @@ export default function UVDetailViewWeekly({ onClose, days, selectedDayIndex = 0
                     <p className="text-sm mr-3" style={{ fontWeight: 600, color: 'var(--foreground)', fontFamily: 'var(--font-family)' }}>{uv}</p>
                     <span
                       className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
-                      style={{ backgroundColor: lvl.solidColor, color: '#000' }}
+                      style={{ backgroundColor: lvl.solidColor, color: 'var(--foreground)' }}
                     >
                       {lvl.label}
                     </span>
