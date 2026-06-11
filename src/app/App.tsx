@@ -47,8 +47,8 @@ export default function App() {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [experimentMode, activeView]);
-  const SCHWERE_ARBEIT_LABEL: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte Arbeit', mittel: 'Mittlere Arbeit', schwer: 'Schwere Arbeit' };
-  const BEKLEIDUNG_SHORT: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte Arbeitskleidung', mittel: 'Mittlere Arbeitskleidung', schwer: 'Schwere Arbeitskleidung' };
+  const SCHWERE_ARBEIT_LABEL: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte', mittel: 'Mittlere', schwer: 'Schwere' };
+  const BEKLEIDUNG_SHORT: Record<'leicht' | 'mittel' | 'schwer', string> = { leicht: 'Leichte', mittel: 'Mittlere', schwer: 'Schwere' };
 
   const navItems = experimentMode
     ? [

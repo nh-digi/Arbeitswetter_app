@@ -1,5 +1,5 @@
 import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X, Moon } from 'lucide-react';
-import { CloudSun, Sun as PhosphorSun } from '@phosphor-icons/react';
+import { CloudSun, Sun as PhosphorSun, MapPin, HardHat, TShirt, PencilSimple } from '@phosphor-icons/react';
 import { useState, useRef, useEffect, type RefObject } from 'react';
 import ActionList from './ActionList';
 import DWDWarningBanner from './DWDWarningBanner';
@@ -584,7 +584,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           const numPos    = polar(LABEL_R, angle);
           const pillDist  = R + SW / 2 + 14;
           const pillC     = polar(pillDist, angle);
-          const pillW = 54, pillH = 20;
+          const pillW = 104, pillH = 20;
           return (
             <g key={h} style={{ pointerEvents: 'none' }}>
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
@@ -598,7 +598,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
               <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.white}
                 style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
-                Start
+                Arbeitsbeginn
               </text>
             </g>
           );
@@ -658,7 +658,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       <text x={C} y={C + 28} textAnchor="middle" dominantBaseline="middle"
         fill={T.mutedFg}
         style={{ fontSize: '14px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-        {getStatusDescription(status.label)}
+        {status.level >= 2 ? 'Hitze, UV' : getStatusDescription(status.label)}
       </text>
 
       {/* Drag handle — plain white circle, no icon */}
@@ -752,12 +752,12 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const CardHeader = ({ compact = false, tiny = false }: { compact?: boolean; tiny?: boolean }) => {
     // Header always reflects the whole day (peak), never the scrubbed hour.
     const dayLabel = dayPeakStatus.level >= 4
-      ? 'Heute Kritisch'
+      ? 'Heute Kritische Belastung'
       : dayPeakStatus.level >= 3
-        ? 'Erhöhte Belastung heute'
+        ? 'Heute Erhöhte Belastung'
         : dayPeakStatus.level >= 2
-          ? 'Mäßige Belastung heute'
-          : 'Gut planbar heute';
+          ? 'Heute Mäßige Belastung'
+          : 'Heute Geringe Belastung';
 
     return (
       <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: tiny ? 2 : compact ? 5 : 7 }}>
@@ -827,23 +827,42 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 strokeWidth={1.75}
               />
               <span style={{ fontSize: 'var(--type-size-caption)', fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
-                Außer Dienst
+                Feierabend
               </span>
             </div>
           )}
         </div>
 
-        {/* Row 3: settings — plain text link, full width, no button chrome */}
+        {/* Row 3: connected settings pill */}
         <button
           onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
-          className="inline-flex items-center gap-1.5 w-full transition-opacity hover:opacity-60 cursor-pointer
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
-          style={{ padding: 0, background: 'none', border: 'none' }}
+          className="inline-flex items-center transition-opacity hover:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
+          style={{ padding: 0, background: 'none', border: 'none', alignSelf: 'center' }}
         >
-          <Edit3 size={14} style={{ color: T.n600, flexShrink: 0 }} strokeWidth={1.5} />
-          <span style={{ fontSize: 'var(--type-size-body-sm)', color: T.n600, fontFamily: 'var(--font-family)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
-          </span>
+          <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: T.mutedFg, fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+              <MapPin size={12} weight="regular" />
+              {activeLocation ?? 'Kein Standort'}
+            </span>
+            {schwere && (<>
+              <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+                <HardHat size={12} weight="regular" />
+                {schwere}
+              </span>
+            </>)}
+            {bekleidung && (<>
+              <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+                <TShirt size={12} weight="regular" />
+                {bekleidung}
+              </span>
+            </>)}
+            <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
+              <PencilSimple size={12} weight="regular" />
+            </span>
+          </div>
         </button>
       </div>
     );
@@ -854,16 +873,33 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const LocationButton = () => (
     <button
       onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
-      className="inline-flex items-center gap-1.5 w-full rounded-2xl transition-all duration-200 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background overflow-hidden lg:min-h-[52px]"
-      style={{
-        backgroundColor: 'var(--muted)',
-        padding: '8px 12px'
-      }}
+      className="inline-flex items-center transition-opacity hover:opacity-60 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
     >
-      <Edit3 className="w-3 lg:w-4 h-3 lg:h-4 flex-shrink-0 transition-colors" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
-      <span className="truncate" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', fontSize: 'var(--type-size-body-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-        {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
-      </span>
+      <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: 'var(--muted-foreground)', fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+          <MapPin size={12} weight="regular" />
+          {activeLocation ?? 'Kein Standort'}
+        </span>
+        {schwere && (<>
+          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+            <HardHat size={12} weight="regular" />
+            {schwere}
+          </span>
+        </>)}
+        {bekleidung && (<>
+          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+            <TShirt size={12} weight="regular" />
+            {bekleidung}
+          </span>
+        </>)}
+        <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
+          <PencilSimple size={12} weight="regular" />
+        </span>
+      </div>
     </button>
   );
 
@@ -1107,12 +1143,11 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   ];
 
   const ACTIONS_L4 = [
-    { cat: 'technisch'       as const, short: 'Klimatisierte Kabinen nutzen',       long: 'Nutzung von klimatisierten Fahrzeugkabinen, Kranführerkabinen oder geschlossenen Steuerständen.' },
-    { cat: 'technisch'       as const, short: 'Heiße Oberflächen abschirmen',       long: 'Vermeidung zusätzlicher Lasten durch Kühlung heißer Maschinenoberflächen oder Ableitung heißer Luft.' },
-    { cat: 'organisatorisch' as const, short: "Arbeit als 'Hitzearbeit' behandeln", long: 'Die Arbeit muss als Hitzearbeit betrachtet werden. Die Expositionszeit der Mitarbeiter wird strikt zeitlich begrenzt.' },
-    { cat: 'organisatorisch' as const, short: 'Rotationspläne einführen',           long: 'Prüfung einer Aussetzung oder Anpassung von Leistungslohn- und Akkordsystemen, um Überanstrengung zu verhindern. Organisation von Arbeitsplatzrotation.' },
-    { cat: 'personenbezogen' as const, short: 'Kühlwesten nutzen',                  long: 'Einsatz von aktiv kühlenden Maßnahmen wie Kühlwesten oder Belüftungssystemen mit gekühlter Luft bei geschlossenen Schutzanzügen.' },
-    { cat: 'personenbezogen' as const, short: 'Erste-Hilfe-Bereitschaft',           long: 'Sofortige Umsetzung von Erste-Hilfe-Maßnahmen bei Hitzeerkrankungen (Lagerung im Schatten, feuchte Tücher, Rettungsdienst alarmieren).' },
+    { cat: 'technisch'       as const, short: 'Heiße Oberflächen abschirmen',                     long: 'Vermeidung zusätzlicher Lasten durch Kühlung heißer Maschinenoberflächen oder Ableitung heißer Luft.' },
+    { cat: 'technisch'       as const, short: 'In Fahrzeugen: Klimatisierte Kabinen nutzen',      long: 'Nutzung von klimatisierten Fahrzeugkabinen, Kranführerkabinen oder geschlossenen Steuerständen.' },
+    { cat: 'organisatorisch' as const, short: 'Rotationspläne einführen',                         long: 'Prüfung einer Aussetzung oder Anpassung von Leistungslohn- und Akkordsystemen, um Überanstrengung zu verhindern. Organisation von Arbeitsplatzrotation.' },
+    { cat: 'personenbezogen' as const, short: 'Kühlende Kleidung / PSA nutzen',                   long: 'Einsatz von aktiv kühlenden Maßnahmen wie Kühlwesten oder Belüftungssystemen mit gekühlter Luft bei geschlossenen Schutzanzügen.' },
+    { cat: 'personenbezogen' as const, short: 'Bei Notfällen: Erste Hilfe leisten',               long: 'Sofortige Umsetzung von Erste-Hilfe-Maßnahmen bei Hitzeerkrankungen (Lagerung im Schatten, feuchte Tücher, Rettungsdienst alarmieren).' },
     { cat: 'personenbezogen' as const, short: 'Schwere Arbeit in der Sonne nach Möglichkeit vermeiden', long: 'Bei kritischer Hitzebelastung sollte schwere körperliche Arbeit in direkter Sonneneinstrahlung nach Möglichkeit vermieden oder auf kühlere Tageszeiten (früher Morgen, später Abend) verlagert werden.' },
   ];
 
@@ -1139,7 +1174,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   type FactorKind = 'hitze' | 'uv' | 'trockenheit';
 
   const getFactors = (): FactorKind[] => {
-    if (status.level >= 4) return ['hitze', 'uv', 'trockenheit'];
+    if (status.level >= 4) return ['hitze', 'uv'];
     if (status.level >= 2) return ['hitze', 'uv'];
     return [];
   };
@@ -1166,13 +1201,28 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     return (
       <div ref={actionsCardRef} className={dark ? 'scroll-mt-4' : 'rounded-[16px] overflow-hidden scroll-mt-4'} style={dark ? undefined : { backgroundColor: T.n50 }}>
         <div className={dark ? 'px-3 pt-2 pb-2' : 'px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4'}>
-          {/* Period chip */}
-          {rangeLabel && !dark && (
-            <div className="inline-flex items-center px-2.5 py-1 rounded-full mb-2"
-              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: dark ? T.n100 : T.n800, fontFamily: 'var(--font-family)' }}>
-                {rangeLabel} · {status.label}
-              </span>
+          {/* Top row: period chip + factor pills (left) + Beurteilungstemperatur for hour (right) */}
+          {!dark && (
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {rangeLabel && (
+                  <div className="inline-flex items-center px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: T.n100 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: T.n800, fontFamily: 'var(--font-family)' }}>
+                      {rangeLabel} · {status.label}
+                    </span>
+                  </div>
+                )}
+                {getFactors().map((f) => (
+                  <FactorChip key={f} kind={f} />
+                ))}
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0"
+                style={{ backgroundColor: status.badgeBg }}>
+                <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 700, color: status.badgeText, fontFamily: 'var(--font-family)' }}>
+                  {status.beurteilungstemperatur}°C
+                </span>
+              </div>
             </div>
           )}
           {/* Headline — hidden in dark/mobile tray (redundant with banner) */}
@@ -1180,14 +1230,6 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
               Handlungsempfehlungen für diesen Zeitraum
             </p>
-          )}
-          {/* Factor pills — below headline */}
-          {getFactors().length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2.5">
-              {getFactors().map((f) => (
-                <FactorChip key={f} kind={f} />
-              ))}
-            </div>
           )}
           <ActionList items={items} dark={dark} />
         </div>
@@ -1236,20 +1278,20 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
     if (status.level >= 4) {
       const rows = [
-        { Icon: Sun,  label: `Extreme Hitzebelastung bei ${temp}°C erwartet` },
-        { Icon: Sun,  label: `Sehr hohe UV-Strahlung (Index ${uvIndex})` },
+        { Icon: Sun,  label: `Extreme Hitzebelastung bei ${temp}°C` },
+        { Icon: Sun,  label: `UV-Index ${uvIndex}` },
       ];
       if (multiFactors.length > 1) {
-        rows.push({ Icon: AlertTriangle, label: `Mehrfachbelastung: ${multiFactors.join(' + ')}` });
+        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: ${multiFactors.join(' + ')}` });
       }
       return rows;
     } else if (status.level >= 3) {
       const rows = [
         { Icon: Sun,  label: `Erhöhte Hitzebelastung bei ${temp}°C` },
-        { Icon: Sun,  label: `Hohe UV-Strahlung (Index ${uvIndex})` },
+        { Icon: Sun,  label: `UV-Index ${uvIndex}` },
       ];
       if (multiFactors.length > 1) {
-        rows.push({ Icon: AlertTriangle, label: `Mehrfachbelastung: ${multiFactors.join(' + ')}` });
+        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: ${multiFactors.join(' + ')}` });
       }
       return rows;
     } else if (status.level >= 2) {
@@ -1460,7 +1502,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           className="w-full flex items-center justify-between px-3 lg:px-4 py-3 lg:py-4 hover:opacity-90 transition-opacity"
         >
           <p className="text-sm lg:text-base" style={{ color: T.white, fontFamily: 'var(--font-family)' }}>
-            Wichtige Informationen zur Nutzung der Anwendung
+            Wichtige Informationen zur Nutzung der Anwendung und den angezeigten Hinweisen
           </p>
           <ChevronDown
             className="w-4 h-4 flex-shrink-0 ml-3 transition-transform"

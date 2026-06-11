@@ -1,5 +1,6 @@
 import React from 'react';
-import { Settings, Edit3 } from 'lucide-react';
+import { Settings } from 'lucide-react';
+import { MapPin, HardHat, TShirt, PencilSimple } from '@phosphor-icons/react';
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
 
@@ -36,26 +37,33 @@ export default function PageHeader({
   const LocationButton = () => (
     <button
       onClick={handleOpenSettings}
-      className="inline-flex items-center gap-2 rounded-2xl px-3 md:px-4 py-2 md:py-2 h-9 md:h-10 border transition-all duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 flex-1 md:flex-initial overflow-hidden"
-      style={{
-        backgroundColor: isDark ? 'var(--neutral-800)' : 'var(--muted)',
-        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'transparent',
-      }}
+      className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity"
+      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
     >
-      <Edit3
-        className="w-3.5 md:w-4 h-3.5 md:h-4 flex-shrink-0"
-        strokeWidth={1.5}
-        style={{ color: isDark ? 'var(--text-inverse-secondary)' : 'var(--muted-foreground)' }}
-      />
-      <span
-        className="text-xs md:text-[15px] truncate"
-        style={{
-          color: isDark ? 'var(--text-inverse-secondary)' : 'var(--muted-foreground)',
-          fontFamily: 'var(--font-family)'
-        }}
-      >
-        {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
-      </span>
+      <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: 'var(--muted-foreground)', fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+          <MapPin size={13} weight="regular" />
+          {activeLocation ?? 'Kein Standort'}
+        </span>
+        {schwere && (<>
+          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+            <HardHat size={13} weight="regular" />
+            {schwere}
+          </span>
+        </>)}
+        {bekleidung && (<>
+          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+            <TShirt size={13} weight="regular" />
+            {bekleidung}
+          </span>
+        </>)}
+        <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
+          <PencilSimple size={13} weight="regular" />
+        </span>
+      </div>
     </button>
   );
 
