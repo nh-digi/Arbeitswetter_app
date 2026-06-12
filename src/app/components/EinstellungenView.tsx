@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  HardHat, MapPin, Sun, CloudSun, Leaf, Building2,
+  Dumbbell, MapPin, Sun, CloudSun, Leaf, Building2,
   Check, Info, Clock, Trash2,
   ChevronRight, Moon, Sunrise, Bell, X, LocateFixed, Search,
 } from 'lucide-react';
@@ -510,7 +510,7 @@ export default function EinstellungenView({ startZeit, setStartZeit, endZeit, se
         {/* ── SECTION 2: Arbeitsprofil ─────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+            <Dumbbell className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
             <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
             <p className="text-sm text-muted-foreground ml-1">· Beeinflusst Empfehlungen</p>
           </div>

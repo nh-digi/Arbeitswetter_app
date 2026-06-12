@@ -232,6 +232,8 @@ const HAZARD_ICONS = {
 
 // Handlungsempfehlungen — same data as HeuteView's ActionsCard.
 // Order within each level: technisch → organisatorisch → personenbezogen
+const CAT_ORDER = { technisch: 0, organisatorisch: 1, personenbezogen: 2 } as const;
+
 const ACTIONS_L1: ActionItem[] = [
   { cat: 'organisatorisch', short: 'Normale Arbeitsplanung möglich', long: 'Keine besonderen Schutzmaßnahmen erforderlich. Reguläre Pausen und Sonnenschutz werden empfohlen.' },
 ];
@@ -246,13 +248,14 @@ const ACTIONS_L2: ActionItem[] = [
 ];
 
 const ACTIONS_L3: ActionItem[] = [
+  ...ACTIONS_L2,
   { cat: 'technisch',       short: 'Kühlung verstärken',                long: 'Aktivierung von Wasserservern, Luftduschen oder mobilen Kühlgeräten im betroffenen Arbeitsbereich.' },
   { cat: 'technisch',       short: 'Sonnenschutz intensivieren',        long: 'Zwingende Intensivierung und lückenlose Umsetzung aller Verschattungsmaßnahmen aus Stufe 2.' },
   { cat: 'organisatorisch', short: 'Schwere Arbeit in kühlere Stunden', long: 'Verlegung schwerer körperlicher Arbeiten in die kühleren Morgen- oder Abendstunden (z. B. durch Gleitzeit oder Schichtverlegung).' },
   { cat: 'organisatorisch', short: 'Entwärmungspausen einführen',       long: 'Einplanung zusätzlicher Tätigkeitsunterbrechungen und passiver Entwärmungsphasen. Viele kurze Pausen sind effektiver als wenige lange.' },
   { cat: 'personenbezogen', short: 'Pausen im Schatten verbringen',     long: 'Ruhepausen dürfen nicht am aufgeheizten Arbeitsplatz verbracht werden, sondern in schattigen oder extra gekühlten Bereichen.' },
   { cat: 'personenbezogen', short: 'Kollegen aktiv im Blick behalten',  long: 'Gegenseitige Beobachtung der Beschäftigten auf erste Anzeichen von Hitzeerkrankungen (Schwindel, Erschöpfung, Sonnenstich).' },
-];
+].sort((a, b) => CAT_ORDER[a.cat] - CAT_ORDER[b.cat]);
 
 const ACTIONS_BY_STATUS: Record<BlockStatus, ActionItem[]> = {
   ok: ACTIONS_L1,

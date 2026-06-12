@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Clock, Droplet, AlertCircle, AlertTriangle, Info, CheckCircle, X, Thermometer, Wind, Sun, HardHat, Shirt } from 'lucide-react';
+import { Shield, Clock, Droplet, AlertCircle, AlertTriangle, Info, CheckCircle, X, Thermometer, Wind, Sun, Dumbbell, Shirt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip } from 'recharts';
 import DetailRowList from './DetailRowList';
 import type { Day } from './PlanungView';
@@ -76,7 +76,7 @@ export default function BeurteilungstemperaturDetailViewWeekly({
     { Icon: Droplet,     label: 'Relative Luftfeuchtigkeit', value: selDay.conditions.feuchtigkeit, description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.' },
     { Icon: Wind,        label: 'Wind',                      value: selDay.conditions.wind,         description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.' },
     { Icon: Sun,         label: 'UV-Index',                  value: selDay.conditions.uv,           description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.' },
-    { Icon: HardHat,     label: 'Arbeitsschwere',            value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Eingestellt in Arbeitsprofil', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Eingestellt unter Einstellungen → Arbeitsprofil.' },
+    { Icon: Dumbbell,     label: 'Arbeitsschwere',            value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Eingestellt in Arbeitsprofil', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Eingestellt unter Einstellungen → Arbeitsprofil.' },
     { Icon: Shirt,       label: 'Bekleidung / PSA',          value: bekleidung ? (BEKLEIDUNG_SHORT[bekleidung as keyof typeof BEKLEIDUNG_SHORT] ?? bekleidung) : 'Eingestellt in Arbeitsprofil', description: bekleidung ? (BEKLEIDUNG_DESC[bekleidung] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Eingestellt unter Einstellungen → Arbeitsprofil.' },
   ] : [];
 

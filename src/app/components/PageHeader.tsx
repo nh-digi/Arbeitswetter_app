@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
-import { MapPin, HardHat, TShirt, PencilSimple } from '@phosphor-icons/react';
+import { MapPin, Barbell, TShirt, PencilSimple } from '@phosphor-icons/react';
 
 type View = 'heute' | 'planung' | 'warnung' | 'einstellungen' | 'styleguide';
 
@@ -34,34 +34,37 @@ export default function PageHeader({
   const isDark = variant === 'dark';
   const handleOpenSettings = () => onOpenSettings ? onOpenSettings() : onNavigate?.('einstellungen');
 
+  const locBtnBorder = isDark ? 'var(--neutral-700)' : 'var(--border-soft)';
+  const locBtnColor  = isDark ? 'var(--text-inverse-secondary)' : 'var(--muted-foreground)';
+
   const LocationButton = () => (
     <button
       onClick={handleOpenSettings}
       className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity"
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
     >
-      <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: 'var(--muted-foreground)', fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'stretch', border: `1px solid ${locBtnBorder}`, borderRadius: 999, overflow: 'hidden', color: locBtnColor, fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-          <MapPin size={13} weight="regular" />
+          <MapPin size={16} weight="regular" />
           {activeLocation ?? 'Kein Standort'}
         </span>
         {schwere && (<>
-          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-            <HardHat size={13} weight="regular" />
+            <Barbell size={16} weight="regular" />
             {schwere}
           </span>
         </>)}
         {bekleidung && (<>
-          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+          <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-            <TShirt size={13} weight="regular" />
+            <TShirt size={16} weight="regular" />
             {bekleidung}
           </span>
         </>)}
-        <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
+        <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
         <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
-          <PencilSimple size={13} weight="regular" />
+          <PencilSimple size={16} weight="regular" />
         </span>
       </div>
     </button>

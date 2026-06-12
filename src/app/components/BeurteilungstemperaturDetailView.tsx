@@ -1,5 +1,5 @@
 import React from 'react';
-import { Thermometer, Droplet, Wind, Sun, Shield, Clock, AlertCircle, AlertTriangle, Info, CheckCircle, HardHat, Shirt, X } from 'lucide-react';
+import { Thermometer, Droplet, Wind, Sun, Shield, Clock, AlertCircle, AlertTriangle, Info, CheckCircle, Dumbbell, Shirt, X } from 'lucide-react';
 import DetailRowList from './DetailRowList';
 import { SCHWERE_SHORT, BEKLEIDUNG_SHORT } from '../constants/workProfile';
 
@@ -147,7 +147,7 @@ export default function BeurteilungstemperaturDetailView({ onClose, activeLocati
     { Icon: Droplet,     label: 'Relative Luftfeuchtigkeit', value: `${w.humidity}%`, description: 'Erhöhte Luftfeuchtigkeit vermindert die Schweißverdunstung und verstärkt die gefühlte Wärme.' },
     { Icon: Wind,        label: 'Wind',           value: w.wind,           description: 'Geringe Konvektionskühlung. Wind kann die Wärmebelastung bei hohen Temperaturen leicht senken.' },
     { Icon: Sun,         label: 'UV-Index',       value: w.uv,             description: 'Erhöht die Strahlungsbelastung auf der Haut und verstärkt die Wärmeempfindung im Freien.' },
-    { Icon: HardHat,     label: 'Arbeitsschwere', value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Nicht eingestellt', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Unter Einstellungen → Arbeitsprofil festlegen.' },
+    { Icon: Dumbbell,     label: 'Arbeitsschwere', value: schwere ? (SCHWERE_SHORT[schwere as keyof typeof SCHWERE_SHORT] ?? schwere) : 'Nicht eingestellt', description: schwere ? (SCHWERE_DESC[schwere] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Unter Einstellungen → Arbeitsprofil festlegen.' },
     { Icon: Shirt,       label: 'Bekleidung / PSA', value: bekleidung ? (BEKLEIDUNG_SHORT[bekleidung as keyof typeof BEKLEIDUNG_SHORT] ?? bekleidung) : 'Nicht eingestellt', description: bekleidung ? (BEKLEIDUNG_DESC[bekleidung] ?? 'Eingestellt unter Einstellungen → Arbeitsprofil.') : 'Unter Einstellungen → Arbeitsprofil festlegen.' },
   ];
 

@@ -1,5 +1,5 @@
 import { Edit3, AlertTriangle, AlertCircle, CheckCircle, Thermometer, Droplet, Wind, Sun, Wrench, ClipboardList, User, ChevronDown, ChevronRight, RotateCcw, X, Moon } from 'lucide-react';
-import { CloudSun, Sun as PhosphorSun, MapPin, HardHat, TShirt, PencilSimple } from '@phosphor-icons/react';
+import { CloudSun, Sun as PhosphorSun, MapPin, Barbell, TShirt, PencilSimple } from '@phosphor-icons/react';
 import { useState, useRef, useEffect, type RefObject } from 'react';
 import ActionList from './ActionList';
 import DWDWarningBanner from './DWDWarningBanner';
@@ -333,6 +333,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const isDragging      = useRef(false);
   const returnTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const actionsCardRef  = useRef<HTMLDivElement>(null);
+  const trayRef         = useRef<HTMLDivElement>(null);
+
+  // When the mobile tray opens, scroll it into view so the list is visible.
+  useEffect(() => {
+    if (trayOpen) {
+      setTimeout(() => {
+        trayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  }, [trayOpen]);
 
   // Smooth-scroll the recommendations card into view on mobile after a list selection,
   // so the cause (tapped row) and effect (updated card) are visible together.
@@ -363,7 +373,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const VIEWPORT_W      = typeof window !== 'undefined' ? window.innerWidth  : 390;
   const VIEWPORT_H      = typeof window !== 'undefined' ? window.innerHeight : 844;
   const isTinyScreen    = VIEWPORT_H < 700; // iPhone SE (667px) and shorter phones
-  const mobileClockSize = Math.max(280, Math.min(VIEWPORT_W - 64, SIZE));
+  const mobileClockSize = Math.max(240, Math.min(VIEWPORT_W - 64, SIZE));
 
   // True clock-face mapping: (h % 12) * 30°  →  8→240°, 12→0°(top), 15→90°(right), 18→180°(bottom)
   const hourToAngle = (h: number) => (h % 12) * 30;
@@ -535,7 +545,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     <svg
       ref={ref}
       width="100%" height="100%"
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
+      viewBox={`0 19 ${SIZE} ${SIZE}`}
       className="select-none overflow-visible"
       style={{ display: 'block', touchAction: 'none' }}
     >
@@ -582,14 +592,18 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         if (h === wStartH) {
           const dotPos    = polar(R, angle);
           const numPos    = polar(LABEL_R, angle);
-          const pillDist  = R + SW / 2 + 14;
+          const pillDist  = R + SW / 2 + 28;
           const pillC     = polar(pillDist, angle);
-          const pillW = 104, pillH = 20;
+          const lineStart = polar(R + SW / 2 + 2, angle);
+          const pillW = 94, pillH = 20;
           return (
             <g key={h} style={{ pointerEvents: 'none' }}>
+              <line x1={lineStart.x} y1={lineStart.y} x2={pillC.x} y2={pillC.y}
+                stroke={T.n300} strokeWidth={1.5} />
+              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
-                style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
               <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
@@ -597,7 +611,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 fill={T.n800} />
               <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.white}
-                style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Arbeitsbeginn
               </text>
             </g>
@@ -607,14 +621,18 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         if (h % 24 === wEndH) {
           const dotPos    = polar(R, angle);
           const numPos    = polar(LABEL_R, angle);
-          const pillDist  = R + SW / 2 + 14;
+          const pillDist  = R + SW / 2 + 28;
           const pillC     = polar(pillDist, angle);
+          const lineStart = polar(R + SW / 2 + 2, angle);
           const pillW = 82, pillH = 20;
           return (
             <g key={h} style={{ pointerEvents: 'none' }}>
+              <line x1={lineStart.x} y1={lineStart.y} x2={pillC.x} y2={pillC.y}
+                stroke={T.n300} strokeWidth={1.5} />
+              <circle cx={dotPos.x} cy={dotPos.y} r={5} fill={T.n800} />
               <text x={numPos.x} y={numPos.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.n800}
-                style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 {display}
               </text>
               <rect x={pillC.x - pillW / 2} y={pillC.y - pillH / 2}
@@ -622,7 +640,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 fill={T.n800} />
               <text x={pillC.x} y={pillC.y} textAnchor="middle" dominantBaseline="middle"
                 fill={T.white}
-                style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
+                style={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-family)' }}>
                 Feierabend
               </text>
             </g>
@@ -634,7 +652,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           <text key={h} x={pos.x} y={pos.y}
             textAnchor="middle" dominantBaseline="middle"
             fill={T.n500}
-            style={{ fontSize: '14px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
+            style={{ fontSize: '12px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
             {display}
           </text>
         );
@@ -654,11 +672,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         {status.label}
       </text>
 
-      {/* Center: description — 14 px regular */}
+      {/* Center: description — 14 px regular — shows factors when available */}
       <text x={C} y={C + 28} textAnchor="middle" dominantBaseline="middle"
         fill={T.mutedFg}
         style={{ fontSize: '14px', fontWeight: 400, pointerEvents: 'none', fontFamily: 'var(--font-family)' }}>
-        {status.level >= 2 ? 'Hitze, UV' : getStatusDescription(status.label)}
+        {(() => {
+          const factors = getFactors();
+          if (factors.length === 0) return getStatusDescription(status.label);
+          const text = factors.map(f => FACTOR_LABEL_MAP[f]).join(', ');
+          return text.length > 14 ? text.substring(0, 13) + '…' : text;
+        })()}
       </text>
 
       {/* Drag handle — plain white circle, no icon */}
@@ -693,7 +716,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           </div>
           <div className="flex-1 min-w-0">
             <p className="leading-snug mb-0.5 lg:mb-1"
-              style={{ fontSize: 'var(--type-size-body)', lineHeight: 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
+              style={{ fontSize: mobile ? 16 : 'var(--type-size-body)', lineHeight: mobile ? 1.35 : 'var(--type-body-lh)', fontWeight: 600, fontFamily: 'var(--font-family)', color: T.white }}>
               {isPreShift && scrubbingHour !== null && Math.abs(scrubbingHour - wStart) < 0.25
                 ? `Schichtbeginn, ${formatHH(wStart)} Uhr`
                 : scrubbingHour !== null
@@ -701,22 +724,22 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                   : `Jetzt, ${formatHH(realtimeHour)} Uhr`}
             </p>
             <p className="leading-snug"
-              style={{ fontSize: 'var(--type-size-body-sm)', lineHeight: 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
+              style={{ fontSize: mobile ? 15 : 'var(--type-size-body)', lineHeight: mobile ? 1.4 : 'var(--type-body-lh)', fontFamily: 'var(--font-family)', color: T.n100 }}>
               {status.alertBody}
             </p>
           </div>
         </div>
 
-        {/* Mobile: bottom sheet trigger row */}
+        {/* Mobile: accordion row embedded inside banner */}
         {mobile && status.level >= 2 && (
           <>
             <div style={{ height: 1, margin: '0 12px', backgroundColor: 'rgba(255,255,255,0.12)' }} />
             <button
-              onClick={() => setTrayOpen(true)}
+              onClick={() => setTrayOpen(o => !o)}
               className="flex items-center justify-between w-full px-3 py-2.5 transition-opacity active:opacity-60"
             >
-              <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
-                Empfehlungen
+              <span style={{ fontSize: 15, fontWeight: 400, color: T.n100, fontFamily: 'var(--font-family)' }}>
+                Empfehlungen · {status.label}
               </span>
               <div className="flex items-center gap-1.5">
                 <span style={{
@@ -734,13 +757,18 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 }}>
                   {items.length}
                 </span>
-                <ChevronRight
+                <ChevronDown
                   size={14}
                   strokeWidth={2}
-                  style={{ color: T.n300, flexShrink: 0 }}
+                  style={{ color: T.n300, flexShrink: 0, transition: 'transform 0.2s', transform: trayOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                 />
               </div>
             </button>
+            {trayOpen && (
+              <div ref={trayRef} className="pb-3 animate-slide-up">
+                <ActionsCard dark />
+              </div>
+            )}
           </>
         )}
       </div>
@@ -754,7 +782,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     const dayLabel = dayPeakStatus.level >= 4
       ? 'Heute Kritische Belastung'
       : dayPeakStatus.level >= 3
-        ? 'Heute Erhöhte Belastung'
+        ? 'Heute Starke Belastung'
         : dayPeakStatus.level >= 2
           ? 'Heute Mäßige Belastung'
           : 'Heute Geringe Belastung';
@@ -771,7 +799,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5">
                 <WeatherIcon size={compact ? 13 : 14} weight="regular" color={T.mutedFg} />
-                <span style={{ fontSize: 'var(--type-size-body-sm)', color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
+                <span style={{ fontSize: 13, color: T.mutedFg, fontFamily: 'var(--font-family)', letterSpacing: '0.01em' }}>
                   {`${formatGermanDate(now)} · ${formatHH(h)} Uhr`}
                 </span>
               </div>
@@ -784,7 +812,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="flex items-center gap-2">
           {compact ? (
             <h1 style={{
-              fontSize: tiny ? 'var(--type-size-body)' : 'var(--type-size-h3)',
+              fontSize: tiny ? 16 : 18,
               fontWeight: 700,
               lineHeight: 1.15,
               letterSpacing: '-0.3px',
@@ -796,7 +824,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </h1>
           ) : (
             <h1 style={{
-              fontSize: 'var(--type-size-h3)',
+              fontSize: 20,
               fontWeight: 700,
               lineHeight: 1.1,
               letterSpacing: '-0.3px',
@@ -814,7 +842,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
             style={{ backgroundColor: dayPeakStatus.badgeBg }}>
-            <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
+            <span style={{ fontSize: compact ? 13 : 14, fontWeight: 700, color: dayPeakStatus.badgeText, fontFamily: 'var(--font-family)' }}>
               {dayPeakStatus.beurteilungstemperatur}°C max.
             </span>
           </div>
@@ -826,41 +854,42 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                 className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'}
                 strokeWidth={1.75}
               />
-              <span style={{ fontSize: 'var(--type-size-caption)', fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
+              <span style={{ fontSize: compact ? 12 : 13, fontWeight: 600, color: T.brand, fontFamily: 'var(--font-family)' }}>
                 Feierabend
               </span>
             </div>
           )}
         </div>
 
-        {/* Row 3: connected settings pill */}
+        {/* Row 3: settings — pill button matching Planung LocationButton */}
         <button
           onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
-          className="inline-flex items-center transition-opacity hover:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
+          className="inline-flex items-center transition-opacity hover:opacity-80 cursor-pointer
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2"
           style={{ padding: 0, background: 'none', border: 'none', alignSelf: 'center' }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: T.mutedFg, fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: 'var(--muted-foreground)', fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-              <MapPin size={12} weight="regular" />
+              <MapPin size={16} weight="regular" />
               {activeLocation ?? 'Kein Standort'}
             </span>
             {schwere && (<>
               <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-                <HardHat size={12} weight="regular" />
+                <Barbell size={16} weight="regular" />
                 {schwere}
               </span>
             </>)}
             {bekleidung && (<>
               <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-                <TShirt size={12} weight="regular" />
+                <TShirt size={16} weight="regular" />
                 {bekleidung}
               </span>
             </>)}
             <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
             <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
-              <PencilSimple size={12} weight="regular" />
+              <PencilSimple size={16} weight="regular" />
             </span>
           </div>
         </button>
@@ -873,33 +902,16 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   const LocationButton = () => (
     <button
       onClick={() => onOpenSettings ? onOpenSettings() : onNavigate('einstellungen')}
-      className="inline-flex items-center transition-opacity hover:opacity-60 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+      className="inline-flex items-center gap-1.5 w-full rounded-2xl transition-all duration-200 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background overflow-hidden lg:min-h-[52px]"
+      style={{
+        backgroundColor: 'var(--muted)',
+        padding: '8px 12px'
+      }}
     >
-      <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--border-soft)', borderRadius: 999, overflow: 'hidden', color: 'var(--muted-foreground)', fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-          <MapPin size={12} weight="regular" />
-          {activeLocation ?? 'Kein Standort'}
-        </span>
-        {schwere && (<>
-          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-            <HardHat size={12} weight="regular" />
-            {schwere}
-          </span>
-        </>)}
-        {bekleidung && (<>
-          <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
-            <TShirt size={12} weight="regular" />
-            {bekleidung}
-          </span>
-        </>)}
-        <span style={{ width: 1, background: 'var(--border-soft)', alignSelf: 'stretch' }} />
-        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
-          <PencilSimple size={12} weight="regular" />
-        </span>
-      </div>
+      <Edit3 className="w-3 lg:w-4 h-3 lg:h-4 flex-shrink-0 transition-colors" style={{ color: 'var(--muted-foreground)' }} strokeWidth={1.5} />
+      <span className="truncate" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-family)', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+        {activeLocation ?? 'Kein Standort'}{schwere ? ` · ${schwere}` : ''}{bekleidung ? ` · ${bekleidung}` : ''}
+      </span>
     </button>
   );
 
@@ -1006,7 +1018,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
                     </p>
                     {isNow && (
                       <span className="inline-flex items-center px-1.5 py-px rounded-full"
-                        style={{ backgroundColor: T.n100, color: T.n800, fontSize: 'var(--type-size-caption)', fontWeight: 600, fontFamily: 'var(--font-family)', lineHeight: 1.4 }}>
+                        style={{ backgroundColor: T.n100, color: T.n800, fontSize: 10, fontWeight: 600, fontFamily: 'var(--font-family)', lineHeight: 1.4 }}>
                         Jetzt
                       </span>
                     )}
@@ -1143,11 +1155,12 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
   ];
 
   const ACTIONS_L4 = [
-    { cat: 'technisch'       as const, short: 'Heiße Oberflächen abschirmen',                     long: 'Vermeidung zusätzlicher Lasten durch Kühlung heißer Maschinenoberflächen oder Ableitung heißer Luft.' },
-    { cat: 'technisch'       as const, short: 'In Fahrzeugen: Klimatisierte Kabinen nutzen',      long: 'Nutzung von klimatisierten Fahrzeugkabinen, Kranführerkabinen oder geschlossenen Steuerständen.' },
-    { cat: 'organisatorisch' as const, short: 'Rotationspläne einführen',                         long: 'Prüfung einer Aussetzung oder Anpassung von Leistungslohn- und Akkordsystemen, um Überanstrengung zu verhindern. Organisation von Arbeitsplatzrotation.' },
-    { cat: 'personenbezogen' as const, short: 'Kühlende Kleidung / PSA nutzen',                   long: 'Einsatz von aktiv kühlenden Maßnahmen wie Kühlwesten oder Belüftungssystemen mit gekühlter Luft bei geschlossenen Schutzanzügen.' },
-    { cat: 'personenbezogen' as const, short: 'Bei Notfällen: Erste Hilfe leisten',               long: 'Sofortige Umsetzung von Erste-Hilfe-Maßnahmen bei Hitzeerkrankungen (Lagerung im Schatten, feuchte Tücher, Rettungsdienst alarmieren).' },
+    { cat: 'technisch'       as const, short: 'Heiße Oberflächen abschirmen',               long: 'Vermeidung zusätzlicher Lasten durch Kühlung heißer Maschinenoberflächen oder Ableitung heißer Luft.' },
+    { cat: 'technisch'       as const, short: 'In Fahrzeugen: klimatisierte Kabinen nutzen', long: 'Nutzung von klimatisierten Fahrzeugkabinen, Kranführerkabinen oder geschlossenen Steuerständen.' },
+    { cat: 'organisatorisch' as const, short: "Arbeit als 'Hitzearbeit' behandeln",          long: 'Die Arbeit muss als Hitzearbeit betrachtet werden. Die Expositionszeit der Mitarbeiter wird strikt zeitlich begrenzt.' },
+    { cat: 'organisatorisch' as const, short: 'Rotationspläne einführen',                   long: 'Prüfung einer Aussetzung oder Anpassung von Leistungslohn- und Akkordsystemen, um Überanstrengung zu verhindern. Organisation von Arbeitsplatzrotation.' },
+    { cat: 'personenbezogen' as const, short: 'Kühlende Kleidung / PSA nutzen',             long: 'Einsatz von aktiv kühlenden Maßnahmen wie Kühlwesten oder Belüftungssystemen mit gekühlter Luft bei geschlossenen Schutzanzügen.' },
+    { cat: 'personenbezogen' as const, short: 'Bei Notfällen: Erste Hilfe leisten',         long: 'Sofortige Umsetzung von Erste-Hilfe-Maßnahmen bei Hitzeerkrankungen (Lagerung im Schatten, feuchte Tücher, Rettungsdienst alarmieren).' },
     { cat: 'personenbezogen' as const, short: 'Schwere Arbeit in der Sonne nach Möglichkeit vermeiden', long: 'Bei kritischer Hitzebelastung sollte schwere körperliche Arbeit in direkter Sonneneinstrahlung nach Möglichkeit vermieden oder auf kühlere Tageszeiten (früher Morgen, später Abend) verlagert werden.' },
   ];
 
@@ -1197,37 +1210,38 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
   const ActionsCard = ({ dark = false }: { dark?: boolean }) => {
     const items = getActionItems();
-    const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
+    const rangeLabel = activeBlock
+      ? `${activeBlock.start} – ${activeBlock.end}`
+      : `${formatHH(wStart)} – ${formatHH(wEnd)}`;
     return (
       <div ref={actionsCardRef} className={dark ? 'scroll-mt-4' : 'rounded-[16px] overflow-hidden scroll-mt-4'} style={dark ? undefined : { backgroundColor: T.n50 }}>
         <div className={dark ? 'px-3 pt-2 pb-2' : 'px-3 lg:px-4 pt-4 lg:pt-6 pb-2 lg:pb-4'}>
-          {/* Top row: period chip + factor pills (left) + Beurteilungstemperatur for hour (right) */}
-          {!dark && (
-            <div className="flex items-center justify-between gap-2 mb-2.5">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {rangeLabel && (
-                  <div className="inline-flex items-center px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: T.n100 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: T.n800, fontFamily: 'var(--font-family)' }}>
-                      {rangeLabel} · {status.label}
-                    </span>
-                  </div>
-                )}
-                {getFactors().map((f) => (
-                  <FactorChip key={f} kind={f} />
-                ))}
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full flex-shrink-0"
-                style={{ backgroundColor: status.badgeBg }}>
-                <span style={{ fontSize: 'var(--type-size-body-sm)', fontWeight: 700, color: status.badgeText, fontFamily: 'var(--font-family)' }}>
-                  {status.beurteilungstemperatur}°C
-                </span>
-              </div>
+          {/* Period chip + Beurteilungstemperatur */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="inline-flex items-center px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: dark ? T.n100 : T.n800, fontFamily: 'var(--font-family)' }}>
+                {rangeLabel} · {status.label}
+              </span>
+            </div>
+            <div className="inline-flex items-center px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: dark ? 'rgba(255,255,255,0.1)' : T.n100 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: dark ? T.n100 : T.brand, fontFamily: 'var(--font-family)' }}>
+                {status.beurteilungstemperatur}°C
+              </span>
+            </div>
+          </div>
+          {/* Factor pills — above headline */}
+          {!dark && getFactors().length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {getFactors().map((f) => (
+                <FactorChip key={f} kind={f} />
+              ))}
             </div>
           )}
           {/* Headline — hidden in dark/mobile tray (redundant with banner) */}
           {!dark && (
-            <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
+            <p className="pb-2 lg:pb-3 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.n950, fontFamily: 'var(--font-family)' }}>
               Handlungsempfehlungen für diesen Zeitraum
             </p>
           )}
@@ -1278,20 +1292,20 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
     if (status.level >= 4) {
       const rows = [
-        { Icon: Sun,  label: `Extreme Hitzebelastung bei ${temp}°C` },
-        { Icon: Sun,  label: `UV-Index ${uvIndex}` },
+        { Icon: Sun,  label: `Extreme Hitzebelastung (${temp}°C)` },
+        { Icon: Sun,  label: `Sehr hohe UV-Strahlung (Index ${uvIndex})` },
       ];
       if (multiFactors.length > 1) {
-        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: ${multiFactors.join(' + ')}` });
+        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: Hitze + UV` });
       }
       return rows;
     } else if (status.level >= 3) {
       const rows = [
-        { Icon: Sun,  label: `Erhöhte Hitzebelastung bei ${temp}°C` },
-        { Icon: Sun,  label: `UV-Index ${uvIndex}` },
+        { Icon: Sun,  label: `Erhöhte Hitzebelastung (${temp}°C)` },
+        { Icon: Sun,  label: `Hohe UV-Strahlung (Index ${uvIndex})` },
       ];
       if (multiFactors.length > 1) {
-        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: ${multiFactors.join(' + ')}` });
+        rows.push({ Icon: AlertTriangle, label: `Kombinationsbelastung: Hitze + UV` });
       }
       return rows;
     } else if (status.level >= 2) {
@@ -1312,7 +1326,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
     const rangeLabel = activeBlock ? `${activeBlock.start} – ${activeBlock.end}` : null;
     return (
     <div className="md:rounded-[16px] overflow-hidden" style={{ backgroundColor: T.n700 }}>
-      <div className="px-4 lg:px-4 pt-4 lg:pt-6 pb-4 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
+      <div className="px-3 lg:px-4 pt-4 lg:pt-6 pb-3 lg:pb-4 flex flex-col gap-1.5 lg:gap-2">
         {rangeLabel && (
           <div className="inline-flex self-start items-center px-2.5 py-1 rounded-full mb-1"
             style={{ backgroundColor: T.n600 }}>
@@ -1321,7 +1335,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
             </span>
           </div>
         )}
-        <p className="pb-1 lg:pb-2 lg:text-lg" style={{ fontWeight: 600, fontSize: 'var(--type-size-body)', lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
+        <p className="pb-1 lg:pb-2 lg:text-lg" style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
           Belastungsfaktoren in diesem Zeitraum
         </p>
         {hazardRows.map(({ Icon, label }, i) => (
@@ -1386,15 +1400,15 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       { Icon: Thermometer, label: 'Lufttemperatur',           value: `${temp}°C`, showWarning: tempWarning },
       { Icon: Droplet,     label: 'relative Luftfeuchtigkeit', value: `${humidity}%`, showWarning: humidityWarning },
       { Icon: Wind,        label: 'Wind',                     value: wind, showWarning: false },
-      { Icon: Sun,         label: 'UV-Index',                 value: uv, showWarning: uvWarning },
+      { Icon: Sun,         label: 'UV Index',                 value: uv, showWarning: uvWarning },
     ];
   };
 
   const weatherStats = getWeatherStats();
 
   const WeatherSection = () => (
-    <div className="md:rounded-[16px] p-4 lg:p-4 flex flex-col gap-2.5 lg:gap-3" style={{ backgroundColor: T.n800 }}>
-      <p className="lg:text-base" style={{ fontWeight: 700, fontSize: 'var(--type-size-body-sm)', lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
+    <div className="md:rounded-[16px] p-3 lg:p-4 flex flex-col gap-2.5 lg:gap-3" style={{ backgroundColor: T.n800 }}>
+      <p className="lg:text-base" style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.35, color: T.white, fontFamily: 'var(--font-family)' }}>
         Heute um {Math.floor(currentHour % 24)}:00 Uhr
       </p>
 
@@ -1403,14 +1417,14 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         {weatherStats.map(({ Icon, label, value, showWarning }) => (
           <button
             key={label}
-            onClick={() => label === 'UV' && setUvDetailOpen(true)}
+            onClick={() => label === 'UV Index' && setUvDetailOpen(true)}
             className="flex-1 rounded-[10px] flex items-center gap-2 px-2.5 py-2.5 relative text-left hover:opacity-90 transition-opacity"
             style={{
               backgroundColor: T.n950,
               minWidth: 200,
-              cursor: label === 'UV' ? 'pointer' : 'default'
+              cursor: label === 'UV Index' ? 'pointer' : 'default'
             }}
-            disabled={label !== 'UV'}
+            disabled={label !== 'UV Index'}
           >
             <Icon className="w-4 h-4 flex-shrink-0" style={{ color: '#E2E8F0' }} strokeWidth={1.5} />
             <div className="flex-1">
@@ -1448,13 +1462,13 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
           {weatherStats.map(({ Icon, label, value, showWarning }) => (
             <button
               key={label}
-              onClick={() => label === 'UV' && setUvDetailOpen(true)}
+              onClick={() => label === 'UV Index' && setUvDetailOpen(true)}
               className="rounded-[10px] flex items-center gap-3 px-3 py-4 relative text-left"
               style={{
                 backgroundColor: T.n950,
-                cursor: label === 'UV' ? 'pointer' : 'default'
+                cursor: label === 'UV Index' ? 'pointer' : 'default'
               }}
-              disabled={label !== 'UV'}
+              disabled={label !== 'UV Index'}
             >
               <Icon className="w-6 h-6 flex-shrink-0" style={{ color: '#E2E8F0' }} strokeWidth={1.5} />
               <div className="flex-1 min-w-0">
@@ -1644,82 +1658,21 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
       {/* ── MOBILE ───────────────────────────────────────────────────────── */}
       <div className="lg:hidden">
 
-        {/* Recommendations bottom sheet */}
-        {trayOpen && (
-          <>
-            {/* Scrim */}
-            <div
-              className="fixed inset-0 z-40"
-              style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
-              onClick={() => setTrayOpen(false)}
-            />
-            {/* Sheet */}
-            <div
-              className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
-              style={{
-                height: 'calc(100svh - 3rem)',
-                backgroundColor: T.n800,
-                borderRadius: '20px 20px 0 0',
-                animation: 'slideUpSheet 0.28s cubic-bezier(0.32,0.72,0,1)',
-              }}
-            >
-              {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-                <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.25)' }} />
-              </div>
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 pb-3 flex-shrink-0">
-                <div>
-                  <p style={{ fontSize: 17, fontWeight: 700, color: T.white, fontFamily: 'var(--font-family)' }}>
-                    Empfehlungen
-                  </p>
-                  {activeBlock && (
-                    <p style={{ fontSize: 13, color: T.n300, fontFamily: 'var(--font-family)', marginTop: 2 }}>
-                      {activeBlock.start} – {activeBlock.end} · {status.label}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setTrayOpen(false)}
-                  className="flex items-center justify-center transition-opacity active:opacity-60"
-                  style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }}
-                >
-                  <X size={16} strokeWidth={2} style={{ color: T.white }} />
-                </button>
-              </div>
-              <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)', flexShrink: 0 }} />
-              {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto px-4 py-4">
-                <ActionsCard dark />
-              </div>
-            </div>
-            <style>{`
-              @keyframes slideUpSheet {
-                from { transform: translateY(100%); }
-                to   { transform: translateY(0); }
-              }
-            `}</style>
-          </>
-        )}
-
         {/* Main card */}
-        <div className="md:px-4 md:max-w-xl md:mx-auto h-[calc(100svh-5rem)] md:h-[100svh] flex flex-col">
-          <div className="bg-card md:rounded-[24px] md:shadow-lg px-4 pt-3 min-[390px]:pt-4 flex flex-col flex-1 overflow-hidden" style={{ border: '1px solid #3a3a4a' }}>
+        <div className="pb-3 md:px-4 md:max-w-xl md:mx-auto">
+          <div className="bg-card md:rounded-[24px] md:shadow-lg px-4 pt-3 pb-3 min-[390px]:pt-4 min-[390px]:pb-4 flex flex-col gap-2 overflow-hidden" style={{ border: '1px solid #3a3a4a' }}>
             <CardHeader compact tiny={isTinyScreen} />
-            {mobileView === 'clock' ? (
-              <div className="flex-1 flex items-center justify-center w-full min-h-0">
-                <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', maxHeight: '100%' }}>
+            <div className="w-full">
+              {mobileView === 'clock' && (
+                <div style={{ width: '100%', maxWidth: `${mobileClockSize}px`, aspectRatio: '1 / 1', margin: '0 auto' }}>
                   {makeClockSVG(clockRefMobile)}
                 </div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto w-full min-h-0 pt-1">
-                <ListBlocks compact />
-              </div>
-            )}
+              )}
+              {mobileView === 'list' && <ListBlocks compact />}
+            </div>
             <DaySummary />
             {mobileView === 'clock' && (
-              <div className="-mx-4">
+              <div className="-mx-4 -mb-3 min-[390px]:-mb-4">
                 <AlertBanner mobile />
               </div>
             )}
@@ -1727,7 +1680,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
         </div>
 
         {/* Weather + cards */}
-        <div className="mt-4 mb-4 md:px-4 md:max-w-xl md:mx-auto flex flex-col gap-4">
+        <div className="mb-3 md:px-4 md:max-w-xl md:mx-auto flex flex-col gap-3">
           <HazardCard />
           <WeatherSection />
           <InfoAccordion />
@@ -1750,7 +1703,7 @@ export default function HeuteView({ onNavigate, activeLocation, workStart, workE
 
       {/* ── BEURTEILUNGSTEMPERATUR DETAIL VIEW ──────────────────────── */}
       {beurtDetailOpen && (
-        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} activeLocation={activeLocation} beurteilungstemperatur={status.beurteilungstemperatur} statusLabel={status.label} schwere={schwere} bekleidung={bekleidung} />
+        <BeurteilungstemperaturDetailView onClose={() => setBeurtDetailOpen(false)} />
       )}
     </div>
   );

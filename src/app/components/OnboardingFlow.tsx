@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ChevronLeft, X, MapPin, HardHat, Clock, Check,
+  ChevronLeft, X, MapPin, Dumbbell, Clock, Check,
   Search, LocateFixed, Shirt, ShieldCheck, Eye,
   Sunrise, Sun, Moon,
 } from 'lucide-react';
@@ -44,13 +44,13 @@ const MOCK_VORSCHLÄGE: OrtVorschlag[] = [
 
 const SCHWERE_OPTIONS: { id: Schwere; label: string; sub: string; Icon: React.ElementType }[] = [
   { id: 'leicht', label: 'Leichte Arbeit',  sub: 'Stehen, Gehen, Kontrolle, leichte Montagearbeiten',  Icon: Eye        },
-  { id: 'mittel', label: 'Mittlere Arbeit', sub: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten', Icon: HardHat    },
+  { id: 'mittel', label: 'Mittlere Arbeit', sub: 'Handwerk, Montage, moderate Hebe- und Tragearbeiten', Icon: Dumbbell  },
   { id: 'schwer', label: 'Schwere Arbeit',  sub: 'Schaufeln, Graben, schwere Hebe- und Tragearbeiten', Icon: ShieldCheck },
 ];
 
 const BEKLEIDUNG_OPTIONS: { id: Bekleidung; label: string; sub: string; Icon: React.ElementType }[] = [
   { id: 'leicht', label: 'Leichte Kleidung',      sub: 'Atmungsaktiv, z. B. T-Shirt, Baumwoll-Arbeitshose',         Icon: Shirt      },
-  { id: 'mittel', label: 'Arbeitskleidung',        sub: 'Typische Arbeitskleidung, z. B. Hemd, Arbeitshose',          Icon: HardHat    },
+  { id: 'mittel', label: 'Arbeitskleidung',        sub: 'Typische Arbeitskleidung, z. B. Hemd, Arbeitshose',          Icon: Dumbbell   },
   { id: 'schwer', label: 'Schwere Schutzkleidung', sub: 'Warnschutzoverall, Wetterschutzanzug, Schutzausrüstung',     Icon: ShieldCheck },
 ];
 
@@ -336,7 +336,7 @@ export default function OnboardingFlow({
     <div key="welcome" className="flex-1 flex flex-col">
       <div className="my-auto flex flex-col items-center text-center gap-6">
         <div className="w-24 h-24 rounded-3xl bg-[#eef2fd] flex items-center justify-center">
-          <HardHat className="w-12 h-12 text-[#325cda]" strokeWidth={1.5} />
+          <Dumbbell className="w-12 h-12 text-[#325cda]" strokeWidth={1.5} />
         </div>
         <div className="space-y-2">
           <h1 className="text-[28px] font-semibold tracking-[-0.5px] text-black leading-tight">
@@ -450,7 +450,7 @@ export default function OnboardingFlow({
     <div key="schwere" className="flex-1 flex flex-col justify-center space-y-4 py-4">
       <div>
         <div className="flex items-center gap-2 mb-1 px-0.5">
-          <HardHat className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
+          <Dumbbell className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={1.5} />
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Arbeitsprofil</p>
         </div>
         <h2 className="font-semibold tracking-tight text-black mt-2" style={{ fontSize: 'var(--type-size-h2)' }}>Wie schwer ist die Arbeit?</h2>
@@ -593,7 +593,7 @@ export default function OnboardingFlow({
         </div>
         {/* Schwere */}
         <div className="flex items-center gap-3 px-4 py-3.5">
-          <HardHat className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+          <Dumbbell className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
           <span className="text-sm text-black flex-1">Arbeitsschwere</span>
           <ValueChip label={SCHWERE_SHORT[schwere]} />
         </div>
