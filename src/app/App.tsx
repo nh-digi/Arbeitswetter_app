@@ -166,7 +166,7 @@ export default function App() {
           endZeit={endZeit}         setEndZeit={setEndZeit}
           orte={orte}               setOrte={setOrte}
           aktiveOrtId={aktiveOrtId} setAktiveOrtId={setAktiveOrtId}
-          onClose={() => { setOnboardingOpen(false); localStorage.setItem('onboardingDone', 'true'); }}
+          onClose={() => { setOnboardingOpen(false); localStorage.setItem('onboardingDone', 'true'); window.scrollTo(0, 0); }}
         />
       )}
     </div>

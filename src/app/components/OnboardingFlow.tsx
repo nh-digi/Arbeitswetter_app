@@ -627,7 +627,7 @@ export default function OnboardingFlow({
 
   // ── Layout ──────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 bg-white md:bg-[#f0f4fe] flex items-center justify-center" style={{ height: '100dvh' }}>
+    <div className="fixed inset-0 z-50 bg-white md:bg-[#f0f4fe] flex items-center justify-center">
 
       {/* Card */}
       <div className={[
