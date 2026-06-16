@@ -39,6 +39,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.repository == 'nh-digi/Arbeitswetter_app'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
