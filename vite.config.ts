@@ -18,7 +18,7 @@ function figmaAssetResolver() {
 }
 
 export default defineConfig({
-  base: '/arbeitswetter/',
+  base: '/Arbeitswetter_app/',
   server: {
     host: true,
   },
