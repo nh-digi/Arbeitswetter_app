@@ -43,9 +43,9 @@ export default function ActionList({ items, dark = false, variant = 'default' }:
             >
               <div
                 className="flex items-center justify-center rounded-lg flex-shrink-0"
-                style={{ width: 28, height: 28, backgroundColor: iconBg }}
+                style={{ width: 40, height: 40, backgroundColor: iconBg }}
               >
-                <Icon className="w-4 h-4" style={{ color: iconColor }} strokeWidth={1.5} />
+                <Icon className="w-5 h-5" style={{ color: iconColor }} strokeWidth={1.5} />
               </div>
               <p
                 className="flex-1 leading-snug"

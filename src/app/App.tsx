@@ -75,7 +75,7 @@ export default function App() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border" style={{ zIndex: 30 }}>
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -94,7 +94,7 @@ export default function App() {
                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--status-critical)] border border-white" />
                   )}
                 </span>
-                <span className="text-xs leading-none hidden min-[400px]:inline">{item.label}</span>
+                <span className="text-xs leading-none">{item.label}</span>
               </button>
             );
           })}

@@ -41,29 +41,29 @@ export default function PageHeader({
     <button
       onClick={handleOpenSettings}
       className="inline-flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-80 transition-opacity"
-      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+      style={{ background: 'none', border: 'none', padding: '8px 0', cursor: 'pointer', minHeight: 44 }}
     >
       <div style={{ display: 'inline-flex', alignItems: 'stretch', border: `1px solid ${locBtnBorder}`, borderRadius: 999, overflow: 'hidden', color: locBtnColor, fontSize: 'var(--type-size-body-sm)', fontFamily: 'var(--font-family)' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', whiteSpace: 'nowrap' }}>
           <MapPin size={16} weight="regular" />
           {activeLocation ?? 'Kein Standort'}
         </span>
         {schwere && (<>
           <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', whiteSpace: 'nowrap' }}>
             <Barbell size={16} weight="regular" />
             {schwere}
           </span>
         </>)}
         {bekleidung && (<>
           <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', whiteSpace: 'nowrap' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', whiteSpace: 'nowrap' }}>
             <TShirt size={16} weight="regular" />
             {bekleidung}
           </span>
         </>)}
         <span style={{ width: 1, background: locBtnBorder, alignSelf: 'stretch' }} />
-        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 9px' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 10px' }}>
           <PencilSimple size={16} weight="regular" />
         </span>
       </div>
@@ -78,6 +78,8 @@ export default function PageHeader({
       <div className="max-w-5xl mx-auto">
         {/* Mobile: Stacked layout */}
         <div className="md:hidden space-y-3">
+          {/* Title + subtitle group: tighter 4px gap so they read as one semantic unit */}
+          <div className="space-y-1">
           <div className="flex items-center gap-3">
             {Icon && (
               <Icon
@@ -112,6 +114,7 @@ export default function PageHeader({
               {subtitle}
             </p>
           )}
+          </div>{/* end title+subtitle group */}
 
           {(showLocationButton || showSettings) && (
             <div className="flex items-center gap-2">

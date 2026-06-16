@@ -19,6 +19,9 @@ function figmaAssetResolver() {
 
 export default defineConfig({
   base: '/arbeitswetter/',
+  server: {
+    host: true,
+  },
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
@@ -33,10 +36,11 @@ export default defineConfig({
         name: 'Arbeitswetter',
         short_name: 'Arbeitswetter',
         description: 'Wetterbasierte Arbeitsschutzhinweise für Bauberufe',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#111111',
+        background_color: '#111111',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/arbeitswetter/',
+        scope: '/arbeitswetter/',
         icons: [
           {
             src: 'pwa-192x192.png',

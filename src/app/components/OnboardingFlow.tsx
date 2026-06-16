@@ -379,7 +379,7 @@ export default function OnboardingFlow({
                 onFocus={() => setSuchFokus(true)}
                 onBlur={() => setTimeout(() => setSuchFokus(false), 150)}
                 placeholder="Stadt oder Postleitzahl..."
-                className="flex-1 text-sm bg-transparent outline-none placeholder:text-muted-foreground/60 text-black"
+                className="flex-1 text-base bg-transparent outline-none placeholder:text-muted-foreground/60 text-black"
                 aria-label="Ort suchen"
               />
               {suchQuery && (
@@ -542,7 +542,7 @@ export default function OnboardingFlow({
                 if (isValidTime(val)) setStartZeit(val);
                 setStartZeitDraft(null);
               }}
-              className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+              className="text-base font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[55px]"
               aria-label="Arbeitsbeginn"
             />
           </label>
@@ -569,7 +569,7 @@ export default function OnboardingFlow({
                 if (isValidTime(val)) setEndZeit(val);
                 setEndZeitDraft(null);
               }}
-              className="text-sm font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[50px]"
+              className="text-base font-semibold tabular-nums text-black bg-transparent border-none outline-none cursor-text p-0 m-0 w-[55px]"
               aria-label="Arbeitsende"
             />
           </label>

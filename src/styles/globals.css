@@ -1,4 +1,29 @@
-/* Prevent browser pull-to-refresh from firing during clock handle drags */
+/* Prevent horizontal overflow from making the whole page pan-able on mobile,
+   and prevent pull-to-refresh / overscroll bounce in both axes. */
+html,
 body {
-  overscroll-behavior-y: none;
+  overflow-x: hidden;
+  max-width: 100vw;
+  overscroll-behavior: none;
+}
+
+/* Clock handle drag affordance: subtle pulsing ring on the SVG drag handle */
+@keyframes clock-handle-pulse {
+  0%, 100% { opacity: 0; transform: scale(0.85); }
+  50%       { opacity: 0.7; transform: scale(1.1); }
+}
+.clock-handle-pulse {
+  animation: clock-handle-pulse 2.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Prevent iOS Safari from auto-zooming when an input is focused.
+   iOS zooms in whenever the focused input's font-size is below 16px. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
 }
